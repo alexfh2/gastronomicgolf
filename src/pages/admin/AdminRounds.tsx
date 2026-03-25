@@ -202,12 +202,15 @@ const AdminRounds = () => {
 
   const openEdit = (round: Round) => {
     setEditingRound(round);
+    const parData = (round as any).course_par;
+    const parStr = Array.isArray(parData) ? parData.join(', ') : '';
     setForm({
       name: round.name, round_number: String(round.round_number),
       date: round.date, end_date: round.end_date || '',
       club: round.club || '', course: round.course || '',
       sponsor: round.sponsor || '', is_master: round.is_master,
       status: round.status, season_id: round.season_id,
+      course_par: parStr,
     });
     setDialogOpen(true);
   };
