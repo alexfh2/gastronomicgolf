@@ -15,7 +15,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet } from 'lucide-react';
+import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import RoundResultsImport from '@/components/admin/RoundResultsImport';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import type { Database } from '@/integrations/supabase/types';
@@ -65,6 +75,9 @@ const AdminRounds = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [resultsRound, setResultsRound] = useState<Round | null>(null);
+  const [deletingRound, setDeletingRound] = useState<Round | null>(null);
+  const [courseUrl, setCourseUrl] = useState('');
+  const [extractingPar, setExtractingPar] = useState(false);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
@@ -229,6 +242,57 @@ const AdminRounds = () => {
 
   const updateField = (key: string, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  // ─── DELETE ROUND ───
+  const deleteMutation = useMutation({
+    mutationFn: async (roundId: string) => {
+      // First delete related results
+      const { error: resError } = await supabase.from('results').delete().eq('round_id', roundId);
+      if (resError) throw resError;
+      // Delete import logs
+      const { error: logError } = await supabase.from('import_logs').delete().eq('round_id', roundId);
+      if (logError) throw logError;
+      // Delete photos
+      const { error: photoError } = await supabase.from('photos').delete().eq('round_id', roundId);
+      if (photoError) throw photoError;
+      // Delete news drafts
+      const { error: newsError } = await supabase.from('news_drafts').delete().eq('round_id', roundId);
+      if (newsError) throw newsError;
+      // Finally delete the round
+      const { error } = await supabase.from('rounds').delete().eq('id', roundId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
+      toast({ title: 'Jornada eliminada' });
+      setDeletingRound(null);
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  // ─── EXTRACT PAR FROM URL ───
+  const handleExtractPar = async () => {
+    if (!courseUrl.trim()) return;
+    setExtractingPar(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-course-par', {
+        body: { url: courseUrl.trim() },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure el par');
+      
+      const parArray: number[] = data.par;
+      updateField('course_par', parArray.join(', '));
+      toast({ title: 'Par extret correctament', description: `Par ${parArray.reduce((a: number, b: number) => a + b, 0)} (${parArray.length} forats)` });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: 'Error extraient par', description: message, variant: 'destructive' });
+    } finally {
+      setExtractingPar(false);
+    }
+  };
 
   return (
     <div className="animate-fade-in">
@@ -399,6 +463,9 @@ const AdminRounds = () => {
                   <Button variant="ghost" size="icon" onClick={() => openEdit(round)} title="Editar">
                     <Pencil className="h-4 w-4" />
                   </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setDeletingRound(round)} title="Eliminar" className="text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardHeader>
             </Card>
@@ -450,14 +517,26 @@ const AdminRounds = () => {
               <Input value={form.sponsor} onChange={(e) => updateField('sponsor', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Par del camp (18 forats, separats per comes)</Label>
+              <Label>Par del camp (18 forats)</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={courseUrl}
+                  onChange={(e) => setCourseUrl(e.target.value)}
+                  placeholder="https://web-del-camp.com/el-campo/"
+                  className="flex-1"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={handleExtractPar} disabled={extractingPar || !courseUrl.trim()}>
+                  {extractingPar ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Globe className="h-4 w-4 mr-1" />}
+                  {extractingPar ? 'Extraient...' : 'Extreure par'}
+                </Button>
+              </div>
               <Input
                 value={form.course_par}
                 onChange={(e) => updateField('course_par', e.target.value)}
                 placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
               />
               <p className="text-xs text-muted-foreground">
-                Introdueix el par de cada forat separat per comes (p. ex. 4,4,5,3,...). Necessari per mostrar birdie/par/bogey a les targetes.
+                Enganxa la URL de la web del camp per extreure el par automàticament, o introdueix-lo manualment separat per comes.
               </p>
             </div>
             <div className="space-y-2">
@@ -498,6 +577,27 @@ const AdminRounds = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deletingRound} onOpenChange={(open) => !open && setDeletingRound(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar {deletingRound?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              S'eliminaran tots els resultats, fotos i dades associades a aquesta jornada. Aquesta acció no es pot desfer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingRound && deleteMutation.mutate(deletingRound.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? 'Eliminant...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
