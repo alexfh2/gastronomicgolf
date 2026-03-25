@@ -69,6 +69,7 @@ const AdminRounds = () => {
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
     status: 'draft' as RoundStatus, season_id: '',
+    course_par: '' as string,
   });
 
   const { data: seasons } = useQuery({
@@ -157,6 +158,15 @@ const AdminRounds = () => {
   // ─── MANUAL EDIT ───
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // Parse course_par from comma-separated string
+      let coursePar: number[] | null = null;
+      if (form.course_par.trim()) {
+        coursePar = form.course_par.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+        if (coursePar.length !== 18) {
+          throw new Error('El par del camp ha de tenir exactament 18 valors');
+        }
+      }
+
       const payload: TablesInsert<'rounds'> = {
         name: form.name,
         round_number: parseInt(form.round_number),
@@ -169,7 +179,8 @@ const AdminRounds = () => {
         master_coefficient: form.is_master ? 1.25 : 1.0,
         status: form.status,
         season_id: form.season_id || activeSeasonId,
-      };
+        course_par: coursePar,
+      } as any;
       if (editingRound) {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
         if (error) throw error;
@@ -191,12 +202,15 @@ const AdminRounds = () => {
 
   const openEdit = (round: Round) => {
     setEditingRound(round);
+    const parData = (round as any).course_par;
+    const parStr = Array.isArray(parData) ? parData.join(', ') : '';
     setForm({
       name: round.name, round_number: String(round.round_number),
       date: round.date, end_date: round.end_date || '',
       club: round.club || '', course: round.course || '',
       sponsor: round.sponsor || '', is_master: round.is_master,
       status: round.status, season_id: round.season_id,
+      course_par: parStr,
     });
     setDialogOpen(true);
   };
@@ -208,6 +222,7 @@ const AdminRounds = () => {
       name: `Jornada ${n}`, round_number: String(n),
       date: '', end_date: '', club: '', course: '', sponsor: '',
       is_master: false, status: 'draft', season_id: activeSeasonId,
+      course_par: '',
     });
     setDialogOpen(true);
   };
@@ -433,6 +448,17 @@ const AdminRounds = () => {
             <div className="space-y-2">
               <Label>Patrocinador</Label>
               <Input value={form.sponsor} onChange={(e) => updateField('sponsor', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Par del camp (18 forats, separats per comes)</Label>
+              <Input
+                value={form.course_par}
+                onChange={(e) => updateField('course_par', e.target.value)}
+                placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
+              />
+              <p className="text-xs text-muted-foreground">
+                Introdueix el par de cada forat separat per comes (p. ex. 4,4,5,3,...). Necessari per mostrar birdie/par/bogey a les targetes.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Estat</Label>
