@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 
@@ -31,13 +33,91 @@ const Rounds = () => {
       if (!expandedRound) return [];
       const { data } = await supabase
         .from('results')
-        .select('*, players(name, license, club)')
+        .select('*, players(id, name, license, club, gender, is_senior, current_handicap)')
         .eq('round_id', expandedRound)
         .order('stableford_points', { ascending: false });
       return data || [];
     },
     enabled: !!expandedRound,
   });
+
+  const categorizeResults = (results: typeof roundResults) => {
+    if (!results) return {};
+    const all = results;
+
+    // Scratch: sorted by scratch_score ascending (lower better)
+    const scratch = [...all].filter(r => r.scratch_score != null).sort((a, b) => (a.scratch_score ?? 999) - (b.scratch_score ?? 999));
+
+    // HCP Bajo: handicap ≤ 15.0, stableford desc
+    const hcpLow = all.filter(r => {
+      const hcp = r.handicap_at_round ?? (r.players as any)?.current_handicap;
+      return hcp != null && hcp <= 15.0;
+    }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+
+    // HCP Alto: handicap 15.1 - 36
+    const hcpHigh = all.filter(r => {
+      const hcp = r.handicap_at_round ?? (r.players as any)?.current_handicap;
+      return hcp != null && hcp > 15.0 && hcp <= 36;
+    }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+
+    // Female
+    const female = all.filter(r => (r.players as any)?.gender === 'F')
+      .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+
+    // Senior
+    const senior = all.filter(r => (r.players as any)?.is_senior)
+      .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+
+    return { scratch, hcpLow, hcpHigh, female, senior };
+  };
+
+  const renderResultsTable = (results: any[], mode: 'stableford' | 'scratch') => {
+    if (!results?.length) return <p className="text-sm text-muted-foreground py-2">{t('common.noData')}</p>;
+    const isScratch = mode === 'scratch';
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border/40 text-muted-foreground">
+              <th className="text-left py-2 pr-2 w-10">{t('common.position')}</th>
+              <th className="text-left py-2">{t('common.name')}</th>
+              <th className="text-right py-2 px-2">{t('common.handicap')}</th>
+              <th className="text-right py-2 px-2">{isScratch ? 'Scratch' : 'Stableford'}</th>
+              {!isScratch && <th className="text-right py-2">Scratch</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((r: any, i: number) => (
+              <tr key={r.id} className="border-b border-border/20 last:border-0">
+                <td className="py-1.5 pr-2 font-mono text-muted-foreground">{i + 1}</td>
+                <td className="py-1.5 font-medium">
+                  <Link to={`/jugadors/${r.player_id}`} className="hover:text-primary transition-colors">
+                    {(r.players as any)?.name}
+                  </Link>
+                </td>
+                <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
+                <td className="py-1.5 px-2 text-right font-mono font-bold text-primary">
+                  {isScratch ? (r.scratch_score ?? '—') : (r.stableford_points ?? '—')}
+                </td>
+                {!isScratch && <td className="py-1.5 text-right font-mono">{r.scratch_score ?? '—'}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const categorized = categorizeResults(roundResults);
+
+  const roundCategories = [
+    { key: 'scratch', label: 'Scratch', mode: 'scratch' as const },
+    { key: 'hcpLow', label: 'HCP Baix (≤15)', mode: 'stableford' as const },
+    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)', mode: 'stableford' as const },
+    { key: 'female', label: t('categories.female'), mode: 'stableford' as const },
+    { key: 'senior', label: t('categories.senior'), mode: 'stableford' as const },
+  ];
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
@@ -98,30 +178,20 @@ const Rounds = () => {
                     <span>{roundResults?.length || 0} {t('rounds.participants').toLowerCase()}</span>
                   </div>
                   {roundResults && roundResults.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border/40 text-muted-foreground">
-                            <th className="text-left py-2 pr-2 w-10">{t('common.position')}</th>
-                            <th className="text-left py-2">{t('common.name')}</th>
-                            <th className="text-right py-2 px-2">{t('common.handicap')}</th>
-                            <th className="text-right py-2 px-2">Stableford</th>
-                            <th className="text-right py-2">Scratch</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {roundResults.map((r, i) => (
-                            <tr key={r.id} className="border-b border-border/20 last:border-0">
-                              <td className="py-1.5 pr-2 font-mono text-muted-foreground">{i + 1}</td>
-                              <td className="py-1.5 font-medium">{(r.players as any)?.name}</td>
-                              <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
-                              <td className="py-1.5 px-2 text-right font-mono font-bold text-primary">{r.stableford_points ?? '—'}</td>
-                              <td className="py-1.5 text-right font-mono">{r.scratch_score ?? '—'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <Tabs defaultValue="scratch">
+                      <TabsList className="flex-wrap h-auto gap-1 mb-4">
+                        {roundCategories.map(cat => (
+                          <TabsTrigger key={cat.key} value={cat.key} className="text-xs">
+                            {cat.label}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                      {roundCategories.map(cat => (
+                        <TabsContent key={cat.key} value={cat.key}>
+                          {renderResultsTable((categorized as any)[cat.key], cat.mode)}
+                        </TabsContent>
+                      ))}
+                    </Tabs>
                   ) : (
                     <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
                   )}
