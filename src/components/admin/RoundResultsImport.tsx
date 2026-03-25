@@ -4,11 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Check, X, AlertTriangle, Search } from 'lucide-react';
+import { Check, X, AlertTriangle, Search, Plus, Trash2 } from 'lucide-react';
 import { DialogDescription } from '@/components/ui/dialog';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -24,9 +24,9 @@ interface ParsedResult {
   scratch_score: number | null;
   scores: number[];
   source_url: string;
-  // UI state
   _selected: boolean;
   _matched_player_id?: string;
+  _url_index?: number;
 }
 
 interface Props {
@@ -37,54 +37,83 @@ interface Props {
 const RoundResultsImport = ({ round, onClose }: Props) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [resultUrl, setResultUrl] = useState('');
+  const [urls, setUrls] = useState<string[]>(['']);
   const [format, setFormat] = useState('stableford');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ParsedResult[]>([]);
   const [source, setSource] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
 
+  const addUrl = () => setUrls(prev => [...prev, '']);
+  const removeUrl = (idx: number) => setUrls(prev => prev.filter((_, i) => i !== idx));
+  const updateUrl = (idx: number, value: string) =>
+    setUrls(prev => prev.map((u, i) => i === idx ? value : u));
+
   const handleFetch = async () => {
-    if (!resultUrl.trim()) return;
+    const validUrls = urls.filter(u => u.trim());
+    if (validUrls.length === 0) return;
     setLoading(true);
     setWarnings([]);
+    setResults([]);
+
     try {
-      const { data, error } = await supabase.functions.invoke('parse-results', {
-        body: { url: resultUrl.trim(), format },
-      });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'Error parsing results');
+      // Fetch all URLs in parallel
+      const responses = await Promise.all(
+        validUrls.map(async (url, urlIdx) => {
+          const { data, error } = await supabase.functions.invoke('parse-results', {
+            body: { url: url.trim(), format },
+          });
+          if (error) throw new Error(`Error URL ${urlIdx + 1}: ${error.message}`);
+          if (!data?.success) throw new Error(data?.error || `Error parsing URL ${urlIdx + 1}`);
+          return { ...data, urlIdx };
+        })
+      );
 
-      const parsed = (data.results as ParsedResult[]).map(r => ({
-        ...r,
-        _selected: true,
-      }));
+      // Merge results from all URLs, avoiding duplicates by name+license
+      const seen = new Map<string, ParsedResult>();
+      let detectedSource = '';
 
-      setResults(parsed);
-      setSource(data.source || 'generic');
-
-      // Try to match players by name
-      const { data: players } = await supabase
-        .from('players')
-        .select('id, name, license');
-
-      if (players && players.length > 0) {
-        const w: string[] = [];
-        const matched = parsed.map(r => {
-          const match = players.find(
-            p => p.license === r.license ||
-              p.name.toLowerCase() === r.name.toLowerCase()
-          );
-          if (!match) w.push(`"${r.name}" no trobat a la base de dades`);
-          return { ...r, _matched_player_id: match?.id };
-        });
-        setResults(matched);
-        if (w.length > 0) setWarnings(w);
+      for (const resp of responses) {
+        detectedSource = detectedSource || resp.source;
+        for (const r of resp.results as ParsedResult[]) {
+          const key = (r.license || r.name).toLowerCase();
+          const existing = seen.get(key);
+          if (existing) {
+            // Keep the better result (higher stableford or lower scratch)
+            if (r.stableford_points != null && existing.stableford_points != null) {
+              if (r.stableford_points > existing.stableford_points) seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
+            } else if (r.scratch_score != null && existing.scratch_score != null) {
+              if (r.scratch_score < existing.scratch_score) seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
+            }
+          } else {
+            seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
+          }
+        }
       }
 
+      const parsed = Array.from(seen.values()).sort((a, b) => a.position - b.position);
+      setSource(detectedSource);
+
+      // Match players
+      const { data: players } = await supabase.from('players').select('id, name, license');
+      const w: string[] = [];
+
+      const matched = parsed.map(r => {
+        const match = players?.find(
+          p => (r.license && p.license === r.license) ||
+            p.name.toLowerCase() === r.name.toLowerCase()
+        );
+        if (!match) w.push(`"${r.name}" no trobat a la base de dades`);
+        return { ...r, _matched_player_id: match?.id };
+      });
+
+      setResults(matched);
+      if (w.length > 0) setWarnings(w);
+
+      const totalResults = responses.reduce((sum, r) => sum + (r.count || 0), 0);
       toast({
-        title: `${data.count} resultats detectats`,
-        description: `Font: ${data.source}. Revisa abans de guardar.`,
+        title: `${matched.length} resultats únics (${totalResults} total de ${validUrls.length} URL${validUrls.length > 1 ? 's' : ''})`,
+        description: `Font: ${detectedSource}. Revisa abans de guardar.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
@@ -105,11 +134,9 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       const selected = results.filter(r => r._selected);
       const newPlayers: string[] = [];
 
-      // First, ensure all players exist
       for (const r of selected) {
         if (r._matched_player_id) continue;
 
-        // Create new player
         const { data: newPlayer, error } = await supabase
           .from('players')
           .insert({
@@ -128,7 +155,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         newPlayers.push(r.name);
       }
 
-      // Insert results
       const payloads = selected.map(r => ({
         round_id: round.id,
         player_id: r._matched_player_id!,
@@ -142,11 +168,10 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       const { error } = await supabase.from('results').insert(payloads);
       if (error) throw error;
 
-      // Log the import
       await supabase.from('import_logs').insert({
         round_id: round.id,
         source: source || 'url',
-        source_url: resultUrl,
+        source_url: urls.filter(u => u.trim()).join(' | '),
         records_imported: selected.length,
         records_skipped: results.length - selected.length,
         skipped_records: results.filter(r => !r._selected).map(r => ({ name: r.name, reason: 'deselected' })),
@@ -171,22 +196,34 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   return (
     <div className="space-y-4">
       <DialogDescription className="text-sm text-muted-foreground">
-        Importa resultats des d'una URL de Teeone o altra font de resultats.
+        Importa resultats des d'una o més URLs (una per dia de joc). Suporta GolfDirecto i Teeone.
       </DialogDescription>
 
-      {/* URL input */}
+      {/* URL inputs */}
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">URL dels resultats</Label>
+        <Label className="text-sm font-semibold">URLs dels resultats</Label>
         <p className="text-xs text-muted-foreground">
-          Enganxa la URL de la pàgina de resultats (Teeone, GolfDirecto o altra font)
+          Afegeix una URL per cada dia de joc. Els resultats es fusionaran automàticament (millor resultat per jugador).
         </p>
+        {urls.map((url, idx) => (
+          <div key={idx} className="flex gap-2">
+            <Input
+              value={url}
+              onChange={(e) => updateUrl(idx, e.target.value)}
+              placeholder={`URL dia ${idx + 1} — https://www.golfdirecto.com/micro/game/...`}
+              className="flex-1"
+            />
+            {urls.length > 1 && (
+              <Button variant="ghost" size="icon" onClick={() => removeUrl(idx)}>
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            )}
+          </div>
+        ))}
         <div className="flex gap-2">
-          <Input
-            value={resultUrl}
-            onChange={(e) => setResultUrl(e.target.value)}
-            placeholder="https://open.teeone.golf/es/..."
-            className="flex-1"
-          />
+          <Button variant="outline" size="sm" onClick={addUrl}>
+            <Plus className="h-3 w-3 mr-1" /> Afegir URL
+          </Button>
           <Select value={format} onValueChange={setFormat}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
@@ -196,9 +233,9 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
               <SelectItem value="medal">Medal</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleFetch} disabled={loading || !resultUrl.trim()}>
+          <Button onClick={handleFetch} disabled={loading || urls.every(u => !u.trim())} className="ml-auto">
             <Search className="h-4 w-4 mr-2" />
-            {loading ? 'Llegint...' : 'Llegir'}
+            {loading ? 'Llegint...' : 'Llegir resultats'}
           </Button>
         </div>
       </div>
