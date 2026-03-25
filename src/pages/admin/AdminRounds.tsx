@@ -463,6 +463,9 @@ const AdminRounds = () => {
                   <Button variant="ghost" size="icon" onClick={() => openEdit(round)} title="Editar">
                     <Pencil className="h-4 w-4" />
                   </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setDeletingRound(round)} title="Eliminar" className="text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardHeader>
             </Card>
