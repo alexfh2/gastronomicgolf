@@ -187,7 +187,7 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
         }
         // Only keep if we got meaningful data (not all zeros)
         const hasData = holes.some((v) => v > 0);
-        if (holes.length > 0) {
+        if (hasData) {
           ed.result.scores = holes;
         }
       } catch {
