@@ -377,9 +377,14 @@ const AdminRounds = () => {
                     <span className="text-xs text-muted-foreground">→ {round.end_date}</span>
                   )}
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => openEdit(round)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => setResultsRound(round)} title="Importar resultats">
+                    <FileSpreadsheet className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(round)} title="Editar">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
             </Card>
           ))}
