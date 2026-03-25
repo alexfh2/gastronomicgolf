@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search } from 'lucide-react';
@@ -87,7 +87,9 @@ const Players = () => {
                 return (
                   <tr key={p.id} className="border-b border-border/20 last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="py-2 font-medium">
-                      {p.name}
+                      <Link to={`/jugadors/${p.id}`} className="hover:text-primary transition-colors">
+                        {p.name}
+                      </Link>
                       {p.gender === 'F' && <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">F</Badge>}
                       {p.is_senior && <Badge variant="outline" className="ml-1 text-[10px] px-1.5 py-0">SR</Badge>}
                     </td>

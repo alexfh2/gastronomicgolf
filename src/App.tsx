@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Rankings from "./pages/Rankings";
 import Rounds from "./pages/Rounds";
 import Players from "./pages/Players";
+import PlayerDetail from "./pages/PlayerDetail";
 import Compare from "./pages/Compare";
 import Stats from "./pages/Stats";
 import News from "./pages/News";
