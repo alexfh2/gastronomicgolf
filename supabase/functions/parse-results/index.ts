@@ -182,9 +182,11 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
         const holes: number[] = [];
         for (let h = 1; h <= 18; h++) {
           const val = score[`gross${h}`];
-          if (val != null && val > 0) holes.push(val);
-          else break;
+          if (val != null) holes.push(Number(val));
+          else holes.push(0);
         }
+        // Only keep if we got meaningful data (not all zeros)
+        const hasData = holes.some((v) => v > 0);
         if (holes.length > 0) {
           ed.result.scores = holes;
         }
