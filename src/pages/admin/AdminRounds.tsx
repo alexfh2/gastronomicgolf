@@ -243,6 +243,57 @@ const AdminRounds = () => {
   const updateField = (key: string, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  // ─── DELETE ROUND ───
+  const deleteMutation = useMutation({
+    mutationFn: async (roundId: string) => {
+      // First delete related results
+      const { error: resError } = await supabase.from('results').delete().eq('round_id', roundId);
+      if (resError) throw resError;
+      // Delete import logs
+      const { error: logError } = await supabase.from('import_logs').delete().eq('round_id', roundId);
+      if (logError) throw logError;
+      // Delete photos
+      const { error: photoError } = await supabase.from('photos').delete().eq('round_id', roundId);
+      if (photoError) throw photoError;
+      // Delete news drafts
+      const { error: newsError } = await supabase.from('news_drafts').delete().eq('round_id', roundId);
+      if (newsError) throw newsError;
+      // Finally delete the round
+      const { error } = await supabase.from('rounds').delete().eq('id', roundId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
+      toast({ title: 'Jornada eliminada' });
+      setDeletingRound(null);
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  // ─── EXTRACT PAR FROM URL ───
+  const handleExtractPar = async () => {
+    if (!courseUrl.trim()) return;
+    setExtractingPar(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-course-par', {
+        body: { url: courseUrl.trim() },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure el par');
+      
+      const parArray: number[] = data.par;
+      updateField('course_par', parArray.join(', '));
+      toast({ title: 'Par extret correctament', description: `Par ${parArray.reduce((a: number, b: number) => a + b, 0)} (${parArray.length} forats)` });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: 'Error extraient par', description: message, variant: 'destructive' });
+    } finally {
+      setExtractingPar(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Header */}
