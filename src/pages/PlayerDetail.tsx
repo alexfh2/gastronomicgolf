@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
+import ScorecardVisual from '@/components/ScorecardVisual';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
