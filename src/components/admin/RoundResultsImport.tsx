@@ -144,7 +144,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             license: r.license || `AUTO-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             current_handicap: r.handicap,
             initial_handicap: r.handicap,
-            gender: r.gender === 'F' ? 'female' : r.gender === 'M' ? 'male' : null,
+            gender: r.gender === 'F' ? 'F' : r.gender === 'M' ? 'M' : null,
             is_senior: false,
           })
           .select('id')
