@@ -135,19 +135,19 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
     const name = [player.firstName, player.surname].filter(Boolean).join(" ").trim();
     if (!name || name.length < 2) continue;
 
-    const position = dayView.rankingPosition || dayView.realRanking || 0;
-    const result = dayView.result ?? null;
-    const strokeNumber = dayView.strokeNumber ?? null;
-    const hcpExact = player.hcpExact != null ? parseFloat(String(player.hcpExact)) : null;
+    const positionValue = parseNumber(dayView.rankingPosition ?? dayView.realRanking);
+    const hcpExact = parseNumber(player.hcpExact);
+    const stablefordPoints = parseNumber(dayView.onlyNet ?? (isNet ? dayView.result : null));
+    const scratchScore = parseNumber(dayView.strokeNumber ?? dayView.onlyGross ?? (!isNet ? dayView.result : null));
 
     results.push({
-      position,
+      position: positionValue != null ? Math.trunc(positionValue) : 0,
       name,
       license: player.license || "",
       gender: player.gender === "F" ? "F" : player.gender === "M" ? "M" : "",
-      handicap: isNaN(hcpExact as number) ? null : hcpExact,
-      stableford_points: isNet ? result : null,
-      scratch_score: !isNet ? strokeNumber : result,
+      handicap: hcpExact,
+      stableford_points: stablefordPoints,
+      scratch_score: scratchScore,
       scores: [],
       source_url: url,
     });
