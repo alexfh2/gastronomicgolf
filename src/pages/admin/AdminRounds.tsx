@@ -517,14 +517,26 @@ const AdminRounds = () => {
               <Input value={form.sponsor} onChange={(e) => updateField('sponsor', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Par del camp (18 forats, separats per comes)</Label>
+              <Label>Par del camp (18 forats)</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={courseUrl}
+                  onChange={(e) => setCourseUrl(e.target.value)}
+                  placeholder="https://web-del-camp.com/el-campo/"
+                  className="flex-1"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={handleExtractPar} disabled={extractingPar || !courseUrl.trim()}>
+                  {extractingPar ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Globe className="h-4 w-4 mr-1" />}
+                  {extractingPar ? 'Extraient...' : 'Extreure par'}
+                </Button>
+              </div>
               <Input
                 value={form.course_par}
                 onChange={(e) => updateField('course_par', e.target.value)}
                 placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
               />
               <p className="text-xs text-muted-foreground">
-                Introdueix el par de cada forat separat per comes (p. ex. 4,4,5,3,...). Necessari per mostrar birdie/par/bogey a les targetes.
+                Enganxa la URL de la web del camp per extreure el par automàticament, o introdueix-lo manualment separat per comes.
               </p>
             </div>
             <div className="space-y-2">
