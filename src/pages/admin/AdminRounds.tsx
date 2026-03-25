@@ -455,6 +455,23 @@ const AdminRounds = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Results import dialog */}
+      <Dialog open={!!resultsRound} onOpenChange={(open) => !open && setResultsRound(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              Importar resultats — {resultsRound?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {resultsRound && (
+            <RoundResultsImport
+              round={resultsRound}
+              onClose={() => setResultsRound(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
