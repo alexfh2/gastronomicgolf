@@ -34,11 +34,15 @@ serve(async (req) => {
 
     const detectedSource = detectSource(url);
     let results: ParsedResult[];
+    let categories: { id: string; name: string; count: number }[] | undefined;
 
-    if (detectedSource === "teeone") {
+    if (detectedSource === "golfdirecto") {
+      const gd = await parseGolfDirecto(url, format);
+      results = gd.results;
+      categories = gd.categories;
+    } else if (detectedSource === "teeone") {
       results = await parseTeeoneViaAPI(url, format);
     } else {
-      // For other sources, fetch HTML and try generic parse
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
       const html = await response.text();
@@ -46,7 +50,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, source: detectedSource, results, count: results.length }),
+      JSON.stringify({ success: true, source: detectedSource, results, count: results.length, categories }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
@@ -59,23 +63,109 @@ serve(async (req) => {
 });
 
 function detectSource(url: string): string {
-  if (url.includes("teeone.golf") || url.includes("teeone.es")) return "teeone";
   if (url.includes("golfdirecto.com")) return "golfdirecto";
+  if (url.includes("teeone.golf") || url.includes("teeone.es")) return "teeone";
   return "generic";
 }
 
-/**
- * Parse Teeone results by:
- * 1. Fetching the livescoring page to extract hidden field values (API token, tournament ID, etc.)
- * 2. Calling the Teeone API directly to get structured JSON results
- */
+// ─── GOLFDIRECTO ───────────────────────────────────────────────────────────────
+
+interface GolfDirectoResult {
+  results: ParsedResult[];
+  categories: { id: string; name: string; count: number }[];
+}
+
+async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirectoResult> {
+  // Extract gameId and optional categoryId from URL
+  const gameMatch = url.match(/game\/([a-f0-9]{24})/);
+  if (!gameMatch) {
+    throw new Error("No s'ha pogut extreure l'ID del torneig de la URL de GolfDirecto");
+  }
+  const gameId = gameMatch[1];
+
+  const categoryMatch = url.match(/category=([a-f0-9]{24})/);
+  const requestedCategoryId = categoryMatch ? categoryMatch[1] : null;
+
+  // Fetch game info to get categories
+  const gameRes = await fetch(
+    `https://www.golfdirecto.com/web/home/game/${gameId}/active`,
+    { headers: { Accept: "application/json" } }
+  );
+  if (!gameRes.ok) throw new Error(`Error obtenint info del torneig GolfDirecto: ${gameRes.status}`);
+  const gameData = await gameRes.json();
+  const game = gameData.data || gameData;
+
+  const allCategories: { id: string; name: string; count: number }[] = (game.categories || []).map(
+    (c: { _id: string; name: string; __playersCount: number }) => ({
+      id: c._id,
+      name: c.name || "Sense nom",
+      count: c.__playersCount || 0,
+    })
+  );
+
+  // Determine which category to fetch: use SCRATCH by default or the one in the URL
+  let categoryId = requestedCategoryId;
+  if (!categoryId) {
+    const scratch = allCategories.find((c) => c.name.toUpperCase().includes("SCRATCH"));
+    categoryId = scratch?.id || allCategories[0]?.id;
+  }
+
+  if (!categoryId) {
+    throw new Error("No s'han trobat categories al torneig de GolfDirecto");
+  }
+
+  // Fetch ranking for selected category
+  const rankRes = await fetch(
+    `https://www.golfdirecto.com/web/home/score/ranking/entry?game=${gameId}&category=${categoryId}`,
+    { headers: { Accept: "application/json" } }
+  );
+  if (!rankRes.ok) throw new Error(`Error obtenint ranking GolfDirecto: ${rankRes.status}`);
+  const rankData = await rankRes.json();
+  const entries = rankData.data || [];
+
+  const selectedCat = allCategories.find((c) => c.id === categoryId);
+  const isNet = selectedCat?.name?.toUpperCase().includes("SCRATCH") === false;
+
+  const results: ParsedResult[] = [];
+  for (const entry of entries) {
+    const player = entry.player || {};
+    const view = entry.view || {};
+    const dayView = view.day || view.acc || {};
+
+    const name = [player.firstName, player.surname].filter(Boolean).join(" ").trim();
+    if (!name || name.length < 2) continue;
+
+    const position = dayView.rankingPosition || dayView.realRanking || 0;
+    const result = dayView.result ?? null;
+    const strokeNumber = dayView.strokeNumber ?? null;
+    const hcpExact = player.hcpExact != null ? parseFloat(String(player.hcpExact)) : null;
+
+    results.push({
+      position,
+      name,
+      license: player.license || "",
+      gender: player.gender === "F" ? "F" : player.gender === "M" ? "M" : "",
+      handicap: isNaN(hcpExact as number) ? null : hcpExact,
+      stableford_points: isNet ? result : null,
+      scratch_score: !isNet ? strokeNumber : result,
+      scores: [],
+      source_url: url,
+    });
+  }
+
+  // Sort by position
+  results.sort((a, b) => a.position - b.position);
+
+  return { results, categories: allCategories };
+}
+
+// ─── TEEONE ────────────────────────────────────────────────────────────────────
+
 async function parseTeeoneViaAPI(url: string, format?: string): Promise<ParsedResult[]> {
-  // Step 1: Fetch the page to get hidden fields
   const pageResponse = await fetch(url);
   if (!pageResponse.ok) throw new Error(`Failed to fetch Teeone page: ${pageResponse.status}`);
   const html = await pageResponse.text();
 
-  // Extract hidden field values
   const getHidden = (name: string): string => {
     const match = html.match(new RegExp(`${name}"\\s*value="([^"]*)"`));
     return match ? match[1] : "";
@@ -92,7 +182,6 @@ async function parseTeeoneViaAPI(url: string, format?: string): Promise<ParsedRe
     throw new Error("No s'han pogut extreure els paràmetres de l'API de Teeone. Comprova la URL.");
   }
 
-  // Step 2: Get available rounds
   const vueltasRes = await fetch(`${apiDomain}/api/LiveScoring/ObtenerVueltasLive`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -102,27 +191,18 @@ async function parseTeeoneViaAPI(url: string, format?: string): Promise<ParsedRe
   const vueltas: number[] = vueltasData.cod === 1 ? vueltasData.listaVueltas : [1];
   const lastVuelta = vueltas[vueltas.length - 1] || 1;
 
-  // idTipoClasificacion: 1=Bruto Medal, 2=Neto Medal, 3=Bruto Stableford, 4=Neto Stableford
   const isStableford = !format || format === "stableford";
   const idTipoClasificacion = isStableford ? "4" : "1";
 
-  // Step 3: Get classification positions
   const classRes = await fetch(`${apiDomain}/api/LiveScoring/ObtenerPosicionesClasificacionLive`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      culture,
-      token,
-      idInicioSesion,
-      idVendedor,
-      codTorneo,
+      culture, token, idInicioSesion, idVendedor, codTorneo,
       numVuelta: String(lastVuelta),
       idTipoClasificacion,
-      codSexo: "T",
-      hcpDesde: "-10",
-      hcpHasta: "54",
-      hcpDesempate: false,
-      codNivel: "T",
+      codSexo: "T", hcpDesde: "-10", hcpHasta: "54",
+      hcpDesempate: false, codNivel: "T",
     }),
   });
 
@@ -161,9 +241,8 @@ async function parseTeeoneViaAPI(url: string, format?: string): Promise<ParsedRe
   return results;
 }
 
-/**
- * Generic table parser fallback for HTML pages
- */
+// ─── GENERIC TABLE ─────────────────────────────────────────────────────────────
+
 function parseGenericTable(html: string, sourceUrl: string): ParsedResult[] {
   const results: ParsedResult[] = [];
   const clean = html
