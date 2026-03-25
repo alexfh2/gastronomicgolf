@@ -120,7 +120,8 @@ const PlayerDetail = () => {
       <div className="space-y-4">
         {results?.map(r => {
           const round = r.rounds as any;
-          const scorecard = r.scorecard as number[] | null;
+          const rawScorecard = r.scorecard as any;
+          const scorecard: number[] | null = Array.isArray(rawScorecard) ? rawScorecard : rawScorecard?.scores ?? null;
 
           return (
             <Card key={r.id} className="border-border/60">
