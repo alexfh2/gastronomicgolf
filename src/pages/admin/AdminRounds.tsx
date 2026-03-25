@@ -158,6 +158,15 @@ const AdminRounds = () => {
   // ─── MANUAL EDIT ───
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // Parse course_par from comma-separated string
+      let coursePar: number[] | null = null;
+      if (form.course_par.trim()) {
+        coursePar = form.course_par.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+        if (coursePar.length !== 18) {
+          throw new Error('El par del camp ha de tenir exactament 18 valors');
+        }
+      }
+
       const payload: TablesInsert<'rounds'> = {
         name: form.name,
         round_number: parseInt(form.round_number),
@@ -170,7 +179,8 @@ const AdminRounds = () => {
         master_coefficient: form.is_master ? 1.25 : 1.0,
         status: form.status,
         season_id: form.season_id || activeSeasonId,
-      };
+        course_par: coursePar,
+      } as any;
       if (editingRound) {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
         if (error) throw error;
