@@ -222,6 +222,7 @@ const AdminRounds = () => {
       name: `Jornada ${n}`, round_number: String(n),
       date: '', end_date: '', club: '', course: '', sponsor: '',
       is_master: false, status: 'draft', season_id: activeSeasonId,
+      course_par: '',
     });
     setDialogOpen(true);
   };
