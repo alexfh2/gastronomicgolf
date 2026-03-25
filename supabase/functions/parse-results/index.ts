@@ -326,6 +326,12 @@ function parseGenericTable(html: string, sourceUrl: string): ParsedResult[] {
   return results;
 }
 
+function parseNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(String(value).replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
 }
