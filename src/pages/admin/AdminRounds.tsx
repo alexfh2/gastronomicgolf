@@ -450,6 +450,17 @@ const AdminRounds = () => {
               <Input value={form.sponsor} onChange={(e) => updateField('sponsor', e.target.value)} />
             </div>
             <div className="space-y-2">
+              <Label>Par del camp (18 forats, separats per comes)</Label>
+              <Input
+                value={form.course_par}
+                onChange={(e) => updateField('course_par', e.target.value)}
+                placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
+              />
+              <p className="text-xs text-muted-foreground">
+                Introdueix el par de cada forat separat per comes (p. ex. 4,4,5,3,...). Necessari per mostrar birdie/par/bogey a les targetes.
+              </p>
+            </div>
+            <div className="space-y-2">
               <Label>Estat</Label>
               <Select value={form.status} onValueChange={(v) => updateField('status', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
