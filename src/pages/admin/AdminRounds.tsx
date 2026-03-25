@@ -75,6 +75,9 @@ const AdminRounds = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [resultsRound, setResultsRound] = useState<Round | null>(null);
+  const [deletingRound, setDeletingRound] = useState<Round | null>(null);
+  const [courseUrl, setCourseUrl] = useState('');
+  const [extractingPar, setExtractingPar] = useState(false);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
