@@ -126,7 +126,13 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
   const selectedCat = allCategories.find((c) => c.id === categoryId);
   const isNet = selectedCat?.name?.toUpperCase().includes("SCRATCH") === false;
 
-  const results: ParsedResult[] = [];
+  // Build basic results and collect player IDs for scorecard fetching
+  interface EntryData {
+    playerId: string;
+    result: ParsedResult;
+  }
+  const entryDataList: EntryData[] = [];
+
   for (const entry of entries) {
     const player = entry.player || {};
     const view = entry.view || {};
@@ -140,20 +146,58 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
     const stablefordPoints = parseNumber(dayView.onlyNet ?? (isNet ? dayView.result : null));
     const scratchScore = parseNumber(dayView.strokeNumber ?? dayView.onlyGross ?? (!isNet ? dayView.result : null));
 
-    results.push({
-      position: positionValue != null ? Math.trunc(positionValue) : 0,
-      name,
-      license: player.license || "",
-      gender: player.gender === "F" ? "F" : player.gender === "M" ? "M" : "",
-      handicap: hcpExact,
-      stableford_points: stablefordPoints,
-      scratch_score: scratchScore,
-      scores: [],
-      source_url: url,
+    entryDataList.push({
+      playerId: player._id || "",
+      result: {
+        position: positionValue != null ? Math.trunc(positionValue) : 0,
+        name,
+        license: player.license || "",
+        gender: player.gender === "F" ? "F" : player.gender === "M" ? "M" : "",
+        handicap: hcpExact,
+        stableford_points: stablefordPoints,
+        scratch_score: scratchScore,
+        scores: [],
+        source_url: url,
+      },
     });
   }
 
-  // Sort by position
+  // Fetch hole-by-hole scorecards in parallel (batches of 10 to avoid overwhelming the API)
+  const batchSize = 10;
+  for (let i = 0; i < entryDataList.length; i += batchSize) {
+    const batch = entryDataList.slice(i, i + batchSize);
+    const scorecardPromises = batch.map(async (ed) => {
+      if (!ed.playerId) return;
+      try {
+        const cardRes = await fetch(
+          `https://www.golfdirecto.com/web/home/score/player/${ed.playerId}/result?game=${gameId}`,
+          { headers: { Accept: "application/json" } }
+        );
+        if (!cardRes.ok) return;
+        const cardData = await cardRes.json();
+        const data = cardData.data || cardData;
+        const score = data.score || {};
+
+        // Extract gross scores for holes 1-18
+        const holes: number[] = [];
+        for (let h = 1; h <= 18; h++) {
+          const val = score[`gross${h}`];
+          if (val != null) holes.push(Number(val));
+          else holes.push(0);
+        }
+        // Only keep if we got meaningful data (not all zeros)
+        const hasData = holes.some((v) => v > 0);
+        if (hasData) {
+          ed.result.scores = holes;
+        }
+      } catch {
+        // silently skip scorecard errors
+      }
+    });
+    await Promise.all(scorecardPromises);
+  }
+
+  const results = entryDataList.map((ed) => ed.result);
   results.sort((a, b) => a.position - b.position);
 
   return { results, categories: allCategories };
