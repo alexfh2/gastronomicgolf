@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
+import ScorecardVisual from '@/components/ScorecardVisual';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -143,26 +144,7 @@ const PlayerDetail = () => {
 
                 {scorecard && scorecard.length > 0 ? (
                   <div className="overflow-x-auto">
-                    <table className="text-xs w-full">
-                      <thead>
-                        <tr className="text-muted-foreground">
-                          <th className="py-1 pr-2 text-left">Forat</th>
-                          {scorecard.map((_, i) => (
-                            <th key={i} className="py-1 px-1 text-center w-8">{i + 1}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="py-1 pr-2 font-medium">Cops</td>
-                          {scorecard.map((s, i) => (
-                            <td key={i} className="py-1 px-1 text-center font-mono">
-                              {s > 0 ? s : '—'}
-                            </td>
-                          ))}
-                        </tr>
-                      </tbody>
-                    </table>
+                    <ScorecardVisual scores={scorecard} />
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground">Sense targeta hoyo a hoyo</p>
