@@ -1,11 +1,45 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Users, ArrowRight } from 'lucide-react';
+import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { ca, es } from 'date-fns/locale';
 
 const Index = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ca' ? ca : es;
+
+  const { data: rounds } = useQuery({
+    queryKey: ['public-rounds-home'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('rounds')
+        .select('id, name, date, end_date, club, course, sponsor, status, is_master, round_number')
+        .eq('status', 'published')
+        .order('date', { ascending: true });
+      return data || [];
+    },
+  });
+
+  const { data: topResults } = useQuery({
+    queryKey: ['public-top-results'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('results')
+        .select('stableford_points, player_id, round_id, players(name), rounds!inner(status)')
+        .eq('rounds.status', 'published')
+        .not('stableford_points', 'is', null)
+        .order('stableford_points', { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
+
+  const now = new Date().toISOString().split('T')[0];
+  const nextRound = rounds?.find(r => r.date >= now);
+  const lastRound = rounds ? [...rounds].reverse().find(r => r.date < now) : null;
 
   const quickLinks = [
     { icon: Trophy, label: t('home.viewRankings'), path: '/ranquings', color: 'text-accent' },
@@ -53,19 +87,64 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Placeholder sections */}
+      {/* Next/Last round + Top results */}
       <section className="container pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Next / Last Round */}
           <Card className="border-border/60">
-            <CardContent className="p-8 text-center">
-              <h3 className="font-display text-lg font-semibold mb-2">{t('home.nextRound')}</h3>
-              <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
+            <CardContent className="p-6">
+              <h3 className="font-display text-lg font-semibold mb-4">
+                {nextRound ? t('home.nextRound') : t('home.lastRound')}
+              </h3>
+              {(nextRound || lastRound) ? (
+                <div className="space-y-2">
+                  <p className="text-xl font-bold text-foreground">
+                    {(nextRound || lastRound)!.name}
+                    {(nextRound || lastRound)!.is_master && (
+                      <span className="ml-2 text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-semibold">MASTER</span>
+                    )}
+                  </p>
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <Calendar className="h-4 w-4" />
+                    <span>{format(new Date((nextRound || lastRound)!.date), 'dd MMMM yyyy', { locale })}</span>
+                  </div>
+                  {(nextRound || lastRound)!.club && (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <MapPin className="h-4 w-4" />
+                      <span>{(nextRound || lastRound)!.club}{(nextRound || lastRound)!.course ? ` — ${(nextRound || lastRound)!.course}` : ''}</span>
+                    </div>
+                  )}
+                  {(nextRound || lastRound)!.sponsor && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('rounds.sponsor')}: {(nextRound || lastRound)!.sponsor}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
+              )}
             </CardContent>
           </Card>
+
+          {/* Top results */}
           <Card className="border-border/60">
-            <CardContent className="p-8 text-center">
-              <h3 className="font-display text-lg font-semibold mb-2">{t('home.latestNews')}</h3>
-              <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
+            <CardContent className="p-6">
+              <h3 className="font-display text-lg font-semibold mb-4">{t('home.topPlayers')}</h3>
+              {topResults && topResults.length > 0 ? (
+                <div className="space-y-2">
+                  {topResults.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-mono text-muted-foreground w-5">{i + 1}</span>
+                        <span className="text-sm font-medium">{(r.players as any)?.name}</span>
+                      </div>
+                      <span className="font-mono font-bold text-sm text-primary">{r.stableford_points} pts</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
+              )}
             </CardContent>
           </Card>
         </div>
