@@ -69,6 +69,7 @@ const AdminRounds = () => {
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
     status: 'draft' as RoundStatus, season_id: '',
+    course_par: '' as string,
   });
 
   const { data: seasons } = useQuery({
