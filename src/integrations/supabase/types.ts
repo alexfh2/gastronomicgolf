@@ -14,16 +14,394 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      import_logs: {
+        Row: {
+          created_at: string
+          id: string
+          imported_by: string | null
+          records_imported: number | null
+          records_skipped: number | null
+          round_id: string
+          skipped_records: Json | null
+          source: string
+          source_url: string | null
+          status: string
+          warnings: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          imported_by?: string | null
+          records_imported?: number | null
+          records_skipped?: number | null
+          round_id: string
+          skipped_records?: Json | null
+          source: string
+          source_url?: string | null
+          status?: string
+          warnings?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          imported_by?: string | null
+          records_imported?: number | null
+          records_skipped?: number | null
+          round_id?: string
+          skipped_records?: Json | null
+          source?: string
+          source_url?: string | null
+          status?: string
+          warnings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_logs_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_drafts: {
+        Row: {
+          body: string | null
+          created_at: string
+          highlights: Json | null
+          id: string
+          language: string
+          published_at: string | null
+          round_id: string
+          seo_excerpt: string | null
+          special_mention: string | null
+          status: string
+          subtitle: string | null
+          title: string | null
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          highlights?: Json | null
+          id?: string
+          language: string
+          published_at?: string | null
+          round_id: string
+          seo_excerpt?: string | null
+          special_mention?: string | null
+          status?: string
+          subtitle?: string | null
+          title?: string | null
+          tone: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          highlights?: Json | null
+          id?: string
+          language?: string
+          published_at?: string | null
+          round_id?: string
+          seo_excerpt?: string | null
+          special_mention?: string | null
+          status?: string
+          subtitle?: string | null
+          title?: string | null
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_drafts_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          category: string | null
+          created_at: string
+          id: string
+          round_id: string
+          sort_order: number | null
+          type: string
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          round_id: string
+          sort_order?: number | null
+          type: string
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          round_id?: string
+          sort_order?: number | null
+          type?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          club: string | null
+          created_at: string
+          current_handicap: number | null
+          gender: string | null
+          id: string
+          initial_handicap: number | null
+          is_senior: boolean
+          license: string
+          name: string
+          photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          club?: string | null
+          created_at?: string
+          current_handicap?: number | null
+          gender?: string | null
+          id?: string
+          initial_handicap?: number | null
+          is_senior?: boolean
+          license: string
+          name: string
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          club?: string | null
+          created_at?: string
+          current_handicap?: number | null
+          gender?: string | null
+          id?: string
+          initial_handicap?: number | null
+          is_senior?: boolean
+          license?: string
+          name?: string
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      results: {
+        Row: {
+          category: Database["public"]["Enums"]["player_category"] | null
+          created_at: string
+          handicap_at_round: number | null
+          id: string
+          is_female_prize: boolean
+          is_senior_prize: boolean
+          play_date: string | null
+          player_id: string
+          round_id: string
+          scorecard: Json | null
+          scratch_score: number | null
+          source_url: string | null
+          stableford_points: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["player_category"] | null
+          created_at?: string
+          handicap_at_round?: number | null
+          id?: string
+          is_female_prize?: boolean
+          is_senior_prize?: boolean
+          play_date?: string | null
+          player_id: string
+          round_id: string
+          scorecard?: Json | null
+          scratch_score?: number | null
+          source_url?: string | null
+          stableford_points?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["player_category"] | null
+          created_at?: string
+          handicap_at_round?: number | null
+          id?: string
+          is_female_prize?: boolean
+          is_senior_prize?: boolean
+          play_date?: string | null
+          player_id?: string
+          round_id?: string
+          scorecard?: Json | null
+          scratch_score?: number | null
+          source_url?: string | null
+          stableford_points?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rounds: {
+        Row: {
+          club: string | null
+          course: string | null
+          created_at: string
+          date: string
+          end_date: string | null
+          external_links: Json | null
+          id: string
+          is_master: boolean
+          master_coefficient: number
+          name: string
+          round_number: number
+          season_id: string
+          sponsor: string | null
+          sponsor_logo_url: string | null
+          status: Database["public"]["Enums"]["round_status"]
+          updated_at: string
+        }
+        Insert: {
+          club?: string | null
+          course?: string | null
+          created_at?: string
+          date: string
+          end_date?: string | null
+          external_links?: Json | null
+          id?: string
+          is_master?: boolean
+          master_coefficient?: number
+          name: string
+          round_number: number
+          season_id: string
+          sponsor?: string | null
+          sponsor_logo_url?: string | null
+          status?: Database["public"]["Enums"]["round_status"]
+          updated_at?: string
+        }
+        Update: {
+          club?: string | null
+          course?: string | null
+          created_at?: string
+          date?: string
+          end_date?: string | null
+          external_links?: Json | null
+          id?: string
+          is_master?: boolean
+          master_coefficient?: number
+          name?: string
+          round_number?: number
+          season_id?: string
+          sponsor?: string | null
+          sponsor_logo_url?: string | null
+          status?: Database["public"]["Enums"]["round_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounds_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          rules_config: Json
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          rules_config?: Json
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          rules_config?: Json
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
+      player_category: "hcp_low" | "hcp_high"
+      round_status: "draft" | "imported" | "review" | "validated" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +528,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+      player_category: ["hcp_low", "hcp_high"],
+      round_status: ["draft", "imported", "review", "validated", "published"],
+    },
   },
 } as const
