@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Star, Download, Check, Link2 } from 'lucide-react';
+import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet } from 'lucide-react';
+import RoundResultsImport from '@/components/admin/RoundResultsImport';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -63,6 +64,7 @@ const AdminRounds = () => {
   // Edit dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRound, setEditingRound] = useState<Round | null>(null);
+  const [resultsRound, setResultsRound] = useState<Round | null>(null);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
@@ -375,9 +377,14 @@ const AdminRounds = () => {
                     <span className="text-xs text-muted-foreground">→ {round.end_date}</span>
                   )}
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => openEdit(round)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => setResultsRound(round)} title="Importar resultats">
+                    <FileSpreadsheet className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(round)} title="Editar">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
             </Card>
           ))}
@@ -446,6 +453,23 @@ const AdminRounds = () => {
               {saveMutation.isPending ? 'Guardant...' : 'Guardar'}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Results import dialog */}
+      <Dialog open={!!resultsRound} onOpenChange={(open) => !open && setResultsRound(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              Importar resultats — {resultsRound?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {resultsRound && (
+            <RoundResultsImport
+              round={resultsRound}
+              onClose={() => setResultsRound(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
