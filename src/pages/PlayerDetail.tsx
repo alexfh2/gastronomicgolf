@@ -84,8 +84,7 @@ const PlayerDetail = () => {
                     <th className="text-left py-2.5 px-2">Camp</th>
                     <th className="text-left py-2.5 px-2">Data</th>
                     <th className="text-right py-2.5 px-2">HCP</th>
-                    <th className="text-right py-2.5 px-2">Stableford</th>
-                    <th className="text-right py-2.5">Scratch</th>
+                    <th className="text-right py-2.5">Stableford</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,8 +101,7 @@ const PlayerDetail = () => {
                           {round?.date ? format(new Date(round.date), 'dd MMM yy', { locale }) : '—'}
                         </td>
                         <td className="py-2 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
-                        <td className="py-2 px-2 text-right font-mono font-bold text-primary">{r.stableford_points ?? '—'}</td>
-                        <td className="py-2 text-right font-mono">{r.scratch_score ?? '—'}</td>
+                        <td className="py-2 text-right font-mono font-bold text-primary">{r.stableford_points ?? '—'}</td>
                       </tr>
                     );
                   })}
@@ -138,7 +136,6 @@ const PlayerDetail = () => {
               <CardContent>
                 <div className="flex gap-6 mb-3 text-sm">
                   <span>Stableford: <strong className="text-primary">{r.stableford_points ?? '—'}</strong></span>
-                  <span>Scratch: <strong>{r.scratch_score ?? '—'}</strong></span>
                   <span className="text-muted-foreground">HCP: {r.handicap_at_round ?? '—'}</span>
                 </div>
 

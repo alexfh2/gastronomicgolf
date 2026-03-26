@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Target, TrendingUp, BarChart3, Award, Repeat } from 'lucide-react';
-import type { Json } from '@/integrations/supabase/types';
+import { Trophy, TrendingUp, BarChart3, Award, Repeat } from 'lucide-react';
 
 const Stats = () => {
   const { t } = useTranslation();
@@ -14,7 +13,7 @@ const Stats = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, scratch_score, scorecard, rounds!inner(status, name), players(name)')
+        .select('player_id, stableford_points, scorecard, rounds!inner(status, name), players(name)')
         .eq('rounds.status', 'published');
       return data || [];
     },
@@ -23,22 +22,16 @@ const Stats = () => {
   const stats = useMemo(() => {
     if (!results?.length) return null;
 
-    // Per-player aggregates
-    const byPlayer = new Map<string, { name: string; stableford: number[]; scratch: number[]; birdies: number; pars: number }>();
+    const byPlayer = new Map<string, { name: string; stableford: number[] }>();
 
     for (const r of results) {
       const name = (r.players as any)?.name || 'Desconegut';
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
-        byPlayer.set(pid, { name, stableford: [], scratch: [], birdies: 0, pars: 0 });
+        byPlayer.set(pid, { name, stableford: [] });
       }
       const p = byPlayer.get(pid)!;
       if (r.stableford_points != null) p.stableford.push(r.stableford_points);
-      if (r.scratch_score != null) p.scratch.push(r.scratch_score);
-
-      // Count birdies and pars from scorecard (basic: hole score vs par)
-      // We don't have par info stored with results, so we'll skip hole-by-hole stats for now
-      // unless we add course par data
     }
 
     const players = Array.from(byPlayer.entries());
@@ -58,17 +51,6 @@ const Stats = () => {
         const avg = p.stableford.reduce((a, b) => a + b, 0) / p.stableford.length;
         if (avg > bestAvgStableford.value) {
           bestAvgStableford = { name: p.name, value: Math.round(avg * 10) / 10 };
-        }
-      }
-    }
-
-    // Best avg scratch (min 2 rounds, lower is better)
-    let bestAvgScratch = { name: '—', value: 999 };
-    for (const [, p] of players) {
-      if (p.scratch.length >= 2) {
-        const avg = p.scratch.reduce((a, b) => a + b, 0) / p.scratch.length;
-        if (avg < bestAvgScratch.value) {
-          bestAvgScratch = { name: p.name, value: Math.round(avg * 10) / 10 };
         }
       }
     }
@@ -96,25 +78,15 @@ const Stats = () => {
       }
     }
 
-    // Total players and results
     const totalPlayers = players.length;
     const totalResults = results.length;
 
-    return {
-      bestRound,
-      bestAvgStableford,
-      bestAvgScratch: bestAvgScratch.value < 999 ? bestAvgScratch : { name: '—', value: 0 },
-      mostRegular,
-      mostConsistent,
-      totalPlayers,
-      totalResults,
-    };
+    return { bestRound, bestAvgStableford, mostRegular, mostConsistent, totalPlayers, totalResults };
   }, [results]);
 
   const statCards = stats ? [
     { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.round}` },
     { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvgStableford.value} pts`, detail: stats.bestAvgStableford.name },
-    { icon: Target, label: t('stats.avgScratch'), value: `${stats.bestAvgScratch.value}`, detail: stats.bestAvgScratch.name },
     { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostRegular.value} jornades`, detail: stats.mostRegular.name },
     { icon: BarChart3, label: 'Més consistent', value: `${stats.mostConsistent.value} pts/avg`, detail: stats.mostConsistent.name },
     { icon: Award, label: 'Participació', value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals` },
