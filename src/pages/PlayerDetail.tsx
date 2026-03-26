@@ -84,8 +84,7 @@ const PlayerDetail = () => {
                     <th className="text-left py-2.5 px-2">Camp</th>
                     <th className="text-left py-2.5 px-2">Data</th>
                     <th className="text-right py-2.5 px-2">HCP</th>
-                    <th className="text-right py-2.5 px-2">Stableford</th>
-                    <th className="text-right py-2.5">Scratch</th>
+                    <th className="text-right py-2.5">Stableford</th>
                   </tr>
                 </thead>
                 <tbody>
