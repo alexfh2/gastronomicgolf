@@ -136,7 +136,6 @@ const PlayerDetail = () => {
               <CardContent>
                 <div className="flex gap-6 mb-3 text-sm">
                   <span>Stableford: <strong className="text-primary">{r.stableford_points ?? '—'}</strong></span>
-                  <span>Scratch: <strong>{r.scratch_score ?? '—'}</strong></span>
                   <span className="text-muted-foreground">HCP: {r.handicap_at_round ?? '—'}</span>
                 </div>
 
