@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import RoundResultsImport from '@/components/admin/RoundResultsImport';
+import NewsGenerationDialog from '@/components/admin/NewsGenerationDialog';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -76,12 +77,13 @@ const AdminRounds = () => {
   const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [resultsRound, setResultsRound] = useState<Round | null>(null);
   const [deletingRound, setDeletingRound] = useState<Round | null>(null);
+  const [newsRound, setNewsRound] = useState<Round | null>(null);
   const [courseUrl, setCourseUrl] = useState('');
   const [extractingPar, setExtractingPar] = useState(false);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
-    status: 'draft' as RoundStatus, season_id: '',
+    season_id: '',
     course_par: '' as string,
   });
 
@@ -168,10 +170,9 @@ const AdminRounds = () => {
     },
   });
 
-  // ─── MANUAL EDIT ───
+  // ─── MANUAL EDIT (always saves as current status, new rounds as draft) ───
   const saveMutation = useMutation({
     mutationFn: async () => {
-      // Parse course_par from comma-separated string
       let coursePar: number[] | null = null;
       if (form.course_par.trim()) {
         coursePar = form.course_par.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
@@ -190,7 +191,7 @@ const AdminRounds = () => {
         sponsor: form.sponsor || null,
         is_master: form.is_master,
         master_coefficient: form.is_master ? 1.25 : 1.0,
-        status: form.status,
+        status: editingRound ? editingRound.status : 'draft',
         season_id: form.season_id || activeSeasonId,
         course_par: coursePar,
       } as any;
@@ -213,6 +214,36 @@ const AdminRounds = () => {
     },
   });
 
+  // ─── PUBLISH ROUND ───
+  const publishMutation = useMutation({
+    mutationFn: async (roundId: string) => {
+      const { error } = await supabase.from('rounds').update({ status: 'published' as RoundStatus }).eq('id', roundId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
+      toast({ title: 'Jornada publicada!' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  // ─── UNPUBLISH ROUND ───
+  const unpublishMutation = useMutation({
+    mutationFn: async (roundId: string) => {
+      const { error } = await supabase.from('rounds').update({ status: 'draft' as RoundStatus }).eq('id', roundId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
+      toast({ title: 'Jornada despublicada' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
   const openEdit = (round: Round) => {
     setEditingRound(round);
     const parData = (round as any).course_par;
@@ -222,7 +253,7 @@ const AdminRounds = () => {
       date: round.date, end_date: round.end_date || '',
       club: round.club || '', course: round.course || '',
       sponsor: round.sponsor || '', is_master: round.is_master,
-      status: round.status, season_id: round.season_id,
+      season_id: round.season_id,
       course_par: parStr,
     });
     setDialogOpen(true);
@@ -234,7 +265,7 @@ const AdminRounds = () => {
     setForm({
       name: `Jornada ${n}`, round_number: String(n),
       date: '', end_date: '', club: '', course: '', sponsor: '',
-      is_master: false, status: 'draft', season_id: activeSeasonId,
+      is_master: false, season_id: activeSeasonId,
       course_par: '',
     });
     setDialogOpen(true);
@@ -246,19 +277,14 @@ const AdminRounds = () => {
   // ─── DELETE ROUND ───
   const deleteMutation = useMutation({
     mutationFn: async (roundId: string) => {
-      // First delete related results
       const { error: resError } = await supabase.from('results').delete().eq('round_id', roundId);
       if (resError) throw resError;
-      // Delete import logs
       const { error: logError } = await supabase.from('import_logs').delete().eq('round_id', roundId);
       if (logError) throw logError;
-      // Delete photos
       const { error: photoError } = await supabase.from('photos').delete().eq('round_id', roundId);
       if (photoError) throw photoError;
-      // Delete news drafts
       const { error: newsError } = await supabase.from('news_drafts').delete().eq('round_id', roundId);
       if (newsError) throw newsError;
-      // Finally delete the round
       const { error } = await supabase.from('rounds').delete().eq('id', roundId);
       if (error) throw error;
     },
@@ -349,7 +375,6 @@ const AdminRounds = () => {
               </div>
             </div>
 
-            {/* Preview imported rounds */}
             {importedRounds.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -369,11 +394,7 @@ const AdminRounds = () => {
                     <CardContent className="py-4 space-y-3">
                       <div className="flex items-start gap-3">
                         {r.image_url && (
-                          <img
-                            src={r.image_url}
-                            alt=""
-                            className="w-16 h-20 object-cover rounded"
-                          />
+                          <img src={r.image_url} alt="" className="w-16 h-20 object-cover rounded" />
                         )}
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
@@ -385,27 +406,15 @@ const AdminRounds = () => {
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <div>
                               <Label className="text-xs">Nom / Club</Label>
-                              <Input
-                                value={r.name}
-                                onChange={(e) => updateImportedRound(idx, 'name', e.target.value)}
-                                className="h-8 text-sm"
-                              />
+                              <Input value={r.name} onChange={(e) => updateImportedRound(idx, 'name', e.target.value)} className="h-8 text-sm" />
                             </div>
                             <div>
                               <Label className="text-xs">Club</Label>
-                              <Input
-                                value={r.club}
-                                onChange={(e) => updateImportedRound(idx, 'club', e.target.value)}
-                                className="h-8 text-sm"
-                              />
+                              <Input value={r.club} onChange={(e) => updateImportedRound(idx, 'club', e.target.value)} className="h-8 text-sm" />
                             </div>
                             <div>
                               <Label className="text-xs">Patrocinador</Label>
-                              <Input
-                                value={r.sponsor}
-                                onChange={(e) => updateImportedRound(idx, 'sponsor', e.target.value)}
-                                className="h-8 text-sm"
-                              />
+                              <Input value={r.sponsor} onChange={(e) => updateImportedRound(idx, 'sponsor', e.target.value)} className="h-8 text-sm" />
                             </div>
                           </div>
                         </div>
@@ -419,7 +428,7 @@ const AdminRounds = () => {
         </Card>
       )}
 
-      {/* No season message */}
+      {/* Round list */}
       {!activeSeasonId ? (
         <Card className="border-border/60">
           <CardContent className="p-8 text-center text-muted-foreground">
@@ -457,6 +466,41 @@ const AdminRounds = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-1">
+                  {/* Publish / Unpublish */}
+                  {round.status !== 'published' ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => publishMutation.mutate(round.id)}
+                      title="Publicar"
+                      className="text-emerald-600 hover:text-emerald-700"
+                      disabled={publishMutation.isPending}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => unpublishMutation.mutate(round.id)}
+                      title="Despublicar"
+                      className="text-muted-foreground hover:text-foreground text-xs"
+                      disabled={unpublishMutation.isPending}
+                    >
+                      Despublicar
+                    </Button>
+                  )}
+                  {/* Generate news - only when published */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setNewsRound(round)}
+                    title="Generar notícia"
+                    disabled={round.status !== 'published'}
+                    className={round.status === 'published' ? 'text-primary hover:text-primary' : ''}
+                  >
+                    <Newspaper className="h-4 w-4" />
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => setResultsRound(round)} title="Importar resultats">
                     <FileSpreadsheet className="h-4 w-4" />
                   </Button>
@@ -473,7 +517,7 @@ const AdminRounds = () => {
         </div>
       )}
 
-      {/* Edit/Create dialog */}
+      {/* Edit/Create dialog — no status selector, just data */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -481,6 +525,11 @@ const AdminRounds = () => {
               {editingRound ? 'Editar jornada' : 'Nova jornada'}
             </DialogTitle>
           </DialogHeader>
+          {editingRound && (
+            <Badge className={`${statusColors[editingRound.status]} w-fit`}>
+              {statusLabels[editingRound.status]}
+            </Badge>
+          )}
           <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(); }} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -539,17 +588,6 @@ const AdminRounds = () => {
                 Enganxa la URL de la web del camp per extreure el par automàticament, o introdueix-lo manualment separat per comes.
               </p>
             </div>
-            <div className="space-y-2">
-              <Label>Estat</Label>
-              <Select value={form.status} onValueChange={(v) => updateField('status', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(statusLabels) as RoundStatus[]).map((s) => (
-                    <SelectItem key={s} value={s}>{statusLabels[s]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.is_master} onCheckedChange={(v) => updateField('is_master', v)} />
               <Label>Prova MASTER (coef. ×1.25)</Label>
@@ -577,6 +615,14 @@ const AdminRounds = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* News generation dialog */}
+      {newsRound && (
+        <NewsGenerationDialog
+          round={newsRound}
+          onClose={() => setNewsRound(null)}
+        />
+      )}
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deletingRound} onOpenChange={(open) => !open && setDeletingRound(null)}>
