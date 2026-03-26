@@ -6,7 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Result = Tables<'results'> & {
@@ -16,7 +15,6 @@ type Result = Tables<'results'> & {
 
 const Rankings = () => {
   const { t } = useTranslation();
-  const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
 
   const { data: results, isLoading } = useQuery({
     queryKey: ['public-rankings-data'],
@@ -61,13 +59,12 @@ const Rankings = () => {
 
     const roundMap = new Map(rounds.map(r => [r.id, r]));
 
-    // Group results by player
     const byPlayer = new Map<string, {
       name: string;
       gender: string | null;
       is_senior: boolean;
       handicap: number | null;
-      scores: { points: number; scratch: number | null; roundId: string; roundNumber: number; roundName: string; isMaster: boolean; coef: number }[];
+      scores: { points: number; roundId: string; roundNumber: number; roundName: string; isMaster: boolean; coef: number }[];
     }>();
 
     for (const r of results) {
@@ -85,14 +82,12 @@ const Rankings = () => {
       const round = roundMap.get(r.round_id);
       byPlayer.get(pid)!.scores.push({
         points: r.stableford_points,
-        scratch: r.scratch_score,
         roundId: r.round_id,
         roundNumber: round?.round_number || r.rounds?.round_number || 0,
         roundName: r.rounds?.name || '',
         isMaster: r.rounds?.is_master || false,
         coef: r.rounds?.master_coefficient || 1,
       });
-      // Use the first round's handicap if available
       if (r.handicap_at_round != null && !byPlayer.get(pid)!.handicap) {
         byPlayer.get(pid)!.handicap = r.handicap_at_round;
       }
@@ -100,37 +95,23 @@ const Rankings = () => {
 
     const buildRanking = (
       filterFn: (p: { gender: string | null; is_senior: boolean; handicap: number | null }) => boolean,
-      mode: 'stableford' | 'scratch'
     ) => {
       const filtered = Array.from(byPlayer.entries()).filter(([, p]) => filterFn(p));
 
       return filtered.map(([id, p]) => {
-        // Build round-by-round map
-        const roundScores = new Map<string, { points: number; scratch: number | null; weighted: number }>();
+        const roundScores = new Map<string, { points: number; weighted: number }>();
         for (const s of p.scores) {
           const weighted = Math.round(s.points * (s.isMaster ? s.coef : 1));
-          roundScores.set(s.roundId, { points: s.points, scratch: s.scratch, weighted });
+          roundScores.set(s.roundId, { points: s.points, weighted });
         }
 
-        // Best N for total
         const allWeighted = p.scores.map(s => ({
           ...s,
           weighted: Math.round(s.points * (s.isMaster ? s.coef : 1)),
         }));
-
-        let total: number;
-        if (mode === 'scratch') {
-          // Scratch: sum of scratch scores (lower is better)
-          const scratchScores = p.scores.filter(s => s.scratch != null).map(s => s.scratch!);
-          scratchScores.sort((a, b) => a - b);
-          const bestScratch = scratchScores.slice(0, bestN);
-          total = bestScratch.reduce((sum, s) => sum + s, 0);
-        } else {
-          // Stableford: best N weighted (higher is better)
-          allWeighted.sort((a, b) => b.weighted - a.weighted);
-          const bestScores = allWeighted.slice(0, bestN);
-          total = bestScores.reduce((sum, s) => sum + s.weighted, 0);
-        }
+        allWeighted.sort((a, b) => b.weighted - a.weighted);
+        const bestScores = allWeighted.slice(0, bestN);
+        const total = bestScores.reduce((sum, s) => sum + s.weighted, 0);
 
         return {
           id,
@@ -145,40 +126,34 @@ const Rankings = () => {
       });
     };
 
-    // Scratch general: all players, sorted by total scratch (lower is better)
-    const general = buildRanking(() => true, 'scratch');
-    general.sort((a, b) => a.total - b.total);
-
-    // HCP Bajo: handicap ≤ 15.0, stableford
-    const hcpLow = buildRanking(p => p.handicap != null && p.handicap <= 15.0, 'stableford');
+    // HCP Bajo: handicap ≤ 15.0
+    const hcpLow = buildRanking(p => p.handicap != null && p.handicap <= 15.0);
     hcpLow.sort((a, b) => b.total - a.total);
 
-    // HCP Alto: handicap 15.1 - 36, stableford
-    const hcpHigh = buildRanking(p => p.handicap != null && p.handicap > 15.0 && p.handicap <= 36, 'stableford');
+    // HCP Alto: handicap 15.1 - 36
+    const hcpHigh = buildRanking(p => p.handicap != null && p.handicap > 15.0 && p.handicap <= 36);
     hcpHigh.sort((a, b) => b.total - a.total);
 
     // Female
-    const female = buildRanking(p => p.gender === 'F', 'stableford');
+    const female = buildRanking(p => p.gender === 'F');
     female.sort((a, b) => b.total - a.total);
 
     // Senior
-    const senior = buildRanking(p => p.is_senior, 'stableford');
+    const senior = buildRanking(p => p.is_senior);
     senior.sort((a, b) => b.total - a.total);
 
-    return { general, hcpLow, hcpHigh, female, senior };
+    return { hcpLow, hcpHigh, female, senior };
   }, [results, rounds, bestN]);
 
   const categories = [
-    { key: 'general', label: 'Scratch (General)', mode: 'scratch' as const },
-    { key: 'hcpLow', label: 'HCP Baix (≤15.0)', mode: 'stableford' as const },
-    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)', mode: 'stableford' as const },
-    { key: 'female', label: t('categories.female'), mode: 'stableford' as const },
-    { key: 'senior', label: t('categories.senior'), mode: 'stableford' as const },
+    { key: 'hcpLow', label: 'HCP Baix (≤15.0)' },
+    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)' },
+    { key: 'female', label: t('categories.female') },
+    { key: 'senior', label: t('categories.senior') },
   ];
 
-  const renderTable = (players: ReturnType<typeof rankings.general extends infer T ? () => T : never> | undefined, mode: 'scratch' | 'stableford') => {
+  const renderTable = (players: any[] | undefined) => {
     if (!players?.length) return <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>;
-    const isScratch = mode === 'scratch';
 
     return (
       <div className="overflow-x-auto">
@@ -195,11 +170,10 @@ const Rankings = () => {
             </tr>
           </thead>
           <tbody>
-            {players.map((p, i) => (
+            {players.map((p: any, i: number) => (
               <tr
                 key={p.id}
-                className={`border-b border-border/20 last:border-0 cursor-pointer hover:bg-muted/30 transition-colors ${i < 3 ? 'bg-accent/5' : ''}`}
-                onClick={() => setExpandedPlayer(expandedPlayer === p.id ? null : p.id)}
+                className={`border-b border-border/20 last:border-0 hover:bg-muted/30 transition-colors ${i < 3 ? 'bg-accent/5' : ''}`}
               >
                 <td className="py-2 pr-2 font-mono font-bold text-muted-foreground">
                   {i + 1}
@@ -208,14 +182,14 @@ const Rankings = () => {
                   {i === 2 && <span className="ml-1">🥉</span>}
                 </td>
                 <td className="py-2 font-medium">
-                  <Link to={`/jugadors/${p.id}`} className="hover:text-primary transition-colors" onClick={e => e.stopPropagation()}>
+                  <Link to={`/jugadors/${p.id}`} className="hover:text-primary transition-colors">
                     {p.name}
                   </Link>
                 </td>
                 <td className="py-2 px-2 text-right font-mono text-xs text-muted-foreground">{p.handicap ?? '—'}</td>
                 {rounds?.map(r => {
                   const score = p.roundScores.get(r.id);
-                  const val = isScratch ? score?.scratch : score?.weighted ?? score?.points;
+                  const val = score?.weighted ?? score?.points;
                   return (
                     <td key={r.id} className="py-2 px-1.5 text-right font-mono text-xs">
                       {val != null ? val : <span className="text-muted-foreground/40">—</span>}
@@ -242,7 +216,7 @@ const Rankings = () => {
       {isLoading ? (
         <p className="text-muted-foreground">{t('common.loading')}</p>
       ) : (
-        <Tabs defaultValue="general">
+        <Tabs defaultValue="hcpLow">
           <TabsList className="flex-wrap h-auto gap-1">
             {categories.map((cat) => (
               <TabsTrigger key={cat.key} value={cat.key} className="text-xs sm:text-sm">
@@ -257,7 +231,7 @@ const Rankings = () => {
                   <CardTitle className="text-lg">{cat.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {renderTable((rankings as any)[cat.key], cat.mode)}
+                  {renderTable((rankings as any)[cat.key])}
                 </CardContent>
               </Card>
             </TabsContent>

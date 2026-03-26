@@ -43,37 +43,32 @@ const Rounds = () => {
 
   const categorizeResults = (results: typeof roundResults) => {
     if (!results) return {};
-    const all = results;
-
-    // Scratch: sorted by scratch_score ascending (lower better)
-    const scratch = [...all].filter(r => r.scratch_score != null).sort((a, b) => (a.scratch_score ?? 999) - (b.scratch_score ?? 999));
 
     // HCP Bajo: handicap ≤ 15.0, stableford desc
-    const hcpLow = all.filter(r => {
+    const hcpLow = results.filter(r => {
       const hcp = r.handicap_at_round ?? (r.players as any)?.current_handicap;
       return hcp != null && hcp <= 15.0;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     // HCP Alto: handicap 15.1 - 36
-    const hcpHigh = all.filter(r => {
+    const hcpHigh = results.filter(r => {
       const hcp = r.handicap_at_round ?? (r.players as any)?.current_handicap;
       return hcp != null && hcp > 15.0 && hcp <= 36;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     // Female
-    const female = all.filter(r => (r.players as any)?.gender === 'F')
+    const female = results.filter(r => (r.players as any)?.gender === 'F')
       .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     // Senior
-    const senior = all.filter(r => (r.players as any)?.is_senior)
+    const senior = results.filter(r => (r.players as any)?.is_senior)
       .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
-    return { scratch, hcpLow, hcpHigh, female, senior };
+    return { hcpLow, hcpHigh, female, senior };
   };
 
-  const renderResultsTable = (results: any[], mode: 'stableford' | 'scratch') => {
+  const renderResultsTable = (results: any[]) => {
     if (!results?.length) return <p className="text-sm text-muted-foreground py-2">{t('common.noData')}</p>;
-    const isScratch = mode === 'scratch';
 
     return (
       <div className="overflow-x-auto">
@@ -83,8 +78,7 @@ const Rounds = () => {
               <th className="text-left py-2 pr-2 w-10">{t('common.position')}</th>
               <th className="text-left py-2">{t('common.name')}</th>
               <th className="text-right py-2 px-2">{t('common.handicap')}</th>
-              <th className="text-right py-2 px-2">{isScratch ? 'Scratch' : 'Stableford'}</th>
-              {!isScratch && <th className="text-right py-2">Scratch</th>}
+              <th className="text-right py-2 px-2">Stableford</th>
             </tr>
           </thead>
           <tbody>
@@ -98,9 +92,8 @@ const Rounds = () => {
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
                 <td className="py-1.5 px-2 text-right font-mono font-bold text-primary">
-                  {isScratch ? (r.scratch_score ?? '—') : (r.stableford_points ?? '—')}
+                  {r.stableford_points ?? '—'}
                 </td>
-                {!isScratch && <td className="py-1.5 text-right font-mono">{r.scratch_score ?? '—'}</td>}
               </tr>
             ))}
           </tbody>
@@ -112,11 +105,10 @@ const Rounds = () => {
   const categorized = categorizeResults(roundResults);
 
   const roundCategories = [
-    { key: 'scratch', label: 'Scratch', mode: 'scratch' as const },
-    { key: 'hcpLow', label: 'HCP Baix (≤15)', mode: 'stableford' as const },
-    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)', mode: 'stableford' as const },
-    { key: 'female', label: t('categories.female'), mode: 'stableford' as const },
-    { key: 'senior', label: t('categories.senior'), mode: 'stableford' as const },
+    { key: 'hcpLow', label: 'HCP Baix (≤15)' },
+    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)' },
+    { key: 'female', label: t('categories.female') },
+    { key: 'senior', label: t('categories.senior') },
   ];
 
   return (
@@ -178,7 +170,7 @@ const Rounds = () => {
                     <span>{roundResults?.length || 0} {t('rounds.participants').toLowerCase()}</span>
                   </div>
                   {roundResults && roundResults.length > 0 ? (
-                    <Tabs defaultValue="scratch">
+                    <Tabs defaultValue="hcpLow">
                       <TabsList className="flex-wrap h-auto gap-1 mb-4">
                         {roundCategories.map(cat => (
                           <TabsTrigger key={cat.key} value={cat.key} className="text-xs">
@@ -188,7 +180,7 @@ const Rounds = () => {
                       </TabsList>
                       {roundCategories.map(cat => (
                         <TabsContent key={cat.key} value={cat.key}>
-                          {renderResultsTable((categorized as any)[cat.key], cat.mode)}
+                          {renderResultsTable((categorized as any)[cat.key])}
                         </TabsContent>
                       ))}
                     </Tabs>
