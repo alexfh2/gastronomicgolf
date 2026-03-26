@@ -41,9 +41,8 @@ serve(async (req) => {
       .eq("id", round.season_id)
       .single();
 
-    // Build context for AI
+    // Build context for AI — Stableford only (no scratch)
     const topStableford = results.slice(0, 5);
-    const topScratch = [...results].sort((a, b) => (a.scratch_score ?? 999) - (b.scratch_score ?? 999)).slice(0, 5);
     
     // Categorize results
     const hcpLow = results.filter((r: any) => r.category === 'hcp_low' || (r.handicap_at_round !== null && r.handicap_at_round <= 15));
@@ -51,20 +50,21 @@ serve(async (req) => {
     const females = results.filter((r: any) => r.is_female_prize);
     const seniors = results.filter((r: any) => r.is_senior_prize);
 
+    // Sort each category by stableford
+    hcpLow.sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+    hcpHigh.sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+    females.sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+    seniors.sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+
     // Check for notable scorecards
     const coursePar = round.course_par as number[] | null;
     let notablePerformances = '';
     if (coursePar && Array.isArray(coursePar)) {
-      const totalPar = coursePar.reduce((a: number, b: number) => a + b, 0);
       results.forEach((r: any) => {
         if (r.scorecard && Array.isArray(r.scorecard)) {
           const birdies = r.scorecard.filter((s: number, i: number) => s < coursePar[i]).length;
           if (birdies >= 3) {
             notablePerformances += `${r.players?.name}: ${birdies} birdies. `;
-          }
-          const totalScore = r.scorecard.reduce((a: number, b: number) => a + b, 0);
-          if (totalScore <= totalPar) {
-            notablePerformances += `${r.players?.name}: sota par (${totalScore} vs ${totalPar}). `;
           }
         }
       });
@@ -74,6 +74,7 @@ serve(async (req) => {
     const toneLabel = tone === 'journalistic' ? 'periodístic esportiu, professional' : 'proper, amigable, càlid';
 
     const prompt = `Genera una notícia esportiva de golf en ${langLabel} amb to ${toneLabel}.
+IMPORTANT: La competició és en modalitat STABLEFORD. NO mencionis resultats scratch ni cops totals. Tots els resultats són en punts Stableford.
 
 DADES DE LA JORNADA:
 - Jornada: ${round.name} (J${round.round_number})
@@ -84,25 +85,22 @@ DADES DE LA JORNADA:
 - Patrocinador: ${sponsor || 'cap'}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
 
-RESULTATS TOP 5 STABLEFORD:
-${topStableford.map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
+CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
+${hcpLow.slice(0, 5).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
-RESULTATS TOP 5 SCRATCH:
-${topScratch.map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_score} cops`).join('\n')}
+CLASSIFICACIÓ HANDICAP ALT (15.1–36.0) — ${hcpHigh.length} jugadors:
+${hcpHigh.slice(0, 5).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
-CLASSIFICACIÓ HCP BAIX (≤15): ${hcpLow.length} jugadors
-${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}
-
-CLASSIFICACIÓ HCP ALT (>15): ${hcpHigh.length} jugadors  
-${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}
-
-${females.length > 0 ? `PREMI FEMENÍ: ${females.slice(0, 2).map((r: any) => r.players?.name).join(', ')}` : ''}
-${seniors.length > 0 ? `PREMI SÈNIOR: ${seniors.slice(0, 2).map((r: any) => r.players?.name).join(', ')}` : ''}
+${females.length > 0 ? `PREMI FEMENÍ:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}` : ''}
+${seniors.length > 0 ? `PREMI SÈNIOR:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}` : ''}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 
 Total participants: ${results.length}
 
 INSTRUCCIONS:
+- Destaca els guanyadors de cada categoria (Hcp Baix i Hcp Alt)
+- Si hi ha premis femení o sènior, menciona'ls
+- NO mencionIs resultats scratch ni cops totals
 - Genera un títol atractiu
 - Un subtítol complementari
 - Un cos de 3-5 paràgrafs
