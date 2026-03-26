@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Copy, Download, Sparkles } from 'lucide-react';
+import { Loader2, Copy, Sparkles, ImagePlus, X } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Round = Tables<'rounds'>;
@@ -33,16 +34,21 @@ interface GeneratedNews {
   seo_excerpt: string;
 }
 
+const MAX_IMAGES = 5;
+
 const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [specialMention, setSpecialMention] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
   const [tone, setTone] = useState<'journalistic' | 'friendly'>('journalistic');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
-  // Check if news draft already exists
   const { data: existingDraft } = useQuery({
     queryKey: ['news-draft', round.id, language],
     queryFn: async () => {
@@ -55,6 +61,49 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
       return data;
     },
   });
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const remaining = MAX_IMAGES - imageFiles.length;
+    const toAdd = files.slice(0, remaining);
+
+    setImageFiles(prev => [...prev, ...toAdd]);
+
+    toAdd.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setImagePreviews(prev => [...prev, ev.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (imageFiles.length === 0) return [];
+    setUploadingImages(true);
+    const urls: string[] = [];
+
+    try {
+      for (const file of imageFiles) {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `news/${round.id}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from('photos').upload(path, file);
+        if (error) throw error;
+        const { data: urlData } = supabase.storage.from('photos').getPublicUrl(path);
+        urls.push(urlData.publicUrl);
+      }
+    } finally {
+      setUploadingImages(false);
+    }
+    return urls;
+  };
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -83,6 +132,22 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!generatedNews) throw new Error('No hi ha notícia generada');
+
+      // Upload images first
+      const imageUrls = await uploadImages();
+
+      // Save photos to photos table
+      if (imageUrls.length > 0) {
+        const photoPayloads = imageUrls.map((url, i) => ({
+          round_id: round.id,
+          type: 'news',
+          url,
+          category: 'news',
+          sort_order: i,
+        }));
+        const { error: photoError } = await supabase.from('photos').insert(photoPayloads);
+        if (photoError) throw photoError;
+      }
 
       const payload = {
         round_id: round.id,
@@ -128,11 +193,13 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
           <DialogTitle className="font-display">
             Generar notícia — {round.name}
           </DialogTitle>
+          <DialogDescription>
+            Configura les opcions i genera la notícia automàticament amb IA.
+          </DialogDescription>
         </DialogHeader>
 
         {!generatedNews ? (
           <div className="space-y-4">
-            {/* Pre-generation settings */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <Switch checked={confirmSponsor} onCheckedChange={setConfirmSponsor} />
@@ -153,45 +220,60 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               <div className="space-y-2">
                 <Label>Idioma</Label>
                 <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={language === 'ca' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setLanguage('ca')}
-                  >
-                    Català
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={language === 'es' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setLanguage('es')}
-                  >
-                    Castellà
-                  </Button>
+                  <Button type="button" variant={language === 'ca' ? 'default' : 'outline'} size="sm" onClick={() => setLanguage('ca')}>Català</Button>
+                  <Button type="button" variant={language === 'es' ? 'default' : 'outline'} size="sm" onClick={() => setLanguage('es')}>Castellà</Button>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>To</Label>
                 <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={tone === 'journalistic' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setTone('journalistic')}
-                  >
-                    Periodístic-esportiu
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={tone === 'friendly' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setTone('friendly')}
-                  >
-                    Proper i amigable
-                  </Button>
+                  <Button type="button" variant={tone === 'journalistic' ? 'default' : 'outline'} size="sm" onClick={() => setTone('journalistic')}>Periodístic-esportiu</Button>
+                  <Button type="button" variant={tone === 'friendly' ? 'default' : 'outline'} size="sm" onClick={() => setTone('friendly')}>Proper i amigable</Button>
                 </div>
+              </div>
+
+              {/* Image upload section */}
+              <div className="space-y-2">
+                <Label>Imatges (opcional, màx. {MAX_IMAGES})</Label>
+                <p className="text-xs text-muted-foreground">
+                  Puja fotos de la jornada per acompanyar la notícia.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                {imagePreviews.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {imagePreviews.map((preview, i) => (
+                      <div key={i} className="relative group">
+                        <img src={preview} alt="" className="w-20 h-20 object-cover rounded border border-border" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {imageFiles.length < MAX_IMAGES && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <ImagePlus className="h-4 w-4 mr-1" />
+                    {imageFiles.length === 0 ? 'Afegir imatges' : `Afegir més (${imageFiles.length}/${MAX_IMAGES})`}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -221,7 +303,6 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Generated news preview */}
             <Tabs defaultValue="preview">
               <TabsList>
                 <TabsTrigger value="preview">Vista prèvia</TabsTrigger>
@@ -229,6 +310,13 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               </TabsList>
 
               <TabsContent value="preview" className="space-y-3">
+                {imagePreviews.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {imagePreviews.map((preview, i) => (
+                      <img key={i} src={preview} alt="" className="h-32 rounded object-cover border border-border" />
+                    ))}
+                  </div>
+                )}
                 <div className="bg-muted/30 rounded-lg p-4 space-y-3">
                   <h2 className="font-display text-xl font-bold">{generatedNews.title}</h2>
                   <p className="text-muted-foreground italic">{generatedNews.subtitle}</p>
@@ -252,32 +340,19 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               <TabsContent value="edit" className="space-y-3">
                 <div className="space-y-2">
                   <Label>Títol</Label>
-                  <Input
-                    value={generatedNews.title}
-                    onChange={(e) => setGeneratedNews({ ...generatedNews, title: e.target.value })}
-                  />
+                  <Input value={generatedNews.title} onChange={(e) => setGeneratedNews({ ...generatedNews, title: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label>Subtítol</Label>
-                  <Input
-                    value={generatedNews.subtitle}
-                    onChange={(e) => setGeneratedNews({ ...generatedNews, subtitle: e.target.value })}
-                  />
+                  <Input value={generatedNews.subtitle} onChange={(e) => setGeneratedNews({ ...generatedNews, subtitle: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label>Cos</Label>
-                  <Textarea
-                    value={generatedNews.body}
-                    onChange={(e) => setGeneratedNews({ ...generatedNews, body: e.target.value })}
-                    rows={12}
-                  />
+                  <Textarea value={generatedNews.body} onChange={(e) => setGeneratedNews({ ...generatedNews, body: e.target.value })} rows={12} />
                 </div>
                 <div className="space-y-2">
                   <Label>Extracte SEO</Label>
-                  <Input
-                    value={generatedNews.seo_excerpt}
-                    onChange={(e) => setGeneratedNews({ ...generatedNews, seo_excerpt: e.target.value })}
-                  />
+                  <Input value={generatedNews.seo_excerpt} onChange={(e) => setGeneratedNews({ ...generatedNews, seo_excerpt: e.target.value })} />
                 </div>
               </TabsContent>
             </Tabs>
@@ -289,16 +364,19 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               </Button>
               <Button
                 onClick={() => saveMutation.mutate()}
-                disabled={saveMutation.isPending}
+                disabled={saveMutation.isPending || uploadingImages}
                 size="sm"
               >
-                {saveMutation.isPending ? 'Guardant...' : 'Guardar esborrany'}
+                {saveMutation.isPending || uploadingImages ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    {uploadingImages ? 'Pujant imatges...' : 'Guardant...'}
+                  </>
+                ) : (
+                  `Guardar esborrany${imageFiles.length > 0 ? ` (${imageFiles.length} foto${imageFiles.length > 1 ? 's' : ''})` : ''}`
+                )}
               </Button>
-              <Button
-                onClick={() => { setGeneratedNews(null); }}
-                variant="ghost"
-                size="sm"
-              >
+              <Button onClick={() => setGeneratedNews(null)} variant="ghost" size="sm">
                 Regenerar
               </Button>
             </div>
