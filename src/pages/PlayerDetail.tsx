@@ -101,8 +101,7 @@ const PlayerDetail = () => {
                           {round?.date ? format(new Date(round.date), 'dd MMM yy', { locale }) : '—'}
                         </td>
                         <td className="py-2 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
-                        <td className="py-2 px-2 text-right font-mono font-bold text-primary">{r.stableford_points ?? '—'}</td>
-                        <td className="py-2 text-right font-mono">{r.scratch_score ?? '—'}</td>
+                        <td className="py-2 text-right font-mono font-bold text-primary">{r.stableford_points ?? '—'}</td>
                       </tr>
                     );
                   })}
