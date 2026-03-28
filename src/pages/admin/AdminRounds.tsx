@@ -259,6 +259,8 @@ const AdminRounds = () => {
     setEditingRound(round);
     const parData = (round as any).course_par;
     const parStr = Array.isArray(parData) ? parData.join(', ') : '';
+    const hcpData = (round as any).course_handicap;
+    const hcpStr = Array.isArray(hcpData) ? hcpData.join(', ') : '';
     setForm({
       name: round.name, round_number: String(round.round_number),
       date: round.date, end_date: round.end_date || '',
@@ -266,6 +268,7 @@ const AdminRounds = () => {
       sponsor: round.sponsor || '', is_master: round.is_master,
       season_id: round.season_id,
       course_par: parStr,
+      course_handicap: hcpStr,
     });
     setDialogOpen(true);
   };
