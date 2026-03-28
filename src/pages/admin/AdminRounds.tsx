@@ -596,28 +596,56 @@ const AdminRounds = () => {
               <Label>Patrocinador</Label>
               <Input value={form.sponsor} onChange={(e) => updateField('sponsor', e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Par del camp (18 forats)</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={courseUrl}
-                  onChange={(e) => setCourseUrl(e.target.value)}
-                  placeholder="https://web-del-camp.com/el-campo/"
-                  className="flex-1"
-                />
-                <Button type="button" variant="outline" size="sm" onClick={handleExtractPar} disabled={extractingPar || !courseUrl.trim()}>
+            <div className="space-y-3">
+              <Label className="font-semibold">Dades del camp (par + handicap)</Label>
+              <p className="text-xs text-muted-foreground">
+                Puja una foto/PDF de la tarjeta del camp o enganxa la URL de la web per extreure automàticament el par i el handicap (stroke index) de cada forat.
+              </p>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">URL de la web del camp</Label>
+                  <Input
+                    value={courseUrl}
+                    onChange={(e) => setCourseUrl(e.target.value)}
+                    placeholder="https://web-del-camp.com/el-campo/"
+                  />
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleExtract('url')} disabled={extractingPar || !courseUrl.trim()}>
                   {extractingPar ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Globe className="h-4 w-4 mr-1" />}
-                  {extractingPar ? 'Extraient...' : 'Extreure par'}
+                  URL
                 </Button>
               </div>
-              <Input
-                value={form.course_par}
-                onChange={(e) => updateField('course_par', e.target.value)}
-                placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
-              />
-              <p className="text-xs text-muted-foreground">
-                Enganxa la URL de la web del camp per extreure el par automàticament, o introdueix-lo manualment separat per comes.
-              </p>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">Foto o PDF de la tarjeta</Label>
+                  <Input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setCourseFile(e.target.files?.[0] || null)}
+                    className="text-xs"
+                  />
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleExtract('file')} disabled={extractingPar || !courseFile}>
+                  {extractingPar ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                  Fitxer
+                </Button>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Par (18 forats)</Label>
+                <Input
+                  value={form.course_par}
+                  onChange={(e) => updateField('course_par', e.target.value)}
+                  placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Handicap / Stroke Index (18 forats)</Label>
+                <Input
+                  value={form.course_handicap}
+                  onChange={(e) => updateField('course_handicap', e.target.value)}
+                  placeholder="5, 13, 1, 17, 3, 15, 7, 11, 9, 6, 14, 2, 18, 4, 16, 8, 12, 10"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.is_master} onCheckedChange={(v) => updateField('is_master', v)} />
