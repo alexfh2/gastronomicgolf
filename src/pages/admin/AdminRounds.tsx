@@ -280,7 +280,7 @@ const AdminRounds = () => {
       name: `Jornada ${n}`, round_number: String(n),
       date: '', end_date: '', club: '', course: '', sponsor: '',
       is_master: false, season_id: activeSeasonId,
-      course_par: '',
+      course_par: '', course_handicap: '',
     });
     setDialogOpen(true);
   };
