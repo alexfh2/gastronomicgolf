@@ -32,7 +32,7 @@ const PlayerDetail = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('*, rounds!inner(name, date, club, round_number, status, is_master, course_par)')
+        .select('*, rounds!inner(name, date, club, round_number, status, is_master, course_par, course_handicap)')
         .eq('player_id', id!)
         .eq('rounds.status', 'published')
         .order('rounds(round_number)');
@@ -141,7 +141,12 @@ const PlayerDetail = () => {
 
                 {scorecard && scorecard.length > 0 ? (
                   <div className="overflow-x-auto">
-                    <ScorecardVisual scores={scorecard} par={Array.isArray(round?.course_par) ? round.course_par : undefined} />
+                    <ScorecardVisual
+                      scores={scorecard}
+                      par={Array.isArray(round?.course_par) ? round.course_par : undefined}
+                      handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
+                      playerHandicap={r.handicap_at_round}
+                    />
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground">Sense targeta hoyo a hoyo</p>
