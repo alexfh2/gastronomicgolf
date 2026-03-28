@@ -276,6 +276,7 @@ export type Database = {
         Row: {
           club: string | null
           course: string | null
+          course_handicap: Json | null
           course_par: Json | null
           created_at: string
           date: string
@@ -295,6 +296,7 @@ export type Database = {
         Insert: {
           club?: string | null
           course?: string | null
+          course_handicap?: Json | null
           course_par?: Json | null
           created_at?: string
           date: string
@@ -314,6 +316,7 @@ export type Database = {
         Update: {
           club?: string | null
           course?: string | null
+          course_handicap?: Json | null
           course_par?: Json | null
           created_at?: string
           date?: string

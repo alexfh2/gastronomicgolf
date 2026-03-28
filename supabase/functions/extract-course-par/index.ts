@@ -11,31 +11,59 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
-    if (!url) {
-      return new Response(JSON.stringify({ success: false, error: "URL is required" }), {
+    const { url, file } = await req.json();
+    if (!url && !file) {
+      return new Response(JSON.stringify({ success: false, error: "URL or file is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Fetch the webpage content
-    const pageResponse = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; GolfBot/1.0)" },
-    });
-    if (!pageResponse.ok) {
-      throw new Error(`Failed to fetch URL: ${pageResponse.status}`);
-    }
-    const html = await pageResponse.text();
-
-    // Use Lovable AI to extract par data from the HTML
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Truncate HTML to avoid token limits (keep first 15k chars)
-    const truncatedHtml = html.substring(0, 15000);
+    const systemPrompt = `You are a golf course data extractor. Extract the par AND handicap (stroke index) for each hole from the provided content.
+Return structured data with two arrays of exactly 18 integers each:
+- par: the par value for holes 1-18 (typically 3, 4, or 5)
+- handicap: the stroke index/handicap for holes 1-18 (values 1-18, each used once)
+Look for patterns like "Par 4", "Par 5", "Par 3" and "Hcp", "Handicap", "Stroke Index", "S.I." associated with hole numbers.
+If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extract par from the main/yellow tees unless specified otherwise.`;
+
+    let messages: any[];
+
+    if (file) {
+      // file is a base64 data URI like "data:image/jpeg;base64,..."
+      messages = [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Extract the par and handicap (stroke index) for each of the 18 holes from this golf course scorecard:" },
+            { type: "image_url", image_url: { url: file } },
+          ],
+        },
+      ];
+    } else {
+      // URL: fetch HTML
+      const pageResponse = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; GolfBot/1.0)" },
+      });
+      if (!pageResponse.ok) {
+        throw new Error(`Failed to fetch URL: ${pageResponse.status}`);
+      }
+      const html = await pageResponse.text();
+      const truncatedHtml = html.substring(0, 15000);
+
+      messages = [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: `Extract the par and handicap (stroke index) for each of the 18 holes from this golf course webpage:\n\n${truncatedHtml}`,
+        },
+      ];
+    }
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -44,51 +72,39 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are a golf course data extractor. Extract the par for each hole from the provided webpage HTML. 
-Return ONLY a JSON array of 18 integers representing the par for holes 1-18. 
-Example: [4, 4, 5, 3, 5, 3, 4, 3, 4, 5, 4, 3, 4, 5, 4, 4, 3, 4]
-If you cannot find par data for all 18 holes, return an error message instead.
-Look for patterns like "Par 4", "Par 5", "Par 3" associated with hole numbers.`,
-          },
-          {
-            role: "user",
-            content: `Extract the par for each of the 18 holes from this golf course webpage:\n\n${truncatedHtml}`,
-          },
-        ],
+        model: file ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview",
+        messages,
         tools: [
           {
             type: "function",
             function: {
-              name: "extract_par",
-              description: "Return the par values for all 18 holes of the golf course",
+              name: "extract_course_data",
+              description: "Return the par and handicap (stroke index) values for all 18 holes of the golf course",
               parameters: {
                 type: "object",
                 properties: {
                   par: {
                     type: "array",
                     items: { type: "integer" },
-                    description: "Array of 18 par values, one per hole",
+                    description: "Array of 18 par values, one per hole (holes 1-18)",
+                  },
+                  handicap: {
+                    type: "array",
+                    items: { type: "integer" },
+                    description: "Array of 18 stroke index/handicap values, one per hole (holes 1-18). Values 1-18.",
                   },
                   course_name: {
                     type: "string",
                     description: "Name of the golf course if found",
                   },
-                  total_par: {
-                    type: "integer",
-                    description: "Total par for the course",
-                  },
                 },
-                required: ["par"],
+                required: ["par", "handicap"],
                 additionalProperties: false,
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "extract_par" } },
+        tool_choice: { type: "function", function: { name: "extract_course_data" } },
       }),
     });
 
@@ -118,14 +134,20 @@ Look for patterns like "Par 4", "Par 5", "Par 3" associated with hole numbers.`,
 
     const extracted = JSON.parse(toolCall.function.arguments);
     const par: number[] = extracted.par;
+    const handicap: number[] = extracted.handicap;
 
     if (!Array.isArray(par) || par.length !== 18) {
-      throw new Error(`Expected 18 holes but got ${par?.length || 0}. Try entering the par manually.`);
+      throw new Error(`Expected 18 par values but got ${par?.length || 0}. Try entering manually.`);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      par, 
+    if (!Array.isArray(handicap) || handicap.length !== 18) {
+      throw new Error(`Expected 18 handicap values but got ${handicap?.length || 0}. Try entering manually.`);
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      par,
+      handicap,
       course_name: extracted.course_name,
       total_par: par.reduce((a: number, b: number) => a + b, 0),
     }), {
@@ -134,9 +156,9 @@ Look for patterns like "Par 4", "Par 5", "Par 3" associated with hole numbers.`,
 
   } catch (e) {
     console.error("extract-course-par error:", e);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: e instanceof Error ? e.message : "Unknown error" 
+    return new Response(JSON.stringify({
+      success: false,
+      error: e instanceof Error ? e.message : "Unknown error"
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
