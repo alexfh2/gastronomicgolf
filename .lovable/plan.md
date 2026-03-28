@@ -1,200 +1,55 @@
 
 
-# Gastronomic Golf — Classificació Web App
+## Plan: Extract hole data (par + handicap) from PDF/photo and use hole handicap for Stableford
 
-## Overview
-A bilingual (Catalan/Spanish) web extension for tracking the Gastronomic Golf 2026 private circuit: rankings, rounds, player profiles, comparisons, stats, news generation, and a full admin backoffice.
+### What changes
 
----
+Currently, the system only extracts **par** per hole (18 values) from a URL. The user wants to:
+1. Also extract the **hole handicap (stroke index)** for each hole — needed to correctly calculate Stableford points based on player handicap
+2. Allow uploading a **PDF or photo** of the course scorecard (not just a URL)
+3. Store both `course_par` and `course_handicap` (stroke index) per round
 
-## Phase 1: Foundation & Data Model
+### Database
 
-### Backend Setup (Lovable Cloud / Supabase)
-- **Seasons table** — id, year, rules config (JSON), active flag
-- **Rounds (Jornades)** table — season_id, date, club/course, sponsor, status (draft/imported/review/validated/published), master flag (coef 1.25), multi-day support
-- **Players (Jugadors)** table — license (unique identifier), name, photo_url, club, initial_handicap, current_handicap
-- **Results** table — round_id, player_id, handicap_at_round, stableford_points, scratch_score, category (hcp_low/hcp_high/scratch/female/senior), scorecard (JSON hole-by-hole), source_url
-- **Import logs** table — round_id, source, warnings, skipped records, timestamp
-- **News drafts** table — round_id, language, tone, title, subtitle, body, highlights, seo_excerpt, status
-- **Photos** table — round_id, type (winners/gallery), url, caption, category
-- **Admin users** — via Supabase Auth with admin role table
-- **RLS policies** — public read on all content tables, admin-only write
+**Modify `rounds` table** — add a new column:
+```sql
+ALTER TABLE rounds ADD COLUMN course_handicap jsonb DEFAULT NULL;
+```
+This stores an array of 18 integers representing the stroke index for each hole (e.g., `[5, 13, 1, 17, 3, 15, 7, 11, 9, 6, 14, 2, 18, 4, 16, 8, 12, 10]`).
 
-### Internationalization (i18n)
-- Catalan as default language, Spanish as secondary
-- Language switcher in navbar (CAT / ES)
-- All UI labels, filters, microcopy translated
-- Use react-i18next with JSON translation files
+### Edge Function: `extract-course-par`
 
----
+Update to:
+- Accept **either** `{ url: "..." }` or `{ image: "data:image/...;base64,..." }` (base64-encoded PDF/photo)
+- For URL: fetch HTML as before
+- For image/PDF: pass the base64 image directly to the AI model using multimodal input
+- Update AI prompt to extract **3 values per hole**: hole number, par, and handicap (stroke index)
+- Update the tool schema to also return `handicap: number[]` (array of 18 stroke index values)
+- Return both `par` and `handicap` arrays
 
-## Phase 2: Public Site — Layout & Navigation
+### Admin UI: `AdminRounds.tsx`
 
-### Design System
-- Premium, elegant aesthetic aligned with Gastronomic Golf brand
-- Clean typography, generous spacing, high contrast tables
-- Mobile-first responsive design
-- Color palette: dark greens, golds, warm neutrals — refined "gastronomic" feel
+Update the "Par del camp" section in the create/edit dialog:
+- Add a **file upload input** (accept `.pdf,.jpg,.png,.jpeg,.webp`) alongside the existing URL input
+- Two buttons: "Extreure des d'URL" (existing) and "Extreure des de fitxer" (new)
+- When a file is selected, read it as base64 and send to the edge function
+- Display both **par** and **handicap** fields (comma-separated, editable)
+- Add a new form field `course_handicap` to store stroke index values
+- Save both `course_par` and `course_handicap` to the database
 
-### Navigation Structure
-1. **Visió general** (Overview/Home)
-2. **Rànquings** (Rankings)
-3. **Jornades** (Rounds)
-4. **Jugadors** (Players)
-5. **Comparador** (Compare)
-6. **Estadístiques** (Stats)
-7. **Notícies** (News)
-8. Season selector + Language switcher (CAT/ES)
+### Scorecard Visual: `ScorecardVisual.tsx`
 
----
+- Add optional `handicap` prop to show stroke index row on the scorecard
 
-## Phase 3: Public Pages
+### Stableford Calculation
 
-### Home — Visió General
-- Season summary hero with next/last round highlight
-- Top ranked players cards
-- Quick access CTAs to rankings, comparator, stats
-- Latest news card
-- Sponsor visibility
+The hole handicap data will be available in `rounds.course_handicap` for future use in:
+- Verifying/calculating Stableford points per hole based on player handicap
+- Displaying stroke index on scorecards
 
-### Rànquings (Rankings)
-- General classification table by season
-- Category tabs: Handicap Baix, Handicap Alt, Scratch, Femenina, Senior
-- Filters by round, category, season
-- Columns: position, license, name, per-round scores, total, variation
-- Export buttons: PDF, Excel/CSV, share link, image for WhatsApp
-
-### Jornades (Rounds)
-- Calendar list view of all rounds
-- Round detail page:
-  - Date, club/course, sponsor, links
-  - Results by category, scratch, female, senior
-  - Hole-by-hole scorecards (expandable per player)
-  - Photo gallery
-  - News summary
-  - Multi-day round handling (best result counts)
-
-### Jugadors (Players)
-- Player directory with search
-- Player profile card:
-  - Photo, name, license, club
-  - Initial handicap & latest handicap
-  - Results per round (table)
-  - Performance evolution chart
-  - Birdies/pars/bogeys breakdown (when data available)
-  - Notable holes
-  - "Compare with..." button
-
-### Comparador (Compare)
-- Two-player selector (search by name/license)
-- Side-by-side comparison:
-  - Results per round
-  - Averages (Stableford & scratch)
-  - Positions
-  - Regularity
-  - Birdies, pars
-  - Best round
-  - Evolution chart overlay
-
-### Estadístiques (Stats)
-- Aggregated leaderboards:
-  - Most birdies, most pars
-  - Average Stableford, average scratch
-  - Best round, regularity
-  - Top 10 frequency
-- Player comparison widget (same as Comparador)
-
-### Notícies (News)
-- List of round news articles
-- Article detail with title, subtitle, body, highlights
-- Share buttons
-
----
-
-## Phase 4: Admin Backoffice
-
-### Authentication
-- Admin login (Supabase Auth)
-- Admin management: create, edit, delete admin users
-
-### Season Management
-- Create new season
-- Prompt: "Do rules change?" → if no, inherit previous config
-- Configure calendar: dates, clubs, sponsors per round
-- Mark one round as MASTER (1.25 coefficient)
-
-### Round Management
-- Create/edit rounds
-- Status workflow: Draft → Imported → Review → Validated → Published
-- Paste source URLs (GolfDirecto, Teeone, future sources)
-
-### Import Engine
-- Extensible adapter architecture (GolfDirecto adapter, Teeone adapter)
-- Pre-import validation:
-  - Tournament name match
-  - Date/round match
-  - Club/course match
-  - Expected players match
-  - Scorecard availability check
-- Teeone: support for opening additional per-player URLs for full scorecards
-- Import with warnings (non-blocking): show what wasn't imported and why
-- Import log stored per round
-
-### Classification Engine
-- Stableford-based scoring
-- Category fixed by first round played
-- Best 8 of N scores count
-- MASTER round × 1.25 coefficient
-- Players can play same round on different days → best result only
-- Tiebreak logic per published rules
-- Scratch prize tracking
-- Per-round prizes: female, senior
-- Recalculate all on demand
-
-### Photo Management
-- Upload winner photos per category
-- Upload gallery "beauty" photos
-- Associate photos with rounds
-
-### News Generation
-- Before generating: confirm sponsor, allow special mention
-- Generate one general round news article
-- Two languages: Catalan + Spanish
-- Two tones: journalistic-sports / friendly-close
-- Auto-detect editorial highlights:
-  - Category winners
-  - Top classifieds
-  - Hole-in-one
-  - Most birdies
-  - Notable hole-by-hole performance
-- Output as editable draft:
-  - Title, subtitle, body, highlights, SEO excerpt
-- Export: copy to clipboard, download as document
-
-### Exports
-- PDF export of rankings/results
-- Excel/CSV data export
-- Shareable image generation (for WhatsApp/social)
-- Public shareable links
-- Exportable player cards/blocks
-
----
-
-## Phase 5: Polish & Sharing
-
-- Loading, empty, error states — well-designed
-- Import warning states (incomplete import notice)
-- "Not enough data" states
-- Social share meta tags (OG)
-- Responsive QA across mobile and desktop
-- SEO-friendly URLs and metadata
-
----
-
-## Technical Architecture Summary
-- **Frontend**: React + Vite + Tailwind CSS + react-i18next
-- **Backend**: Supabase (Lovable Cloud) — DB, Auth, Edge Functions, Storage
-- **Import adapters**: Edge functions for scraping/parsing GolfDirecto & Teeone
-- **News generation**: Edge function using Lovable AI
-- **Export generation**: Client-side PDF (jsPDF), CSV, and canvas-to-image for social cards
+### Files to modify
+1. **Database migration** — add `course_handicap` column to `rounds`
+2. **`supabase/functions/extract-course-par/index.ts`** — support image/PDF input + extract handicap
+3. **`src/pages/admin/AdminRounds.tsx`** — file upload UI + handicap field
+4. **`src/components/ScorecardVisual.tsx`** — show stroke index row
 
