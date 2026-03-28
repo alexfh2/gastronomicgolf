@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send } from 'lucide-react';
+import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send, Upload } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,11 +80,13 @@ const AdminRounds = () => {
   const [newsRound, setNewsRound] = useState<Round | null>(null);
   const [courseUrl, setCourseUrl] = useState('');
   const [extractingPar, setExtractingPar] = useState(false);
+  const [courseFile, setCourseFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
     season_id: '',
     course_par: '' as string,
+    course_handicap: '' as string,
   });
 
   const { data: seasons } = useQuery({
@@ -181,6 +183,14 @@ const AdminRounds = () => {
         }
       }
 
+      let courseHandicap: number[] | null = null;
+      if (form.course_handicap.trim()) {
+        courseHandicap = form.course_handicap.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+        if (courseHandicap.length !== 18) {
+          throw new Error('El handicap del camp ha de tenir exactament 18 valors');
+        }
+      }
+
       const payload: TablesInsert<'rounds'> = {
         name: form.name,
         round_number: parseInt(form.round_number),
@@ -194,6 +204,7 @@ const AdminRounds = () => {
         status: editingRound ? editingRound.status : 'draft',
         season_id: form.season_id || activeSeasonId,
         course_par: coursePar,
+        course_handicap: courseHandicap,
       } as any;
       if (editingRound) {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
@@ -248,6 +259,8 @@ const AdminRounds = () => {
     setEditingRound(round);
     const parData = (round as any).course_par;
     const parStr = Array.isArray(parData) ? parData.join(', ') : '';
+    const hcpData = (round as any).course_handicap;
+    const hcpStr = Array.isArray(hcpData) ? hcpData.join(', ') : '';
     setForm({
       name: round.name, round_number: String(round.round_number),
       date: round.date, end_date: round.end_date || '',
@@ -255,6 +268,7 @@ const AdminRounds = () => {
       sponsor: round.sponsor || '', is_master: round.is_master,
       season_id: round.season_id,
       course_par: parStr,
+      course_handicap: hcpStr,
     });
     setDialogOpen(true);
   };
@@ -266,7 +280,7 @@ const AdminRounds = () => {
       name: `Jornada ${n}`, round_number: String(n),
       date: '', end_date: '', club: '', course: '', sponsor: '',
       is_master: false, season_id: activeSeasonId,
-      course_par: '',
+      course_par: '', course_handicap: '',
     });
     setDialogOpen(true);
   };
@@ -298,23 +312,40 @@ const AdminRounds = () => {
     },
   });
 
-  // ─── EXTRACT PAR FROM URL ───
-  const handleExtractPar = async () => {
-    if (!courseUrl.trim()) return;
+  // ─── EXTRACT PAR + HANDICAP ───
+  const handleExtract = async (source: 'url' | 'file') => {
     setExtractingPar(true);
     try {
-      const { data, error } = await supabase.functions.invoke('extract-course-par', {
-        body: { url: courseUrl.trim() },
-      });
+      let body: any;
+      if (source === 'url') {
+        if (!courseUrl.trim()) return;
+        body = { url: courseUrl.trim() };
+      } else {
+        if (!courseFile) return;
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(courseFile);
+        });
+        body = { file: base64 };
+      }
+
+      const { data, error } = await supabase.functions.invoke('extract-course-par', { body });
       if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure el par');
-      
+      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure les dades');
+
       const parArray: number[] = data.par;
+      const hcpArray: number[] = data.handicap;
       updateField('course_par', parArray.join(', '));
-      toast({ title: 'Par extret correctament', description: `Par ${parArray.reduce((a: number, b: number) => a + b, 0)} (${parArray.length} forats)` });
+      updateField('course_handicap', hcpArray.join(', '));
+      toast({
+        title: 'Dades extretes correctament',
+        description: `Par ${parArray.reduce((a: number, b: number) => a + b, 0)} (${parArray.length} forats) + Handicap`,
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
-      toast({ title: 'Error extraient par', description: message, variant: 'destructive' });
+      toast({ title: 'Error extraient dades', description: message, variant: 'destructive' });
     } finally {
       setExtractingPar(false);
     }
@@ -565,28 +596,56 @@ const AdminRounds = () => {
               <Label>Patrocinador</Label>
               <Input value={form.sponsor} onChange={(e) => updateField('sponsor', e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Par del camp (18 forats)</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={courseUrl}
-                  onChange={(e) => setCourseUrl(e.target.value)}
-                  placeholder="https://web-del-camp.com/el-campo/"
-                  className="flex-1"
-                />
-                <Button type="button" variant="outline" size="sm" onClick={handleExtractPar} disabled={extractingPar || !courseUrl.trim()}>
+            <div className="space-y-3">
+              <Label className="font-semibold">Dades del camp (par + handicap)</Label>
+              <p className="text-xs text-muted-foreground">
+                Puja una foto/PDF de la tarjeta del camp o enganxa la URL de la web per extreure automàticament el par i el handicap (stroke index) de cada forat.
+              </p>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">URL de la web del camp</Label>
+                  <Input
+                    value={courseUrl}
+                    onChange={(e) => setCourseUrl(e.target.value)}
+                    placeholder="https://web-del-camp.com/el-campo/"
+                  />
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleExtract('url')} disabled={extractingPar || !courseUrl.trim()}>
                   {extractingPar ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Globe className="h-4 w-4 mr-1" />}
-                  {extractingPar ? 'Extraient...' : 'Extreure par'}
+                  URL
                 </Button>
               </div>
-              <Input
-                value={form.course_par}
-                onChange={(e) => updateField('course_par', e.target.value)}
-                placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
-              />
-              <p className="text-xs text-muted-foreground">
-                Enganxa la URL de la web del camp per extreure el par automàticament, o introdueix-lo manualment separat per comes.
-              </p>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">Foto o PDF de la tarjeta</Label>
+                  <Input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setCourseFile(e.target.files?.[0] || null)}
+                    className="text-xs"
+                  />
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleExtract('file')} disabled={extractingPar || !courseFile}>
+                  {extractingPar ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                  Fitxer
+                </Button>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Par (18 forats)</Label>
+                <Input
+                  value={form.course_par}
+                  onChange={(e) => updateField('course_par', e.target.value)}
+                  placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Handicap / Stroke Index (18 forats)</Label>
+                <Input
+                  value={form.course_handicap}
+                  onChange={(e) => updateField('course_handicap', e.target.value)}
+                  placeholder="5, 13, 1, 17, 3, 15, 7, 11, 9, 6, 14, 2, 18, 4, 16, 8, 12, 10"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.is_master} onCheckedChange={(v) => updateField('is_master', v)} />
