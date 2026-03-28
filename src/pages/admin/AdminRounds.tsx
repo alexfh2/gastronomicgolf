@@ -80,11 +80,13 @@ const AdminRounds = () => {
   const [newsRound, setNewsRound] = useState<Round | null>(null);
   const [courseUrl, setCourseUrl] = useState('');
   const [extractingPar, setExtractingPar] = useState(false);
+  const [courseFile, setCourseFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
     season_id: '',
     course_par: '' as string,
+    course_handicap: '' as string,
   });
 
   const { data: seasons } = useQuery({
