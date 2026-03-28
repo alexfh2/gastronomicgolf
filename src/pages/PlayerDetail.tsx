@@ -32,7 +32,7 @@ const PlayerDetail = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('*, rounds!inner(name, date, club, round_number, status, is_master, course_par)')
+        .select('*, rounds!inner(name, date, club, round_number, status, is_master, course_par, course_handicap)')
         .eq('player_id', id!)
         .eq('rounds.status', 'published')
         .order('rounds(round_number)');
