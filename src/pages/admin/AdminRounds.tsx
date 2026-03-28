@@ -183,6 +183,14 @@ const AdminRounds = () => {
         }
       }
 
+      let courseHandicap: number[] | null = null;
+      if (form.course_handicap.trim()) {
+        courseHandicap = form.course_handicap.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+        if (courseHandicap.length !== 18) {
+          throw new Error('El handicap del camp ha de tenir exactament 18 valors');
+        }
+      }
+
       const payload: TablesInsert<'rounds'> = {
         name: form.name,
         round_number: parseInt(form.round_number),
@@ -196,6 +204,7 @@ const AdminRounds = () => {
         status: editingRound ? editingRound.status : 'draft',
         season_id: form.season_id || activeSeasonId,
         course_par: coursePar,
+        course_handicap: courseHandicap,
       } as any;
       if (editingRound) {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
