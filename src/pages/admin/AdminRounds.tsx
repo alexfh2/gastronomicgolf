@@ -312,23 +312,40 @@ const AdminRounds = () => {
     },
   });
 
-  // ─── EXTRACT PAR FROM URL ───
-  const handleExtractPar = async () => {
-    if (!courseUrl.trim()) return;
+  // ─── EXTRACT PAR + HANDICAP ───
+  const handleExtract = async (source: 'url' | 'file') => {
     setExtractingPar(true);
     try {
-      const { data, error } = await supabase.functions.invoke('extract-course-par', {
-        body: { url: courseUrl.trim() },
-      });
+      let body: any;
+      if (source === 'url') {
+        if (!courseUrl.trim()) return;
+        body = { url: courseUrl.trim() };
+      } else {
+        if (!courseFile) return;
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(courseFile);
+        });
+        body = { file: base64 };
+      }
+
+      const { data, error } = await supabase.functions.invoke('extract-course-par', { body });
       if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure el par');
-      
+      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure les dades');
+
       const parArray: number[] = data.par;
+      const hcpArray: number[] = data.handicap;
       updateField('course_par', parArray.join(', '));
-      toast({ title: 'Par extret correctament', description: `Par ${parArray.reduce((a: number, b: number) => a + b, 0)} (${parArray.length} forats)` });
+      updateField('course_handicap', hcpArray.join(', '));
+      toast({
+        title: 'Dades extretes correctament',
+        description: `Par ${parArray.reduce((a: number, b: number) => a + b, 0)} (${parArray.length} forats) + Handicap`,
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
-      toast({ title: 'Error extraient par', description: message, variant: 'destructive' });
+      toast({ title: 'Error extraient dades', description: message, variant: 'destructive' });
     } finally {
       setExtractingPar(false);
     }
