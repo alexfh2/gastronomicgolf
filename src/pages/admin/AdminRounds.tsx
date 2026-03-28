@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send } from 'lucide-react';
+import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send, Upload } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
