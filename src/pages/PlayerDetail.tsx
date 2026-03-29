@@ -65,7 +65,7 @@ const PlayerDetail = () => {
         <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
           {player.club && <span>{player.club}</span>}
           {player.license && <span>Llicència: {player.license}</span>}
-          {player.current_handicap != null && <span>HCP: {player.current_handicap}</span>}
+          {player.current_handicap != null && <span>Últim HCP participació: {player.current_handicap}</span>}
         </div>
       </div>
 
