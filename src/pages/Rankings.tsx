@@ -175,11 +175,8 @@ const Rankings = () => {
                 key={p.id}
                 className={`border-b border-border/20 last:border-0 hover:bg-muted/30 transition-colors ${i < 3 ? 'bg-accent/5' : ''}`}
               >
-                <td className="py-2 pr-2 font-mono font-bold text-muted-foreground">
+                <td className={`py-2 pr-2 font-mono font-bold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
                   {i + 1}
-                  {i === 0 && <span className="ml-1">🥇</span>}
-                  {i === 1 && <span className="ml-1">🥈</span>}
-                  {i === 2 && <span className="ml-1">🥉</span>}
                 </td>
                 <td className="py-2 font-medium">
                   <Link to={`/jugadors/${p.id}`} className="hover:text-primary transition-colors">
