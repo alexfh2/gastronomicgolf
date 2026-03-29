@@ -74,7 +74,7 @@ const Players = () => {
               <tr className="border-b border-border/40 text-muted-foreground">
                 <th className="text-left py-2.5">{t('common.name')}</th>
                 <th className="text-left py-2.5 px-2">{t('common.club')}</th>
-                <th className="text-right py-2.5 px-2">{t('common.handicap')}</th>
+                <th className="text-right py-2.5 px-2">Últim HCP</th>
                 <th className="text-right py-2.5 px-2">Jornades</th>
                 <th className="text-right py-2.5 px-2">Millor</th>
                 <th className="text-right py-2.5">Mitjana</th>

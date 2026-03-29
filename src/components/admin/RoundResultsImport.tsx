@@ -168,6 +168,16 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       const { error } = await supabase.from('results').insert(payloads);
       if (error) throw error;
 
+      // Update current_handicap on each player to their handicap in this round
+      for (const r of selected) {
+        if (r._matched_player_id && r.handicap != null) {
+          await supabase
+            .from('players')
+            .update({ current_handicap: r.handicap })
+            .eq('id', r._matched_player_id);
+        }
+      }
+
       await supabase.from('import_logs').insert({
         round_id: round.id,
         source: source || 'url',
