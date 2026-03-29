@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin } from 'lucide-react';
+import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -24,15 +26,14 @@ const Index = () => {
   });
 
   const { data: topResults } = useQuery({
-    queryKey: ['public-top-results'],
+    queryKey: ['public-top-results-by-category'],
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('stableford_points, player_id, round_id, players(name), rounds!inner(status)')
+        .select('stableford_points, player_id, round_id, handicap_at_round, players(name, gender, is_senior, current_handicap), rounds!inner(status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null)
-        .order('stableford_points', { ascending: false })
-        .limit(5);
+        .order('stableford_points', { ascending: false });
       return data || [];
     },
   });
@@ -40,12 +41,76 @@ const Index = () => {
   const now = new Date().toISOString().split('T')[0];
   const nextRound = rounds?.find(r => r.date >= now);
   const lastRound = rounds ? [...rounds].reverse().find(r => r.date < now) : null;
+  const featuredRound = nextRound || lastRound;
+
+  // Build per-category top 5
+  const categoryResults = (() => {
+    if (!topResults?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
+
+    // Aggregate best per player
+    const best = new Map<string, { name: string; points: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
+    for (const r of topResults) {
+      const p = r.players as any;
+      if (!p) continue;
+      const hcp = r.handicap_at_round ?? p.current_handicap;
+      const existing = best.get(r.player_id);
+      if (!existing || (r.stableford_points ?? 0) > existing.points) {
+        best.set(r.player_id, {
+          name: p.name,
+          points: r.stableford_points ?? 0,
+          gender: p.gender,
+          is_senior: p.is_senior,
+          handicap: hcp,
+          playerId: r.player_id,
+        });
+      }
+    }
+
+    const all = Array.from(best.values());
+    const hcpLow = all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.points - a.points).slice(0, 5);
+    const hcpHigh = all.filter(p => p.handicap != null && p.handicap > 15 && p.handicap <= 36).sort((a, b) => b.points - a.points).slice(0, 5);
+    const female = all.filter(p => p.gender === 'F').sort((a, b) => b.points - a.points).slice(0, 5);
+    const senior = all.filter(p => p.is_senior).sort((a, b) => b.points - a.points).slice(0, 5);
+
+    return { hcpLow, hcpHigh, female, senior };
+  })();
 
   const quickLinks = [
     { icon: Trophy, label: t('home.viewRankings'), path: '/ranquings' },
     { icon: BarChart3, label: t('home.viewStats'), path: '/estadistiques' },
     { icon: Users, label: t('home.comparePlayers'), path: '/comparador' },
   ];
+
+  const categories = [
+    { key: 'hcpLow', label: 'HCP Baix' },
+    { key: 'hcpHigh', label: 'HCP Alt' },
+    { key: 'female', label: t('categories.female') },
+    { key: 'senior', label: t('categories.senior') },
+  ];
+
+  const renderCategoryList = (players: typeof categoryResults.hcpLow) => {
+    if (!players?.length) return <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>;
+    return (
+      <div className="space-y-0">
+        {players.map((p, i) => (
+          <Link
+            key={p.playerId}
+            to={`/jugadors/${p.playerId}`}
+            className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors -mx-1 px-1 rounded"
+          >
+            <div className="flex items-center gap-3">
+              <span className={`text-xs font-mono w-5 ${i < 3 ? 'text-accent font-bold' : 'text-muted-foreground'}`}>{i + 1}</span>
+              <span className="text-sm font-medium">{p.name}</span>
+              {p.handicap != null && (
+                <span className="text-[11px] text-muted-foreground font-mono">({p.handicap})</span>
+              )}
+            </div>
+            <span className="font-mono font-bold text-sm text-primary">{p.points} pts</span>
+          </Link>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="animate-fade-in">
@@ -87,64 +152,73 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Next/Last round + Top results */}
+      {/* Featured round + Rankings by category */}
       <section className="container pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Next / Last Round */}
-          <Card className="border-border/40">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Featured Round — clickable */}
+          <Card className="border-border/40 lg:col-span-2">
             <CardContent className="p-7">
               <h3 className="font-display text-lg font-semibold mb-5 tracking-tight">
                 {nextRound ? t('home.nextRound') : t('home.lastRound')}
               </h3>
-              {(nextRound || lastRound) ? (
-                <div className="space-y-3">
-                  <p className="text-xl font-bold text-foreground tracking-tight">
-                    {(nextRound || lastRound)!.name}
-                    {(nextRound || lastRound)!.is_master && (
-                      <span className="ml-2 text-[10px] bg-accent/15 text-accent px-2.5 py-0.5 rounded font-semibold uppercase tracking-wider">Master</span>
-                    )}
-                  </p>
-                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                    <Calendar className="h-4 w-4" strokeWidth={1.5} />
-                    <span>{format(new Date((nextRound || lastRound)!.date), 'dd MMMM yyyy', { locale })}</span>
-                  </div>
-                  {(nextRound || lastRound)!.club && (
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                      <MapPin className="h-4 w-4" strokeWidth={1.5} />
-                      <span>{(nextRound || lastRound)!.club}{(nextRound || lastRound)!.course ? ` — ${(nextRound || lastRound)!.course}` : ''}</span>
-                    </div>
-                  )}
-                  {(nextRound || lastRound)!.sponsor && (
-                    <p className="text-xs text-muted-foreground/70 mt-1 tracking-wide">
-                      {t('rounds.sponsor')}: {(nextRound || lastRound)!.sponsor}
+              {featuredRound ? (
+                <Link to="/jornades" className="block group">
+                  <div className="space-y-3">
+                    <p className="text-xl font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
+                      {featuredRound.name}
+                      {featuredRound.is_master && (
+                        <span className="ml-2 text-[10px] bg-accent/15 text-accent px-2.5 py-0.5 rounded font-semibold uppercase tracking-wider">Master</span>
+                      )}
                     </p>
-                  )}
-                </div>
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Calendar className="h-4 w-4" strokeWidth={1.5} />
+                      <span>{format(new Date(featuredRound.date), 'dd MMMM yyyy', { locale })}</span>
+                    </div>
+                    {featuredRound.club && (
+                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                        <MapPin className="h-4 w-4" strokeWidth={1.5} />
+                        <span>{featuredRound.club}{featuredRound.course ? ` — ${featuredRound.course}` : ''}</span>
+                      </div>
+                    )}
+                    {featuredRound.sponsor && (
+                      <p className="text-xs text-muted-foreground/70 mt-1 tracking-wide">
+                        {t('rounds.sponsor')}: {featuredRound.sponsor}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-1 text-xs text-accent font-medium pt-2 group-hover:gap-2 transition-all">
+                      Veure resultats <ChevronRight className="h-3.5 w-3.5" />
+                    </div>
+                  </div>
+                </Link>
               ) : (
                 <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
               )}
             </CardContent>
           </Card>
 
-          {/* Top results */}
-          <Card className="border-border/40">
+          {/* Top classified by category */}
+          <Card className="border-border/40 lg:col-span-3">
             <CardContent className="p-7">
-              <h3 className="font-display text-lg font-semibold mb-5 tracking-tight">{t('home.topPlayers')}</h3>
-              {topResults && topResults.length > 0 ? (
-                <div className="space-y-0">
-                  {topResults.map((r, i) => (
-                    <div key={i} className="flex items-center justify-between py-2.5 border-b border-border/30 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xs font-mono w-5 ${i < 3 ? 'text-accent font-bold' : 'text-muted-foreground'}`}>{i + 1}</span>
-                        <span className="text-sm font-medium">{(r.players as any)?.name}</span>
-                      </div>
-                      <span className="font-mono font-bold text-sm text-primary">{r.stableford_points} pts</span>
-                    </div>
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-display text-lg font-semibold tracking-tight">{t('home.topPlayers')}</h3>
+                <Link to="/ranquings" className="text-xs text-accent font-medium hover:underline flex items-center gap-1">
+                  Veure rànquings <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <Tabs defaultValue="hcpLow">
+                <TabsList className="h-auto gap-1 flex-wrap mb-4">
+                  {categories.map(cat => (
+                    <TabsTrigger key={cat.key} value={cat.key} className="text-xs">
+                      {cat.label}
+                    </TabsTrigger>
                   ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
-              )}
+                </TabsList>
+                {categories.map(cat => (
+                  <TabsContent key={cat.key} value={cat.key}>
+                    {renderCategoryList((categoryResults as any)[cat.key])}
+                  </TabsContent>
+                ))}
+              </Tabs>
             </CardContent>
           </Card>
         </div>
