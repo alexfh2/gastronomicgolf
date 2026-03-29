@@ -207,7 +207,7 @@ const Rankings = () => {
       <h1 className="font-display text-3xl font-bold mb-2">{t('rankings.title')}</h1>
       <p className="text-muted-foreground mb-8">
         {t('rankings.generalClassification')} — {t('common.season')} 2026
-        <Badge variant="outline" className="ml-2 text-xs">Millors {bestN} jornades</Badge>
+        <Badge variant="outline" className="ml-2 text-[10px] tracking-wider uppercase">Millors {bestN} jornades</Badge>
       </p>
 
       {isLoading ? (
