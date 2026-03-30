@@ -28,14 +28,101 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
-    if (!url) {
+    const body = await req.json();
+    const { url, file } = body;
+
+    if (!url && !file) {
       return new Response(
-        JSON.stringify({ success: false, error: "URL is required" }),
+        JSON.stringify({ success: false, error: "URL or file is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // If file (image/PDF) is provided, use AI to extract calendar data
+    if (file) {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            {
+              role: "system",
+              content: `You extract golf tournament calendar data from images/PDFs. Return structured data using the provided tool.`
+            },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "Extract all rounds/jornades from this golf calendar. For each round, extract: round number, course/club name, dates, and sponsor if visible." },
+                { type: "image_url", image_url: { url: file } }
+              ]
+            }
+          ],
+          tools: [{
+            type: "function",
+            function: {
+              name: "extract_calendar",
+              description: "Extract golf tournament calendar rounds",
+              parameters: {
+                type: "object",
+                properties: {
+                  rounds: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        round_number: { type: "number" },
+                        name: { type: "string", description: "Course/club name" },
+                        club: { type: "string" },
+                        sponsor: { type: "string" },
+                        dates: { type: "array", items: { type: "string" }, description: "Dates in YYYY-MM-DD format" },
+                      },
+                      required: ["round_number", "name", "dates"]
+                    }
+                  }
+                },
+                required: ["rounds"]
+              }
+            }
+          }],
+          tool_choice: { type: "function", function: { name: "extract_calendar" } },
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        const errText = await aiResponse.text();
+        console.error("AI error:", aiResponse.status, errText);
+        throw new Error("Error processing image");
+      }
+
+      const aiData = await aiResponse.json();
+      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      if (!toolCall) throw new Error("AI could not extract calendar data");
+
+      const parsed = JSON.parse(toolCall.function.arguments);
+      const rounds: ParsedRound[] = (parsed.rounds || []).map((r: any) => ({
+        round_number: r.round_number,
+        name: r.name || `Jornada ${r.round_number}`,
+        club: r.club || "",
+        sponsor: r.sponsor || "",
+        dates: r.dates || [],
+        detail_url: "",
+        image_url: "",
+      }));
+
+      return new Response(
+        JSON.stringify({ success: true, rounds }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // URL-based parsing (existing logic)
     const response = await fetch(url);
     if (!response.ok) {
       return new Response(

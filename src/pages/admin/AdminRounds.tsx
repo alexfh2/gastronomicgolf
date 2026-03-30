@@ -81,6 +81,7 @@ const AdminRounds = () => {
   const [courseUrl, setCourseUrl] = useState('');
   const [extractingPar, setExtractingPar] = useState(false);
   const [courseFile, setCourseFile] = useState<File | null>(null);
+  const [calendarFile, setCalendarFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
@@ -130,6 +131,31 @@ const AdminRounds = () => {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
       toast({ title: 'Error d\'importació', description: message, variant: 'destructive' });
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  const handleImportFromFile = async () => {
+    if (!calendarFile) return;
+    setImportLoading(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(calendarFile);
+      });
+      const { data, error } = await supabase.functions.invoke('parse-calendar', {
+        body: { file: base64 },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Error parsing');
+      setImportedRounds(data.rounds as ParsedRound[]);
+      toast({ title: `${data.rounds.length} jornades detectades`, description: 'Revisa i edita les dades abans de guardar.' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: "Error d'importació", description: message, variant: 'destructive' });
     } finally {
       setImportLoading(false);
     }
@@ -389,9 +415,9 @@ const AdminRounds = () => {
         <Card className="border-accent/40 bg-accent/5 mb-6">
           <CardContent className="pt-6 space-y-4">
             <div>
-              <Label className="text-sm font-semibold">URL del calendari publicat</Label>
+              <Label className="text-sm font-semibold">Importar calendari</Label>
               <p className="text-xs text-muted-foreground mb-2">
-                Enganxa l'URL de la pàgina amb el calendari de jornades (p. ex. gastronomicgolf.com)
+                Enganxa l'URL de la pàgina del calendari o puja una imatge/PDF amb les jornades.
               </p>
               <div className="flex gap-2">
                 <Input
@@ -401,7 +427,22 @@ const AdminRounds = () => {
                 />
                 <Button onClick={handleImport} disabled={importLoading}>
                   <Download className="h-4 w-4 mr-2" />
-                  {importLoading ? 'Llegint...' : 'Llegir'}
+                  {importLoading ? 'Llegint...' : 'Llegir URL'}
+                </Button>
+              </div>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">Imatge o PDF del calendari</Label>
+                  <Input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setCalendarFile(e.target.files?.[0] || null)}
+                    className="text-xs"
+                  />
+                </div>
+                <Button onClick={handleImportFromFile} disabled={importLoading || !calendarFile}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  {importLoading ? 'Llegint...' : 'Llegir fitxer'}
                 </Button>
               </div>
             </div>
@@ -582,15 +623,9 @@ const AdminRounds = () => {
                 <Input type="date" value={form.end_date} onChange={(e) => updateField('end_date', e.target.value)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Club</Label>
-                <Input value={form.club} onChange={(e) => updateField('club', e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Camp</Label>
-                <Input value={form.course} onChange={(e) => updateField('course', e.target.value)} />
-              </div>
+            <div className="space-y-2">
+              <Label>Camp</Label>
+              <Input value={form.course} onChange={(e) => updateField('course', e.target.value)} placeholder="Nom del camp de golf" />
             </div>
             <div className="space-y-2">
               <Label>Patrocinador</Label>

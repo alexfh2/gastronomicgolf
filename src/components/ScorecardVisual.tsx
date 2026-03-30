@@ -9,17 +9,24 @@ interface ScorecardVisualProps {
   playerHandicap?: number | null;
 }
 
+const calcPlayingHcp = (hcp: number): number => Math.round(hcp);
+
+const calcExtraStrokes = (strokeIndex: number, playerHcp: number): number => {
+  const playingHcp = calcPlayingHcp(playerHcp);
+  const fullStrokes = Math.floor(playingHcp / 18);
+  const remainder = playingHcp % 18;
+  return fullStrokes + (strokeIndex <= remainder ? 1 : 0);
+};
+
 const calcStablefordPoints = (
   gross: number,
   holePar: number,
   strokeIndex: number,
   playerHcp: number
 ): number | null => {
-  if (gross === 0) return null;
-  const fullStrokes = Math.floor(playerHcp / 18);
-  const remainder = Math.round(playerHcp % 18);
-  const extraStrokes = fullStrokes + (strokeIndex <= remainder ? 1 : 0);
-  const net = gross - extraStrokes;
+  if (gross === 0) return null; // lifted ball
+  const extra = calcExtraStrokes(strokeIndex, playerHcp);
+  const net = gross - extra;
   const diff = net - holePar;
   if (diff <= -3) return 5;
   if (diff === -2) return 4;
@@ -38,6 +45,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const backHcp = handicap?.slice(9, 18);
 
   const canCalcStableford = playerHandicap != null && handicap && handicap.length === 18;
+  const playingHcp = playerHandicap != null ? calcPlayingHcp(playerHandicap) : null;
 
   const stablefordPoints = canCalcStableford
     ? scores.map((s, i) => calcStablefordPoints(s, par[i], handicap![i], playerHandicap!))
@@ -46,14 +54,30 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const frontStb = stablefordPoints?.slice(0, 9);
   const backStb = stablefordPoints?.slice(9, 18);
 
-  const frontTotal = front9.reduce((s, v) => s + v, 0);
-  const backTotal = back9.reduce((s, v) => s + v, 0);
+  // Totals: only sum holes where score > 0 (lifted ball = 0 → skip)
+  const sumScores = (arr: number[]) => {
+    const valid = arr.filter(s => s > 0);
+    return valid.length === arr.length ? valid.reduce((a, b) => a + b, 0) : null;
+  };
+
+  const frontTotal = sumScores(front9);
+  const backTotal = sumScores(back9);
+  const hasLiftedBall = scores.some(s => s === 0);
 
   const sumStb = (arr: (number | null)[] | undefined) =>
     arr ? arr.reduce((s: number, v) => s + (v ?? 0), 0) : null;
 
+  // Extra strokes markers per hole
+  const getStrokeMarker = (holeIdx: number): string => {
+    if (!canCalcStableford || !handicap) return '';
+    const extra = calcExtraStrokes(handicap[holeIdx], playerHandicap!);
+    if (extra >= 2) return '••';
+    if (extra === 1) return '•';
+    return '';
+  };
+
   const renderScore = (score: number, holePar: number) => {
-    if (score === 0) return <span className="text-muted-foreground/40">—</span>;
+    if (score === 0) return <span className="text-muted-foreground font-semibold">—</span>;
 
     const diff = score - holePar;
 
@@ -102,9 +126,10 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     halfScores: number[],
     halfPar: number[],
     startHole: number,
-    total: number,
+    total: number | null,
     halfHcp?: number[],
-    halfStb?: (number | null)[]
+    halfStb?: (number | null)[],
+    holeOffset = 0
   ) => (
     <table className="text-xs">
       <thead>
@@ -137,11 +162,18 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
         <tr>
           <td className="pr-2 py-2 font-medium text-foreground">Cops</td>
           {halfScores.map((s, i) => (
-            <td key={i} className="text-center py-2">
+            <td key={i} className="text-center py-2 relative">
               {renderScore(s, halfPar[i])}
+              {canCalcStableford && (
+                <span className="absolute -top-0.5 right-0 text-[8px] text-accent font-bold leading-none">
+                  {getStrokeMarker(holeOffset + i)}
+                </span>
+              )}
             </td>
           ))}
-          <td className="text-center py-2 font-mono font-bold text-foreground text-sm">{total || '—'}</td>
+          <td className="text-center py-2 font-mono font-semibold text-muted-foreground text-sm">
+            {total != null ? total : '—'}
+          </td>
         </tr>
         {halfStb && (
           <tr className="border-t border-border/40">
@@ -164,14 +196,25 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
   return (
     <div className="space-y-2">
-      {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined)}
-      {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined)}
-      <div className="flex items-center gap-4 pt-2 border-t border-border/40">
-        <span className="text-sm font-bold">Total: <span className="text-primary text-lg">{frontTotal + backTotal}</span></span>
+      {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)}
+      {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
+      <div className="flex items-center gap-4 pt-2 border-t border-border/40 flex-wrap">
+        {/* Stableford prominent */}
         {totalStb != null && (
           <span className="text-sm font-bold">Stableford: <span className="text-primary text-lg">{totalStb}</span></span>
         )}
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground ml-auto">
+        {/* Scratch total secondary */}
+        <span className="text-xs text-muted-foreground">
+          Total cops: {frontTotal != null && backTotal != null ? frontTotal + backTotal : '—'}
+          {hasLiftedBall && ' (incomplet)'}
+        </span>
+        {/* Playing HCP */}
+        {playerHandicap != null && playingHcp != null && (
+          <span className="text-xs text-muted-foreground">
+            HCP {playerHandicap} ({playingHcp})
+          </span>
+        )}
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground ml-auto flex-wrap">
           <span className="inline-flex items-center gap-1">
             <span className="w-4 h-4 rounded-full border-2 border-primary inline-block" /> Birdie
           </span>
@@ -184,6 +227,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
           <span className="inline-flex items-center gap-1">
             <span className="w-4 h-4 bg-destructive/15 border border-destructive/30 inline-block" /> Doble+
           </span>
+          {canCalcStableford && (
+            <span className="inline-flex items-center gap-1">
+              <span className="text-accent font-bold">•/••</span> Punts HCP
+            </span>
+          )}
         </div>
       </div>
     </div>
