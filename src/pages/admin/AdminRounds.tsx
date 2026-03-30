@@ -471,19 +471,29 @@ const AdminRounds = () => {
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="text-xs">J{r.round_number}</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {r.dates.join(' · ') || 'Sense dates'}
-                            </span>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <div>
-                              <Label className="text-xs">Nom / Club</Label>
+                              <Label className="text-xs">Camp</Label>
                               <Input value={r.name} onChange={(e) => updateImportedRound(idx, 'name', e.target.value)} className="h-8 text-sm" />
                             </div>
                             <div>
-                              <Label className="text-xs">Club</Label>
-                              <Input value={r.club} onChange={(e) => updateImportedRound(idx, 'club', e.target.value)} className="h-8 text-sm" />
+                              <Label className="text-xs">Data inici</Label>
+                              <Input type="date" value={r.dates[0] || ''} onChange={(e) => {
+                                const newDates = [...r.dates];
+                                newDates[0] = e.target.value;
+                                updateImportedRound(idx, 'dates', newDates as any);
+                              }} className="h-8 text-sm" />
                             </div>
+                            <div>
+                              <Label className="text-xs">Data fi</Label>
+                              <Input type="date" value={r.dates.length > 1 ? r.dates[r.dates.length - 1] : ''} onChange={(e) => {
+                                const newDates = [r.dates[0] || '', e.target.value].filter(Boolean);
+                                updateImportedRound(idx, 'dates', newDates as any);
+                              }} className="h-8 text-sm" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
                               <Label className="text-xs">Patrocinador</Label>
                               <Input value={r.sponsor} onChange={(e) => updateImportedRound(idx, 'sponsor', e.target.value)} className="h-8 text-sm" />
