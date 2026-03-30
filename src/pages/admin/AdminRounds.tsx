@@ -582,15 +582,9 @@ const AdminRounds = () => {
                 <Input type="date" value={form.end_date} onChange={(e) => updateField('end_date', e.target.value)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Club</Label>
-                <Input value={form.club} onChange={(e) => updateField('club', e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Camp</Label>
-                <Input value={form.course} onChange={(e) => updateField('course', e.target.value)} />
-              </div>
+            <div className="space-y-2">
+              <Label>Camp</Label>
+              <Input value={form.course} onChange={(e) => updateField('course', e.target.value)} placeholder="Nom del camp de golf" />
             </div>
             <div className="space-y-2">
               <Label>Patrocinador</Label>
