@@ -82,6 +82,7 @@ const AdminRounds = () => {
   const [extractingPar, setExtractingPar] = useState(false);
   const [courseFile, setCourseFile] = useState<File | null>(null);
   const [calendarFile, setCalendarFile] = useState<File | null>(null);
+  const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
     club: '', course: '', sponsor: '', is_master: false,
     season_id: '',
