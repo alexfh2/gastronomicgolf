@@ -135,6 +135,31 @@ const AdminRounds = () => {
     }
   };
 
+  const handleImportFromFile = async () => {
+    if (!calendarFile) return;
+    setImportLoading(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(calendarFile);
+      });
+      const { data, error } = await supabase.functions.invoke('parse-calendar', {
+        body: { file: base64 },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Error parsing');
+      setImportedRounds(data.rounds as ParsedRound[]);
+      toast({ title: `${data.rounds.length} jornades detectades`, description: 'Revisa i edita les dades abans de guardar.' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: "Error d'importació", description: message, variant: 'destructive' });
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   const updateImportedRound = (index: number, field: string, value: string) => {
     setImportedRounds((prev) =>
       prev.map((r, i) => (i === index ? { ...r, [field]: value } : r))
