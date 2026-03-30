@@ -389,9 +389,9 @@ const AdminRounds = () => {
         <Card className="border-accent/40 bg-accent/5 mb-6">
           <CardContent className="pt-6 space-y-4">
             <div>
-              <Label className="text-sm font-semibold">URL del calendari publicat</Label>
+              <Label className="text-sm font-semibold">Importar calendari</Label>
               <p className="text-xs text-muted-foreground mb-2">
-                Enganxa l'URL de la pàgina amb el calendari de jornades (p. ex. gastronomicgolf.com)
+                Enganxa l'URL de la pàgina del calendari o puja una imatge/PDF amb les jornades.
               </p>
               <div className="flex gap-2">
                 <Input
@@ -401,7 +401,22 @@ const AdminRounds = () => {
                 />
                 <Button onClick={handleImport} disabled={importLoading}>
                   <Download className="h-4 w-4 mr-2" />
-                  {importLoading ? 'Llegint...' : 'Llegir'}
+                  {importLoading ? 'Llegint...' : 'Llegir URL'}
+                </Button>
+              </div>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-1">
+                  <Label className="text-xs">Imatge o PDF del calendari</Label>
+                  <Input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setCalendarFile(e.target.files?.[0] || null)}
+                    className="text-xs"
+                  />
+                </div>
+                <Button onClick={handleImportFromFile} disabled={importLoading || !calendarFile}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  {importLoading ? 'Llegint...' : 'Llegir fitxer'}
                 </Button>
               </div>
             </div>
