@@ -161,7 +161,7 @@ const AdminRounds = () => {
     }
   };
 
-  const updateImportedRound = (index: number, field: string, value: string) => {
+  const updateImportedRound = (index: number, field: string, value: any) => {
     setImportedRounds((prev) =>
       prev.map((r, i) => (i === index ? { ...r, [field]: value } : r))
     );
