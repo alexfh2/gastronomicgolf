@@ -539,9 +539,6 @@ const AdminRounds = () => {
                   <Badge className={statusColors[round.status]}>
                     {statusLabels[round.status]}
                   </Badge>
-                  {round.club && (
-                    <span className="text-xs text-muted-foreground">{round.club}</span>
-                  )}
                   <span className="text-xs text-muted-foreground">{round.date}</span>
                   {round.end_date && round.end_date !== round.date && (
                     <span className="text-xs text-muted-foreground">→ {round.end_date}</span>
