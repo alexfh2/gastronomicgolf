@@ -8,12 +8,15 @@ import {
   LogOut,
   ChevronLeft,
   Users,
+  FileText,
 } from 'lucide-react';
 
 const sidebarLinks = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { path: '/admin/temporades', label: 'Temporades', icon: Trophy, end: false },
   { path: '/admin/jornades', label: 'Jornades', icon: Calendar, end: false },
+  { path: '/admin/jugadors', label: 'Jugadors', icon: Users, end: false },
+  { path: '/admin/noticies', label: 'Notícies', icon: FileText, end: false },
   { path: '/admin/admins', label: 'Administradors', icon: Users, end: false },
 ];
 
