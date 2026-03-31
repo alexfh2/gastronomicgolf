@@ -60,6 +60,8 @@ const App = () => (
               <Route index element={<AdminDashboard />} />
               <Route path="temporades" element={<AdminSeasons />} />
               <Route path="jornades" element={<AdminRounds />} />
+              <Route path="jugadors" element={<AdminPlayers />} />
+              <Route path="noticies" element={<AdminNews />} />
               <Route path="admins" element={<AdminManageAdmins />} />
             </Route>
 
