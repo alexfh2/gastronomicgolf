@@ -21,6 +21,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminSeasons from "./pages/admin/AdminSeasons";
 import AdminRounds from "./pages/admin/AdminRounds";
 import AdminManageAdmins from "./pages/admin/AdminManageAdmins";
+import AdminPlayers from "./pages/admin/AdminPlayers";
+import AdminNews from "./pages/admin/AdminNews";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
