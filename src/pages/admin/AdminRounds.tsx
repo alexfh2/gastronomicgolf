@@ -672,22 +672,69 @@ const AdminRounds = () => {
                   Fitxer
                 </Button>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Par (18 forats)</Label>
-                <Input
-                  value={form.course_par}
-                  onChange={(e) => updateField('course_par', e.target.value)}
-                  placeholder="4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Handicap / Stroke Index (18 forats)</Label>
-                <Input
-                  value={form.course_handicap}
-                  onChange={(e) => updateField('course_handicap', e.target.value)}
-                  placeholder="5, 13, 1, 17, 3, 15, 7, 11, 9, 6, 14, 2, 18, 4, 16, 8, 12, 10"
-                />
-              </div>
+              {/* Scorecard-style table for par + handicap */}
+              {[0, 9].map((offset) => {
+                const parArr = form.course_par ? form.course_par.split(',').map(v => v.trim()) : [];
+                const hcpArr = form.course_handicap ? form.course_handicap.split(',').map(v => v.trim()) : [];
+                const updateCell = (type: 'par' | 'hcp', hole: number, value: string) => {
+                  const arr = type === 'par'
+                    ? (form.course_par ? form.course_par.split(',').map(v => v.trim()) : Array(18).fill(''))
+                    : (form.course_handicap ? form.course_handicap.split(',').map(v => v.trim()) : Array(18).fill(''));
+                  while (arr.length < 18) arr.push('');
+                  arr[hole] = value;
+                  updateField(type === 'par' ? 'course_par' : 'course_handicap', arr.join(', '));
+                };
+                return (
+                  <div key={offset} className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="border border-border px-1 py-1 text-left font-semibold w-12">Forat</th>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <th key={i} className="border border-border px-1 py-1 text-center font-semibold w-8">
+                              {offset + i + 1}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border border-border px-1 py-1 font-semibold bg-muted/30">Par</td>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <td key={i} className="border border-border p-0">
+                              <input
+                                type="number"
+                                min="3"
+                                max="6"
+                                className="w-full h-7 text-center text-xs bg-transparent focus:outline-none focus:bg-accent/20"
+                                value={parArr[offset + i] || ''}
+                                onChange={(e) => updateCell('par', offset + i, e.target.value)}
+                                placeholder="–"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                        <tr>
+                          <td className="border border-border px-1 py-1 font-semibold bg-muted/30">HCP</td>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <td key={i} className="border border-border p-0">
+                              <input
+                                type="number"
+                                min="1"
+                                max="18"
+                                className="w-full h-7 text-center text-xs bg-transparent focus:outline-none focus:bg-accent/20"
+                                value={hcpArr[offset + i] || ''}
+                                onChange={(e) => updateCell('hcp', offset + i, e.target.value)}
+                                placeholder="–"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={form.is_master} onCheckedChange={(v) => updateField('is_master', v)} />
