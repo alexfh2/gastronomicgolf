@@ -598,7 +598,7 @@ const AdminRounds = () => {
 
       {/* Edit/Create dialog — no status selector, just data */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display">
               {editingRound ? 'Editar jornada' : 'Nova jornada'}
