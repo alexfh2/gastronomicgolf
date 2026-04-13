@@ -162,9 +162,21 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
       <thead>
         <tr>
           <td className={holeLabelClass}>Forat</td>
-          {halfScores.map((_, i) => (
-            <td key={i} className={holeCellClass}>{startHole + i}</td>
-          ))}
+          {halfScores.map((_, i) => {
+            const strokes = getStrokeMarker(holeOffset + i);
+            return (
+              <td key={i} className={`${holeCellClass} relative`}>
+                <div>{startHole + i}</div>
+                {strokes > 0 && (
+                  <div className="flex justify-center gap-[2px] mt-0.5">
+                    {Array.from({ length: Math.min(strokes, 3) }).map((_, j) => (
+                      <span key={j} className="w-[4px] h-[4px] rounded-full bg-accent inline-block" />
+                    ))}
+                  </div>
+                )}
+              </td>
+            );
+          })}
           <td className={`${holeCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}>Tot</td>
         </tr>
         <tr>
