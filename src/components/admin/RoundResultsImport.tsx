@@ -249,11 +249,17 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       if (error) throw error;
 
       for (const r of selected) {
-        if (r._matched_player_id && r.handicap != null) {
-          await supabase
-            .from('players')
-            .update({ current_handicap: r.handicap })
-            .eq('id', r._matched_player_id);
+        if (r._matched_player_id) {
+          const updates: { current_handicap?: number; gender?: string; is_senior?: boolean } = {};
+          if (r.handicap != null) updates.current_handicap = r.handicap;
+          if (r.gender === 'F' || r.gender === 'M') updates.gender = r.gender;
+          if (r._is_senior != null) updates.is_senior = r._is_senior;
+          if (Object.keys(updates).length > 0) {
+            await supabase
+              .from('players')
+              .update(updates)
+              .eq('id', r._matched_player_id);
+          }
         }
       }
 
