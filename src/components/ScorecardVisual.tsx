@@ -130,11 +130,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const renderStrokeDots = (extraStrokes: number) => {
     if (extraStrokes === 0) return null;
     return (
-      <div className="flex items-center justify-center gap-[2px] mt-0.5">
+      <div className="absolute top-0.5 right-0.5 flex gap-[2px]">
         {Array.from({ length: Math.min(extraStrokes, 3) }).map((_, i) => (
           <span
             key={i}
-            className="w-[5px] h-[5px] rounded-full bg-accent inline-block"
+            className="w-[4px] h-[4px] rounded-full bg-accent inline-block"
           />
         ))}
       </div>
