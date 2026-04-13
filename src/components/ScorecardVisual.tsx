@@ -130,11 +130,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const renderStrokeDots = (extraStrokes: number) => {
     if (extraStrokes === 0) return null;
     return (
-      <div className="flex items-center justify-center gap-[2px] mt-0.5">
+      <div className="absolute top-0.5 right-0.5 flex gap-[2px]">
         {Array.from({ length: Math.min(extraStrokes, 3) }).map((_, i) => (
           <span
             key={i}
-            className="w-[5px] h-[5px] rounded-full bg-accent inline-block"
+            className="w-[4px] h-[4px] rounded-full bg-accent inline-block"
           />
         ))}
       </div>
@@ -188,11 +188,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
         <tr>
           <td className={`${resultLabelClass} font-semibold text-foreground`}>Cops</td>
           {halfScores.map((s, i) => (
-            <td key={i} className={`${resultCellClass} bg-background`}>
-              <div className="flex flex-col items-center min-h-[2.5rem] justify-center">
+            <td key={i} className={`${resultCellClass} bg-background relative`}>
+              <div className="flex items-center justify-center h-[2.5rem]">
                 {renderScore(s, halfPar[i])}
-                {renderStrokeDots(getStrokeMarker(holeOffset + i))}
               </div>
+              {renderStrokeDots(getStrokeMarker(holeOffset + i))}
             </td>
           ))}
           <td className={`${resultCellClass} ${totalCellClass} bg-muted/30 text-sm`}>
