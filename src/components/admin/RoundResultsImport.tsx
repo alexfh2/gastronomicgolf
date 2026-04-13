@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, AlertTriangle, Search, Plus, Trash2 } from 'lucide-react';
+import { Check, X, AlertTriangle, Search, Plus, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
 import { DialogDescription } from '@/components/ui/dialog';
+import { parseExcelResults, type ExcelParsedResult } from '@/lib/parseExcelResults';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Round = Tables<'rounds'>;
@@ -20,13 +22,17 @@ interface ParsedResult {
   license: string;
   gender: string;
   handicap: number | null;
+  handicap_play: number | null;
+  age: number | null;
   stableford_points: number | null;
   scratch_score: number | null;
-  scores: number[];
+  scores: (number | null)[];
   source_url: string;
   _selected: boolean;
   _matched_player_id?: string;
   _url_index?: number;
+  _is_np?: boolean;
+  _is_senior?: boolean;
 }
 
 interface Props {
@@ -34,21 +40,93 @@ interface Props {
   onClose: () => void;
 }
 
+const SENIOR_AGE = 65;
+
 const RoundResultsImport = ({ round, onClose }: Props) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [urls, setUrls] = useState<string[]>(['']);
   const [format, setFormat] = useState('stableford');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ParsedResult[]>([]);
   const [source, setSource] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [importTab, setImportTab] = useState('url');
 
   const addUrl = () => setUrls(prev => [...prev, '']);
   const removeUrl = (idx: number) => setUrls(prev => prev.filter((_, i) => i !== idx));
   const updateUrl = (idx: number, value: string) =>
     setUrls(prev => prev.map((u, i) => i === idx ? value : u));
 
+  const matchPlayers = async (parsed: ParsedResult[]) => {
+    const { data: players } = await supabase.from('players').select('id, name, license');
+    const w: string[] = [];
+
+    const matched = parsed.map(r => {
+      const match = players?.find(
+        p => (r.license && p.license === r.license) ||
+          p.name.toLowerCase() === r.name.toLowerCase()
+      );
+      if (!match && !r._is_np) w.push(`"${r.name}" no trobat a la base de dades`);
+      return { ...r, _matched_player_id: match?.id };
+    });
+
+    setResults(matched);
+    if (w.length > 0) setWarnings(w);
+    return matched;
+  };
+
+  // --- Excel import ---
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setWarnings([]);
+    setResults([]);
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const excelResults = parseExcelResults(buffer);
+
+      const parsed: ParsedResult[] = excelResults
+        .filter(r => !r.is_np)
+        .map(r => ({
+          position: r.position,
+          name: r.name,
+          license: r.license,
+          gender: r.gender,
+          handicap: r.handicap_exact,
+          handicap_play: r.handicap_play,
+          age: r.age,
+          stableford_points: r.stableford_points,
+          scratch_score: r.scratch_score,
+          scores: r.scores,
+          source_url: `excel:${file.name}`,
+          _selected: true,
+          _is_np: false,
+          _is_senior: r.age != null ? r.age >= SENIOR_AGE : false,
+        }));
+
+      setSource(`Excel: ${file.name}`);
+      const matched = await matchPlayers(parsed);
+
+      toast({
+        title: `${matched.length} resultats importats des d'Excel`,
+        description: `${excelResults.filter(r => r.is_np).length} N.P exclosos. Revisa abans de guardar.`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: "Error llegint Excel", description: message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  // --- URL import ---
   const handleFetch = async () => {
     const validUrls = urls.filter(u => u.trim());
     if (validUrls.length === 0) return;
@@ -57,7 +135,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     setResults([]);
 
     try {
-      // Fetch all URLs in parallel
       const responses = await Promise.all(
         validUrls.map(async (url, urlIdx) => {
           const { data, error } = await supabase.functions.invoke('parse-results', {
@@ -69,7 +146,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         })
       );
 
-      // Merge results from all URLs, avoiding duplicates by name+license
       const seen = new Map<string, ParsedResult>();
       let detectedSource = '';
 
@@ -79,7 +155,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
           const key = (r.license || r.name).toLowerCase();
           const existing = seen.get(key);
           if (existing) {
-            // Keep the better result (higher stableford or lower scratch)
             if (r.stableford_points != null && existing.stableford_points != null) {
               if (r.stableford_points > existing.stableford_points) seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
             } else if (r.scratch_score != null && existing.scratch_score != null) {
@@ -93,26 +168,11 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
 
       const parsed = Array.from(seen.values()).sort((a, b) => a.position - b.position);
       setSource(detectedSource);
-
-      // Match players
-      const { data: players } = await supabase.from('players').select('id, name, license');
-      const w: string[] = [];
-
-      const matched = parsed.map(r => {
-        const match = players?.find(
-          p => (r.license && p.license === r.license) ||
-            p.name.toLowerCase() === r.name.toLowerCase()
-        );
-        if (!match) w.push(`"${r.name}" no trobat a la base de dades`);
-        return { ...r, _matched_player_id: match?.id };
-      });
-
-      setResults(matched);
-      if (w.length > 0) setWarnings(w);
+      await matchPlayers(parsed);
 
       const totalResults = responses.reduce((sum, r) => sum + (r.count || 0), 0);
       toast({
-        title: `${matched.length} resultats únics (${totalResults} total de ${validUrls.length} URL${validUrls.length > 1 ? 's' : ''})`,
+        title: `${parsed.length} resultats únics (${totalResults} total de ${validUrls.length} URL${validUrls.length > 1 ? 's' : ''})`,
         description: `Font: ${detectedSource}. Revisa abans de guardar.`,
       });
     } catch (err: unknown) {
@@ -137,6 +197,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       for (const r of selected) {
         if (r._matched_player_id) continue;
 
+        const isSenior = r._is_senior ?? (r.age != null ? r.age >= SENIOR_AGE : false);
+
         const { data: newPlayer, error } = await supabase
           .from('players')
           .insert({
@@ -145,7 +207,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             current_handicap: r.handicap,
             initial_handicap: r.handicap,
             gender: r.gender === 'F' ? 'F' : r.gender === 'M' ? 'M' : null,
-            is_senior: false,
+            is_senior: isSenior,
           })
           .select('id')
           .single();
@@ -162,13 +224,12 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         scratch_score: r.scratch_score,
         handicap_at_round: r.handicap,
         source_url: r.source_url,
-        scorecard: r.scores.length > 0 ? { scores: r.scores } : null,
+        scorecard: r.scores.length > 0 ? { scores: r.scores, handicap_play: r.handicap_play } : null,
       }));
 
       const { error } = await supabase.from('results').insert(payloads);
       if (error) throw error;
 
-      // Update current_handicap on each player to their handicap in this round
       for (const r of selected) {
         if (r._matched_player_id && r.handicap != null) {
           await supabase
@@ -180,8 +241,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
 
       await supabase.from('import_logs').insert({
         round_id: round.id,
-        source: source || 'url',
-        source_url: urls.filter(u => u.trim()).join(' | '),
+        source: source || (importTab === 'excel' ? 'excel' : 'url'),
+        source_url: importTab === 'excel' ? source : urls.filter(u => u.trim()).join(' | '),
         records_imported: selected.length,
         records_skipped: results.length - selected.length,
         skipped_records: results.filter(r => !r._selected).map(r => ({ name: r.name, reason: 'deselected' })),
@@ -206,49 +267,91 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   return (
     <div className="space-y-4">
       <DialogDescription className="text-sm text-muted-foreground">
-        Importa resultats des d'una o més URLs (una per dia de joc). Suporta GolfDirecto i Teeone.
+        Importa resultats des d'un fitxer Excel o des d'URLs (GolfDirecto / Teeone).
       </DialogDescription>
 
-      {/* URL inputs */}
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold">URLs dels resultats</Label>
-        <p className="text-xs text-muted-foreground">
-          Afegeix una URL per cada dia de joc. Els resultats es fusionaran automàticament (millor resultat per jugador).
-        </p>
-        {urls.map((url, idx) => (
-          <div key={idx} className="flex gap-2">
-            <Input
-              value={url}
-              onChange={(e) => updateUrl(idx, e.target.value)}
-              placeholder={`URL dia ${idx + 1} — https://www.golfdirecto.com/micro/game/...`}
-              className="flex-1"
-            />
-            {urls.length > 1 && (
-              <Button variant="ghost" size="icon" onClick={() => removeUrl(idx)}>
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
+      <Tabs value={importTab} onValueChange={(v) => { setImportTab(v); setResults([]); setWarnings([]); }}>
+        <TabsList className="w-full">
+          <TabsTrigger value="excel" className="flex-1 gap-1">
+            <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
+          </TabsTrigger>
+          <TabsTrigger value="url" className="flex-1 gap-1">
+            <Search className="h-3.5 w-3.5" /> URL
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Excel tab */}
+        <TabsContent value="excel" className="space-y-3 mt-3">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Fitxer Excel amb resultats (.xlsx)</Label>
+            <p className="text-xs text-muted-foreground">
+              Puja l'Excel amb les columnes: Pos, Licencia, Nombre, Hex, NVH, Edad, Sex, Cat, Hpu, Total, H1-H18, Totalx.
+              Els jugadors N.P s'exclouran automàticament. Sènior = edat ≥ 65.
+            </p>
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleExcelUpload}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {loading ? 'Llegint Excel...' : 'Seleccionar fitxer Excel'}
               </Button>
-            )}
+            </div>
           </div>
-        ))}
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={addUrl}>
-            <Plus className="h-3 w-3 mr-1" /> Afegir URL
-          </Button>
-          <Select value={format} onValueChange={setFormat}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="stableford">Stableford</SelectItem>
-              <SelectItem value="medal">Medal</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={handleFetch} disabled={loading || urls.every(u => !u.trim())} className="ml-auto">
-            <Search className="h-4 w-4 mr-2" />
-            {loading ? 'Llegint...' : 'Llegir resultats'}
-          </Button>
-        </div>
-      </div>
+        </TabsContent>
+
+        {/* URL tab */}
+        <TabsContent value="url" className="space-y-3 mt-3">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">URLs dels resultats</Label>
+            <p className="text-xs text-muted-foreground">
+              Afegeix una URL per cada dia de joc. Els resultats es fusionaran automàticament (millor resultat per jugador).
+            </p>
+            {urls.map((url, idx) => (
+              <div key={idx} className="flex gap-2">
+                <Input
+                  value={url}
+                  onChange={(e) => updateUrl(idx, e.target.value)}
+                  placeholder={`URL dia ${idx + 1} — https://www.golfdirecto.com/micro/game/...`}
+                  className="flex-1"
+                />
+                {urls.length > 1 && (
+                  <Button variant="ghost" size="icon" onClick={() => removeUrl(idx)}>
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={addUrl}>
+                <Plus className="h-3 w-3 mr-1" /> Afegir URL
+              </Button>
+              <Select value={format} onValueChange={setFormat}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="stableford">Stableford</SelectItem>
+                  <SelectItem value="medal">Medal</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={handleFetch} disabled={loading || urls.every(u => !u.trim())} className="ml-auto">
+                <Search className="h-4 w-4 mr-2" />
+                {loading ? 'Llegint...' : 'Llegir resultats'}
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Warnings */}
       {warnings.length > 0 && (
@@ -289,7 +392,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             </Button>
           </div>
 
-          <div className="border rounded-md overflow-hidden">
+          <div className="border rounded-md overflow-hidden overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-muted/50 border-b">
@@ -298,7 +401,10 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                   <th className="p-2 text-left">Jugador</th>
                   <th className="p-2 text-left">Llicència</th>
                   <th className="p-2 text-right">Hcp</th>
-                  <th className="p-2 text-right">Pts</th>
+                  <th className="p-2 text-right">Hpu</th>
+                  <th className="p-2 text-right">Stb</th>
+                  <th className="p-2 text-right">Scr</th>
+                  {importTab === 'excel' && <th className="p-2 text-center">Edat</th>}
                   <th className="p-2 text-center">Estat</th>
                 </tr>
               </thead>
@@ -320,12 +426,16 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                     <td className="p-2 font-medium">
                       {r.name}
                       {r.gender && <span className="text-muted-foreground ml-1">({r.gender})</span>}
+                      {r._is_senior && <Badge variant="outline" className="ml-1 text-[10px] px-1 py-0">Sènior</Badge>}
                     </td>
                     <td className="p-2 font-mono text-muted-foreground">{r.license || '—'}</td>
                     <td className="p-2 text-right font-mono">{r.handicap ?? '—'}</td>
-                    <td className="p-2 text-right font-mono font-bold">
-                      {r.stableford_points ?? r.scratch_score ?? '—'}
-                    </td>
+                    <td className="p-2 text-right font-mono">{r.handicap_play ?? '—'}</td>
+                    <td className="p-2 text-right font-mono font-bold">{r.stableford_points ?? '—'}</td>
+                    <td className="p-2 text-right font-mono text-muted-foreground">{r.scratch_score ?? '—'}</td>
+                    {importTab === 'excel' && (
+                      <td className="p-2 text-center font-mono text-muted-foreground">{r.age ?? '—'}</td>
+                    )}
                     <td className="p-2 text-center">
                       {r._matched_player_id ? (
                         <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">Trobat</Badge>
