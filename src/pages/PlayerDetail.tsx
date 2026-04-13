@@ -135,8 +135,9 @@ const PlayerDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-6 mb-3 text-sm">
+                <div className="flex gap-6 mb-3 text-sm items-baseline">
                    <span>Stableford: <strong className="text-primary text-lg">{r.stableford_points ?? '—'}</strong></span>
+                   {r.scratch_score != null && <span className="text-muted-foreground">Scratch: <strong>{r.scratch_score}</strong></span>}
                    <span className="text-muted-foreground">
                      HCP: {r.handicap_at_round ?? '—'}
                      {handicapPlay != null ? ` (HPU: ${handicapPlay})` : r.handicap_at_round != null ? ` (${Math.round(r.handicap_at_round)})` : ''}
