@@ -148,6 +148,8 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const resultCellClass = "text-center py-2.5 px-1 border border-border/20";
   const resultLabelClass = "py-2.5 px-2 font-medium text-xs border border-border/20 w-14";
   const totalCellClass = "text-center py-2 px-1 font-mono font-bold border border-border/30 w-12";
+  const strokeDotCellClass = "text-center py-0.5 px-1 bg-[hsl(var(--primary)/0.08)] border-x border-border/30 h-3";
+  const strokeDotLabelClass = "py-0.5 px-2 bg-[hsl(var(--primary)/0.08)] border-x border-border/30 w-14 h-3";
 
   const renderHalf = (
     halfScores: number[],
@@ -162,23 +164,33 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
       <thead>
         <tr>
           <td className={holeLabelClass}>Forat</td>
-          {halfScores.map((_, i) => {
-            const strokes = getStrokeMarker(holeOffset + i);
-            return (
-              <td key={i} className={`${holeCellClass} relative`}>
-                <div>{startHole + i}</div>
-                {strokes > 0 && (
-                  <div className="flex justify-center gap-[2px] mt-0.5">
-                    {Array.from({ length: Math.min(strokes, 3) }).map((_, j) => (
-                      <span key={j} className="w-[4px] h-[4px] rounded-full bg-accent inline-block" />
-                    ))}
-                  </div>
-                )}
+          {halfScores.map((_, i) => (
+              <td key={i} className={holeCellClass}>
+                {startHole + i}
               </td>
-            );
-          })}
+          ))}
           <td className={`${holeCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}>Tot</td>
         </tr>
+        {canCalcStableford && (
+          <tr>
+            <td className={strokeDotLabelClass}></td>
+            {halfScores.map((_, i) => {
+              const strokes = getStrokeMarker(holeOffset + i);
+              return (
+                <td key={i} className={strokeDotCellClass}>
+                  {strokes > 0 && (
+                    <div className="flex justify-center gap-[3px]">
+                      {Array.from({ length: Math.min(strokes, 3) }).map((_, j) => (
+                        <span key={j} className="w-[6px] h-[6px] rounded-full bg-accent inline-block" />
+                      ))}
+                    </div>
+                  )}
+                </td>
+              );
+            })}
+            <td className={strokeDotCellClass}></td>
+          </tr>
+        )}
         <tr>
           <td className={headerLabelClass}>Par</td>
           {halfPar.map((p, i) => (
