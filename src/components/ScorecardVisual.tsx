@@ -218,18 +218,10 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
       {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)}
       {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
       <div className="flex items-center gap-4 pt-2 border-t border-border/40 flex-wrap">
-        {totalStb != null && (
-          <span className="text-sm font-bold">Stableford: <span className="text-primary text-lg">{totalStb}</span></span>
-        )}
         <span className="text-xs text-muted-foreground">
           Total cops: {frontTotal != null && backTotal != null ? frontTotal + backTotal : '—'}
           {hasLiftedBall && ' (incomplet)'}
         </span>
-        {playerHandicap != null && playingHcp != null && (
-          <span className="text-xs text-muted-foreground">
-            HCP {playerHandicap} ({playingHcp})
-          </span>
-        )}
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground ml-auto flex-wrap">
           <span className="inline-flex items-center gap-1">
             <span className="w-4 h-4 rounded-full border-2 border-primary inline-block" /> Birdie
