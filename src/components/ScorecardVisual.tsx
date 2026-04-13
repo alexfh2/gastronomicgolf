@@ -148,6 +148,8 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const resultCellClass = "text-center py-2.5 px-1 border border-border/20";
   const resultLabelClass = "py-2.5 px-2 font-medium text-xs border border-border/20 w-14";
   const totalCellClass = "text-center py-2 px-1 font-mono font-bold border border-border/30 w-12";
+  const strokeDotCellClass = "text-center py-0.5 px-1 bg-[hsl(var(--primary)/0.08)] border-x border-border/30 h-3";
+  const strokeDotLabelClass = "py-0.5 px-2 bg-[hsl(var(--primary)/0.08)] border-x border-border/30 w-14 h-3";
 
   const renderHalf = (
     halfScores: number[],
