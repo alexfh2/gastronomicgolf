@@ -199,6 +199,15 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // Delete existing results if requested
+      if (deleteExisting) {
+        const { error: delError } = await supabase
+          .from('results')
+          .delete()
+          .eq('round_id', round.id);
+        if (delError) throw new Error(`Error eliminant resultats existents: ${delError.message}`);
+      }
+
       const selected = results.filter(r => r._selected);
       const newPlayers: string[] = [];
 
