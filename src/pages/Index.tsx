@@ -112,7 +112,7 @@ const Index = () => {
                 <span className="text-[11px] text-muted-foreground font-mono">({p.handicap})</span>
               )}
             </div>
-            <span className="font-mono font-bold text-sm text-primary">{p.points} pts</span>
+            <span className="font-mono font-bold text-sm text-primary">{p.totalPoints} pts</span>
           </Link>
         ))}
       </div>
