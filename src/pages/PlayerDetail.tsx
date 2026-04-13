@@ -123,6 +123,21 @@ const PlayerDetail = () => {
           const scorecard: number[] | null = Array.isArray(rawScorecard) ? rawScorecard : rawScorecard?.scores ?? null;
           const handicapPlay: number | null = rawScorecard?.handicap_play ?? null;
 
+          // Calculate scratch stableford (no handicap strokes)
+          const coursePar: number[] | undefined = Array.isArray(round?.course_par) ? round.course_par : undefined;
+          const scratchStableford = scorecard && coursePar && scorecard.length === coursePar.length
+            ? scorecard.reduce((total, s, i) => {
+                if (s === 0 || s == null) return total;
+                const diff = s - coursePar[i];
+                if (diff <= -3) return total + 5;
+                if (diff === -2) return total + 4;
+                if (diff === -1) return total + 3;
+                if (diff === 0) return total + 2;
+                if (diff === 1) return total + 1;
+                return total;
+              }, 0)
+            : null;
+
           return (
             <Card key={r.id} className="border-border/60">
               <CardHeader className="pb-2">
@@ -136,8 +151,8 @@ const PlayerDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-6 mb-3 text-sm items-baseline">
-                   <span>Stableford: <strong className="text-primary text-lg">{r.stableford_points ?? '—'}</strong></span>
-                   {r.scratch_score != null && <span className="text-muted-foreground">Scratch: <strong>{r.scratch_score}</strong></span>}
+                   <span>HCP Stableford: <strong className="text-primary text-lg">{r.stableford_points ?? '—'}</strong></span>
+                   <span className="text-muted-foreground">Scratch Stableford: <strong>{scratchStableford ?? '—'}</strong></span>
                    <span className="text-muted-foreground">
                      HCP: {r.handicap_at_round ?? '—'}
                      {handicapPlay != null ? ` (HPU: ${handicapPlay})` : r.handicap_at_round != null ? ` (${Math.round(r.handicap_at_round)})` : ''}
