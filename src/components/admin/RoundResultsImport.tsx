@@ -54,6 +54,15 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [source, setSource] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
   const [importTab, setImportTab] = useState('url');
+  const [deleteExisting, setDeleteExisting] = useState(false);
+  const [existingCount, setExistingCount] = useState<number | null>(null);
+
+  // Check existing results count on mount
+  useState(() => {
+    supabase.from('results').select('id', { count: 'exact', head: true })
+      .eq('round_id', round.id)
+      .then(({ count }) => setExistingCount(count ?? 0));
+  });
 
   const addUrl = () => setUrls(prev => [...prev, '']);
   const removeUrl = (idx: number) => setUrls(prev => prev.filter((_, i) => i !== idx));
