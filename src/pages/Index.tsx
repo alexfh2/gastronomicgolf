@@ -47,17 +47,24 @@ const Index = () => {
   const categoryResults = (() => {
     if (!topResults?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
 
-    // Aggregate best per player
-    const best = new Map<string, { name: string; points: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
+    // Accumulate total points per player across all rounds
+    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
     for (const r of topResults) {
       const p = r.players as any;
       if (!p) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
-      const existing = best.get(r.player_id);
-      if (!existing || (r.stableford_points ?? 0) > existing.points) {
-        best.set(r.player_id, {
+      const pts = r.stableford_points ?? 0;
+      const existing = agg.get(r.player_id);
+      if (existing) {
+        existing.totalPoints += pts;
+        existing.rounds += 1;
+        // Keep most recent handicap
+        if (hcp != null) existing.handicap = hcp;
+      } else {
+        agg.set(r.player_id, {
           name: p.name,
-          points: r.stableford_points ?? 0,
+          totalPoints: pts,
+          rounds: 1,
           gender: p.gender,
           is_senior: p.is_senior,
           handicap: hcp,
@@ -66,11 +73,11 @@ const Index = () => {
       }
     }
 
-    const all = Array.from(best.values());
-    const hcpLow = all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.points - a.points).slice(0, 5);
-    const hcpHigh = all.filter(p => p.handicap != null && p.handicap > 15 && p.handicap <= 36).sort((a, b) => b.points - a.points).slice(0, 5);
-    const female = all.filter(p => p.gender === 'F').sort((a, b) => b.points - a.points).slice(0, 5);
-    const senior = all.filter(p => p.is_senior).sort((a, b) => b.points - a.points).slice(0, 5);
+    const all = Array.from(agg.values());
+    const hcpLow = all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
+    const hcpHigh = all.filter(p => p.handicap != null && p.handicap > 15 && p.handicap <= 36).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
+    const female = all.filter(p => p.gender === 'F').sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
+    const senior = all.filter(p => p.is_senior).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
 
     return { hcpLow, hcpHigh, female, senior };
   })();
