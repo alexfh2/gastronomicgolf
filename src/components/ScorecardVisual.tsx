@@ -188,11 +188,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
         <tr>
           <td className={`${resultLabelClass} font-semibold text-foreground`}>Cops</td>
           {halfScores.map((s, i) => (
-            <td key={i} className={`${resultCellClass} bg-background`}>
-              <div className="flex flex-col items-center min-h-[2.5rem] justify-center">
+            <td key={i} className={`${resultCellClass} bg-background relative`}>
+              <div className="flex items-center justify-center h-[2.5rem]">
                 {renderScore(s, halfPar[i])}
-                {renderStrokeDots(getStrokeMarker(holeOffset + i))}
               </div>
+              {renderStrokeDots(getStrokeMarker(holeOffset + i))}
             </td>
           ))}
           <td className={`${resultCellClass} ${totalCellClass} bg-muted/30 text-sm`}>
