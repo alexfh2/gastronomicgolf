@@ -141,8 +141,10 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     );
   };
 
-  const headerCellClass = "text-center py-2 px-1 font-mono text-xs bg-[hsl(var(--primary)/0.08)] text-muted-foreground border border-border/30";
-  const headerLabelClass = "py-2 px-2 font-medium text-xs bg-[hsl(var(--primary)/0.08)] text-muted-foreground border border-border/30 w-14";
+  const headerCellClass = "text-center py-1.5 px-1 font-mono text-[10px] bg-[hsl(var(--primary)/0.08)] text-muted-foreground/70 border border-border/30";
+  const headerLabelClass = "py-1.5 px-2 font-medium text-[10px] bg-[hsl(var(--primary)/0.08)] text-muted-foreground/70 border border-border/30 w-14";
+  const holeCellClass = "text-center py-2 px-1 font-mono text-sm font-bold bg-[hsl(var(--primary)/0.08)] text-foreground border border-border/30";
+  const holeLabelClass = "py-2 px-2 font-semibold text-sm bg-[hsl(var(--primary)/0.08)] text-foreground border border-border/30 w-14";
   const resultCellClass = "text-center py-2.5 px-1 border border-border/20";
   const resultLabelClass = "py-2.5 px-2 font-medium text-xs border border-border/20 w-14";
   const totalCellClass = "text-center py-2 px-1 font-mono font-bold border border-border/30 w-12";
@@ -159,11 +161,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     <table className="text-xs w-full border-collapse">
       <thead>
         <tr>
-          <td className={headerLabelClass}>Forat</td>
+          <td className={holeLabelClass}>Forat</td>
           {halfScores.map((_, i) => (
-            <td key={i} className={headerCellClass}>{startHole + i}</td>
+            <td key={i} className={holeCellClass}>{startHole + i}</td>
           ))}
-          <td className={`${headerCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}>Tot</td>
+          <td className={`${holeCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}>Tot</td>
         </tr>
         <tr>
           <td className={headerLabelClass}>Par</td>
