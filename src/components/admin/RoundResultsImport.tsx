@@ -288,6 +288,20 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         Importa resultats des d'un fitxer Excel o des d'URLs (GolfDirecto / Teeone).
       </DialogDescription>
 
+      {existingCount != null && existingCount > 0 && (
+        <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/30">
+          <Checkbox
+            id="delete-existing"
+            checked={deleteExisting}
+            onCheckedChange={(checked) => setDeleteExisting(checked === true)}
+          />
+          <label htmlFor="delete-existing" className="text-sm cursor-pointer">
+            <span className="font-medium">Eliminar {existingCount} resultats existents</span>
+            <span className="text-muted-foreground ml-1">abans d'importar (substituir)</span>
+          </label>
+        </div>
+      )}
+
       <Tabs value={importTab} onValueChange={(v) => { setImportTab(v); setResults([]); setWarnings([]); }}>
         <TabsList className="w-full">
           <TabsTrigger value="excel" className="flex-1 gap-1">
