@@ -12,10 +12,12 @@ interface ParsedResult {
   license: string;
   gender: string;
   handicap: number | null;
+  handicap_play: number | null;
   stableford_points: number | null;
   scratch_score: number | null;
   scores: number[];
   source_url: string;
+  _is_senior?: boolean;
 }
 
 serve(async (req) => {
@@ -76,17 +78,14 @@ interface GolfDirectoResult {
 }
 
 async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirectoResult> {
-  // Extract gameId and optional categoryId from URL
   const gameMatch = url.match(/game\/([a-f0-9]{24})/);
   if (!gameMatch) {
     throw new Error("No s'ha pogut extreure l'ID del torneig de la URL de GolfDirecto");
   }
   const gameId = gameMatch[1];
-
   const categoryMatch = url.match(/category=([a-f0-9]{24})/);
   const requestedCategoryId = categoryMatch ? categoryMatch[1] : null;
 
-  // Fetch game info to get categories
   const gameRes = await fetch(
     `https://www.golfdirecto.com/web/home/game/${gameId}/active`,
     { headers: { Accept: "application/json" } }
@@ -103,7 +102,7 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
     })
   );
 
-  // Determine which category to fetch: use SCRATCH by default or the one in the URL
+  // Determine which category to fetch for results (SCRATCH by default)
   let categoryId = requestedCategoryId;
   if (!categoryId) {
     const scratch = allCategories.find((c) => c.name.toUpperCase().includes("SCRATCH"));
@@ -112,6 +111,28 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
 
   if (!categoryId) {
     throw new Error("No s'han trobat categories al torneig de GolfDirecto");
+  }
+
+  // Find SENIOR and FEMENINA category IDs to detect membership
+  const seniorCatId = allCategories.find((c) => c.name.toUpperCase().includes("SENIOR"))?.id;
+  const femCatId = allCategories.find((c) => c.name.toUpperCase().includes("FEMEN"))?.id;
+
+  // Fetch senior player licenses for cross-reference
+  const seniorLicenses = new Set<string>();
+  if (seniorCatId) {
+    try {
+      const seniorRes = await fetch(
+        `https://www.golfdirecto.com/web/home/score/ranking/entry?game=${gameId}&category=${seniorCatId}`,
+        { headers: { Accept: "application/json" } }
+      );
+      if (seniorRes.ok) {
+        const seniorData = await seniorRes.json();
+        for (const entry of (seniorData.data || [])) {
+          const lic = entry.player?.license;
+          if (lic) seniorLicenses.add(lic);
+        }
+      }
+    } catch { /* ignore */ }
   }
 
   // Fetch ranking for selected category
@@ -126,7 +147,6 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
   const selectedCat = allCategories.find((c) => c.id === categoryId);
   const isNet = selectedCat?.name?.toUpperCase().includes("SCRATCH") === false;
 
-  // Build basic results and collect player IDs for scorecard fetching
   interface EntryData {
     playerId: string;
     result: ParsedResult;
@@ -143,26 +163,32 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
 
     const positionValue = parseNumber(dayView.rankingPosition ?? dayView.realRanking);
     const hcpExact = parseNumber(player.hcpExact);
+    const hcpGame = parseNumber(player.hcpGame);
     const stablefordPoints = parseNumber(dayView.onlyNet ?? (isNet ? dayView.result : null));
     const scratchScore = parseNumber(dayView.strokeNumber ?? dayView.onlyGross ?? (!isNet ? dayView.result : null));
+
+    const license = player.license || "";
+    const isSenior = seniorLicenses.has(license);
 
     entryDataList.push({
       playerId: player._id || "",
       result: {
         position: positionValue != null ? Math.trunc(positionValue) : 0,
         name,
-        license: player.license || "",
+        license,
         gender: player.gender === "F" ? "F" : player.gender === "M" ? "M" : "",
         handicap: hcpExact,
+        handicap_play: hcpGame != null ? Math.trunc(hcpGame) : null,
         stableford_points: stablefordPoints,
         scratch_score: scratchScore,
         scores: [],
         source_url: url,
+        _is_senior: isSenior,
       },
     });
   }
 
-  // Fetch hole-by-hole scorecards in parallel (batches of 10 to avoid overwhelming the API)
+  // Fetch hole-by-hole scorecards in parallel (batches of 10)
   const batchSize = 10;
   for (let i = 0; i < entryDataList.length; i += batchSize) {
     const batch = entryDataList.slice(i, i + batchSize);
@@ -178,14 +204,12 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
         const data = cardData.data || cardData;
         const score = data.score || {};
 
-        // Extract gross scores for holes 1-18
         const holes: number[] = [];
         for (let h = 1; h <= 18; h++) {
           const val = score[`gross${h}`];
           if (val != null) holes.push(Number(val));
           else holes.push(0);
         }
-        // Only keep if we got meaningful data (not all zeros)
         const hasData = holes.some((v) => v > 0);
         if (hasData) {
           ed.result.scores = holes;
@@ -275,6 +299,7 @@ async function parseTeeoneViaAPI(url: string, format?: string): Promise<ParsedRe
       license: p.licencia || "",
       gender: p.codSexo === "F" ? "F" : p.codSexo === "M" ? "M" : "",
       handicap: isNaN(handicap as number) ? null : handicap,
+      handicap_play: null,
       stableford_points: isStableford ? total : null,
       scratch_score: !isStableford ? total : null,
       scores,
@@ -360,6 +385,7 @@ function parseGenericTable(html: string, sourceUrl: string): ParsedResult[] {
       license: "",
       gender: "",
       handicap: hcpText ? parseFloat(hcpText.replace(",", ".")) : null,
+      handicap_play: null,
       stableford_points: ptsText ? parseInt(ptsText) : null,
       scratch_score: null,
       scores: [],
