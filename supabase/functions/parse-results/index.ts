@@ -213,6 +213,11 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
         const hasData = holes.some((v) => v > 0);
         if (hasData) {
           ed.result.scores = holes;
+          // If any hole is 0 (ball picked up), scratch is invalid
+          const hasLiftedBall = holes.some((v) => v === 0);
+          if (hasLiftedBall) {
+            ed.result.scratch_score = null;
+          }
         }
       } catch {
         // silently skip scorecard errors

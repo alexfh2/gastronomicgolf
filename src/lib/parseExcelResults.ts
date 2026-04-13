@@ -78,6 +78,9 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
       scores.push(getNum(10 + h));
     }
 
+    // If any hole has a null score (ball picked up), scratch is invalid
+    const hasLiftedBall = scores.some(s => s === null);
+
     results.push({
       position,
       name,
@@ -88,7 +91,7 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
       handicap_play: getNum(8),
       category: getNum(7) ? Math.floor(getNum(7)!) : null,
       stableford_points: getNum(9) ? Math.floor(getNum(9)!) : null,
-      scratch_score: getNum(28) ? Math.floor(getNum(28)!) : null,
+      scratch_score: hasLiftedBall ? null : (getNum(28) ? Math.floor(getNum(28)!) : null),
       scores,
       is_np: false,
     });
