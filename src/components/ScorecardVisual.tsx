@@ -39,11 +39,11 @@ const calcStablefordPoints = (
 /** Color scale for Stableford points */
 const getStbStyle = (pts: number | null): string => {
   if (pts == null) return 'text-muted-foreground';
-  if (pts >= 4) return 'bg-primary/20 text-primary font-bold';       // eagle+
-  if (pts === 3) return 'bg-primary/10 text-primary font-semibold';   // birdie
-  if (pts === 2) return 'bg-accent/15 text-accent-foreground font-medium'; // par
-  if (pts === 1) return 'bg-muted text-muted-foreground';             // bogey
-  return 'bg-destructive/10 text-destructive font-medium';            // 0 pts
+  if (pts >= 4) return 'bg-primary/20 text-primary font-bold';
+  if (pts === 3) return 'bg-primary/10 text-primary font-semibold';
+  if (pts === 2) return 'bg-accent/15 text-accent-foreground font-medium';
+  if (pts === 1) return 'bg-muted text-muted-foreground';
+  return 'bg-destructive/10 text-destructive font-medium';
 };
 
 const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, playerHandicap }) => {
@@ -88,8 +88,8 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff <= -2) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-primary text-primary font-bold text-xs">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-primary">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary text-primary font-bold text-xs">
+          <span className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-full border border-primary">
             {score}
           </span>
         </span>
@@ -98,7 +98,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff === -1) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-primary text-primary font-bold text-xs">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary text-primary font-bold text-xs">
           {score}
         </span>
       );
@@ -106,7 +106,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff === 0) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 border-2 border-foreground/60 text-foreground font-semibold text-xs">
+        <span className="inline-flex items-center justify-center w-8 h-8 border-2 border-foreground/60 text-foreground font-semibold text-xs">
           {score}
         </span>
       );
@@ -114,14 +114,14 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff === 1) {
       return (
-        <span className="inline-flex items-center justify-center w-7 h-7 bg-muted border border-border text-foreground font-semibold text-xs">
+        <span className="inline-flex items-center justify-center w-8 h-8 bg-muted border border-border text-foreground font-semibold text-xs">
           {score}
         </span>
       );
     }
 
     return (
-      <span className="inline-flex items-center justify-center w-7 h-7 bg-destructive/15 border border-destructive/30 text-destructive font-bold text-xs">
+      <span className="inline-flex items-center justify-center w-8 h-8 bg-destructive/15 border border-destructive/30 text-destructive font-bold text-xs">
         {score}
       </span>
     );
@@ -141,6 +141,12 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     );
   };
 
+  const headerCellClass = "text-center py-2 px-1 font-mono text-xs bg-[hsl(var(--primary)/0.08)] text-muted-foreground border border-border/30";
+  const headerLabelClass = "py-2 px-2 font-medium text-xs bg-[hsl(var(--primary)/0.08)] text-muted-foreground border border-border/30 w-14";
+  const resultCellClass = "text-center py-2.5 px-1 border border-border/20";
+  const resultLabelClass = "py-2.5 px-2 font-medium text-xs border border-border/20 w-14";
+  const totalCellClass = "text-center py-2 px-1 font-mono font-bold border border-border/30 w-12";
+
   const renderHalf = (
     halfScores: number[],
     halfPar: number[],
@@ -150,59 +156,58 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     halfStb?: (number | null)[],
     holeOffset = 0
   ) => (
-    <table className="text-xs w-full">
+    <table className="text-xs w-full border-collapse">
       <thead>
         <tr>
-          <td className="pr-2 py-1 text-muted-foreground font-medium w-12">Forat</td>
+          <td className={headerLabelClass}>Forat</td>
           {halfScores.map((_, i) => (
-            <td key={i} className="text-center py-1 w-9 font-mono text-muted-foreground">{startHole + i}</td>
+            <td key={i} className={headerCellClass}>{startHole + i}</td>
           ))}
-          <td className="text-center py-1 w-10 font-mono font-bold text-muted-foreground">Tot</td>
+          <td className={`${headerCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}>Tot</td>
         </tr>
         <tr>
-          <td className="pr-2 py-1 text-muted-foreground/60 font-medium">Par</td>
+          <td className={headerLabelClass}>Par</td>
           {halfPar.map((p, i) => (
-            <td key={i} className="text-center py-1 font-mono text-muted-foreground/60">{p}</td>
+            <td key={i} className={headerCellClass}>{p}</td>
           ))}
-          <td className="text-center py-1 font-mono text-muted-foreground/60 font-bold">{halfPar.reduce((a, b) => a + b, 0)}</td>
+          <td className={`${headerCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}>{halfPar.reduce((a, b) => a + b, 0)}</td>
         </tr>
         {halfHcp && (
-          <tr className="border-b border-border/40">
-            <td className="pr-2 py-1 text-muted-foreground/60 font-medium">HCP</td>
+          <tr>
+            <td className={headerLabelClass}>HCP</td>
             {halfHcp.map((h, i) => (
-              <td key={i} className="text-center py-1 font-mono text-muted-foreground/60">{h}</td>
+              <td key={i} className={headerCellClass}>{h}</td>
             ))}
-            <td className="text-center py-1"></td>
+            <td className={`${headerCellClass} ${totalCellClass} bg-[hsl(var(--primary)/0.12)]`}></td>
           </tr>
         )}
-        {!halfHcp && <tr className="border-b border-border/40"><td colSpan={11}></td></tr>}
       </thead>
       <tbody>
         <tr>
-          <td className="pr-2 py-2 font-medium text-foreground">Cops</td>
+          <td className={`${resultLabelClass} font-semibold text-foreground`}>Cops</td>
           {halfScores.map((s, i) => (
-            <td key={i} className="text-center py-2">
-              <div className="flex flex-col items-center">
+            <td key={i} className={`${resultCellClass} bg-background`}>
+              <div className="flex flex-col items-center min-h-[2.5rem] justify-center">
                 {renderScore(s, halfPar[i])}
                 {renderStrokeDots(getStrokeMarker(holeOffset + i))}
               </div>
             </td>
           ))}
-          <td className="text-center py-2 font-mono font-semibold text-muted-foreground text-sm">
+          <td className={`${resultCellClass} ${totalCellClass} bg-muted/30 text-sm`}>
             {total != null ? total : '—'}
           </td>
         </tr>
         {halfStb && (
-          <tr className="border-t border-border/40">
-            <td className="pr-2 py-1.5 font-medium text-primary">Stb</td>
+          <tr>
+            <td className={`${resultLabelClass} font-semibold text-primary`}>Stb</td>
             {halfStb.map((pts, i) => (
-              <td key={i} className="text-center py-1">
-                <span className={`inline-flex items-center justify-center w-6 h-6 rounded text-[11px] ${getStbStyle(pts)}`}>
+              <td key={i} className={`${resultCellClass} bg-background`}>
+                <span className={`inline-flex items-center justify-center w-7 h-7 rounded text-[11px] ${getStbStyle(pts)}`}>
                   {pts != null ? pts : '—'}
                 </span>
               </td>
             ))}
-            <td className="text-center py-1.5 font-mono font-bold text-primary text-sm">
+            <td className={`${resultCellClass} ${totalCellClass} text-primary text-sm bg-muted/30`}>
               {sumStb(halfStb)}
             </td>
           </tr>
@@ -211,10 +216,8 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     </table>
   );
 
-  const totalStb = stablefordPoints ? sumStb(stablefordPoints) : null;
-
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)}
       {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
       <div className="flex items-center gap-4 pt-2 border-t border-border/40 flex-wrap">
