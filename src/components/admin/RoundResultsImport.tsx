@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Check, X, AlertTriangle, Search, Plus, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
 import { DialogDescription } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { parseExcelResults, type ExcelParsedResult } from '@/lib/parseExcelResults';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -54,6 +55,14 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [source, setSource] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
   const [importTab, setImportTab] = useState('url');
+  const [deleteExisting, setDeleteExisting] = useState(false);
+  const [existingCount, setExistingCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.from('results').select('id', { count: 'exact', head: true })
+      .eq('round_id', round.id)
+      .then(({ count }) => setExistingCount(count ?? 0));
+  }, [round.id]);
 
   const addUrl = () => setUrls(prev => [...prev, '']);
   const removeUrl = (idx: number) => setUrls(prev => prev.filter((_, i) => i !== idx));
@@ -191,6 +200,15 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // Delete existing results if requested
+      if (deleteExisting) {
+        const { error: delError } = await supabase
+          .from('results')
+          .delete()
+          .eq('round_id', round.id);
+        if (delError) throw new Error(`Error eliminant resultats existents: ${delError.message}`);
+      }
+
       const selected = results.filter(r => r._selected);
       const newPlayers: string[] = [];
 
@@ -269,6 +287,20 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       <DialogDescription className="text-sm text-muted-foreground">
         Importa resultats des d'un fitxer Excel o des d'URLs (GolfDirecto / Teeone).
       </DialogDescription>
+
+      {existingCount != null && existingCount > 0 && (
+        <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/30">
+          <Checkbox
+            id="delete-existing"
+            checked={deleteExisting}
+            onCheckedChange={(checked) => setDeleteExisting(checked === true)}
+          />
+          <label htmlFor="delete-existing" className="text-sm cursor-pointer">
+            <span className="font-medium">Eliminar {existingCount} resultats existents</span>
+            <span className="text-muted-foreground ml-1">abans d'importar (substituir)</span>
+          </label>
+        </div>
+      )}
 
       <Tabs value={importTab} onValueChange={(v) => { setImportTab(v); setResults([]); setWarnings([]); }}>
         <TabsList className="w-full">
