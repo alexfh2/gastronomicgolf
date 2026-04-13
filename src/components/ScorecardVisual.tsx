@@ -24,7 +24,7 @@ const calcStablefordPoints = (
   strokeIndex: number,
   playerHcp: number
 ): number | null => {
-  if (gross === 0) return null; // lifted ball
+  if (gross == null || gross === 0) return null; // lifted ball
   const extra = calcExtraStrokes(strokeIndex, playerHcp);
   const net = gross - extra;
   const diff = net - holePar;
