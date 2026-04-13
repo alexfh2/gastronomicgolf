@@ -121,6 +121,7 @@ const PlayerDetail = () => {
           const round = r.rounds as any;
           const rawScorecard = r.scorecard as any;
           const scorecard: number[] | null = Array.isArray(rawScorecard) ? rawScorecard : rawScorecard?.scores ?? null;
+          const handicapPlay: number | null = rawScorecard?.handicap_play ?? null;
 
           return (
             <Card key={r.id} className="border-border/60">
@@ -135,11 +136,11 @@ const PlayerDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-6 mb-3 text-sm">
-                  <span>Stableford: <strong className="text-primary text-lg">{r.stableford_points ?? '—'}</strong></span>
-                  <span className="text-muted-foreground">
-                    HCP: {r.handicap_at_round ?? '—'}
-                    {r.handicap_at_round != null && ` (${Math.round(r.handicap_at_round)})`}
-                  </span>
+                   <span>Stableford: <strong className="text-primary text-lg">{r.stableford_points ?? '—'}</strong></span>
+                   <span className="text-muted-foreground">
+                     HCP: {r.handicap_at_round ?? '—'}
+                     {handicapPlay != null ? ` (HPU: ${handicapPlay})` : r.handicap_at_round != null ? ` (${Math.round(r.handicap_at_round)})` : ''}
+                   </span>
                 </div>
 
                 {scorecard && scorecard.length > 0 ? (
@@ -148,7 +149,7 @@ const PlayerDetail = () => {
                       scores={scorecard}
                       par={Array.isArray(round?.course_par) ? round.course_par : undefined}
                       handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
-                      playerHandicap={r.handicap_at_round}
+                      playerHandicap={handicapPlay ?? r.handicap_at_round}
                     />
                   </div>
                 ) : (
