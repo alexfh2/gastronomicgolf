@@ -57,12 +57,11 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [deleteExisting, setDeleteExisting] = useState(false);
   const [existingCount, setExistingCount] = useState<number | null>(null);
 
-  // Check existing results count on mount
-  useState(() => {
+  useEffect(() => {
     supabase.from('results').select('id', { count: 'exact', head: true })
       .eq('round_id', round.id)
       .then(({ count }) => setExistingCount(count ?? 0));
-  });
+  }, [round.id]);
 
   const addUrl = () => setUrls(prev => [...prev, '']);
   const removeUrl = (idx: number) => setUrls(prev => prev.filter((_, i) => i !== idx));
