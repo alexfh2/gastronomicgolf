@@ -116,6 +116,73 @@ const PlayerDetail = () => {
         </CardContent>
       </Card>
 
+      {/* Player Statistics */}
+      {results && results.length > 0 && (() => {
+        const roundsWithScorecard = results.filter(r => {
+          const raw = r.scorecard as any;
+          const scores: number[] | null = Array.isArray(raw) ? raw : raw?.scores ?? null;
+          const round = r.rounds as any;
+          const par: number[] | undefined = Array.isArray(round?.course_par) ? round.course_par : undefined;
+          return scores && par && scores.length === par.length;
+        });
+
+        const n = roundsWithScorecard.length;
+        if (n === 0) return null;
+
+        let birdies = 0, pars = 0, bogeys = 0, doublePlus = 0, totalHoles = 0;
+        for (const r of roundsWithScorecard) {
+          const raw = r.scorecard as any;
+          const scores: number[] = Array.isArray(raw) ? raw : raw?.scores;
+          const round = r.rounds as any;
+          const par: number[] = round.course_par;
+          for (let i = 0; i < scores.length; i++) {
+            if (scores[i] === 0 || scores[i] == null) continue;
+            totalHoles++;
+            const diff = scores[i] - par[i];
+            if (diff <= -1) birdies++;
+            else if (diff === 0) pars++;
+            else if (diff === 1) bogeys++;
+            else doublePlus++;
+          }
+        }
+
+        const stablefordScores = results.filter(r => r.stableford_points != null).map(r => r.stableford_points!);
+        const avgStableford = stablefordScores.length > 0 ? (stablefordScores.reduce((a, b) => a + b, 0) / stablefordScores.length).toFixed(1) : '—';
+        const bestStableford = stablefordScores.length > 0 ? Math.max(...stablefordScores) : '—';
+
+        const stats = [
+          { label: 'Mitjana Stb.', value: avgStableford, icon: '⛳' },
+          { label: 'Millor Stb.', value: bestStableford, icon: '🏆' },
+          { label: 'Birdies/ronda', value: (birdies / n).toFixed(1), icon: '🐦' },
+          { label: 'Pars/ronda', value: (pars / n).toFixed(1), icon: '✅' },
+          { label: 'Bogeys/ronda', value: (bogeys / n).toFixed(1), icon: '📦' },
+          { label: 'Doble+/ronda', value: (doublePlus / n).toFixed(1), icon: '💥' },
+        ];
+
+        return (
+          <Card className="border-border/60 mb-6">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Estadístiques</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+                {stats.map(s => (
+                  <div key={s.label} className="text-center">
+                    <div className="text-2xl mb-1">{s.icon}</div>
+                    <div className="font-display font-extrabold text-lg text-primary tabular-nums">{s.value}</div>
+                    <div className="text-[11px] text-muted-foreground leading-tight">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-4 mt-4 pt-3 border-t border-border/40 text-xs text-muted-foreground">
+                <span>{n} rondes amb targeta</span>
+                <span>{totalHoles} forats jugats</span>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Individual scorecards */}
       <h2 className="font-display text-xl font-semibold mb-4">Targetes</h2>
       <Accordion type="multiple" className="space-y-3">
