@@ -394,7 +394,7 @@ const Stats = () => {
                     <CollapsibleContent>
                       <CardContent className="pt-0 pb-4">
                         <div className="border-t border-border/60 pt-3 space-y-1.5">
-                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top 10</p>
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
                           {lb.map((entry, i) => {
                             const isHoleStat = card.unit === 'cops';
                             return (
