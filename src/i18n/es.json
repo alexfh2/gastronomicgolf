@@ -110,7 +110,16 @@
     "avgScratch": "Media Scratch",
     "bestRound": "Mejor vuelta",
     "regularity": "Regularidad",
-    "top10Frequency": "Top 10 frecuentes"
+    "top10Frequency": "Top 10 frecuentes",
+    "biggestClimb": "Mayor subida de ranking",
+    "biggestClimbDesc": "Posiciones ganadas en el ranking general tras una jornada",
+    "courseDifficulty": "Campos por dificultad",
+    "courseDifficultyDesc": "Media Stableford por campo (menor = más exigente)",
+    "hardestHole": "Hoyo más difícil",
+    "hardestHoleDesc": "Media de golpes por encima del par",
+    "easiestHole": "Hoyo más fácil",
+    "easiestHoleDesc": "Media de golpes respecto al par",
+    "participation": "Participación"
   },
   "news": {
     "title": "Noticias",

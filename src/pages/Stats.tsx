@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, BarChart3, Award, Repeat, ChevronDown } from 'lucide-react';
+import { Trophy, TrendingUp, BarChart3, Award, Repeat, ChevronDown, ArrowUpRight, Mountain, CircleDot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string };
@@ -26,7 +26,7 @@ const Stats = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, scorecard, rounds!inner(status, name), players(name)')
+        .select('player_id, stableford_points, scorecard, rounds!inner(status, name, round_number, club, course, course_par), players(name)')
         .eq('rounds.status', 'published');
       return data || [];
     },
@@ -35,7 +35,7 @@ const Stats = () => {
   const { stats, leaderboards } = useMemo(() => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
 
-    const byPlayer = new Map<string, { name: string; stableford: number[]; rounds: string[] }>();
+    const byPlayer = new Map<string, { name: string; stableford: number[]; rounds: { name: string; number: number; pts: number }[] }>();
 
     for (const r of results) {
       const name = (r.players as any)?.name || 'Desconegut';
@@ -46,14 +46,18 @@ const Stats = () => {
       const p = byPlayer.get(pid)!;
       if (r.stableford_points != null) {
         p.stableford.push(r.stableford_points);
-        p.rounds.push((r.rounds as any)?.name || '');
+        p.rounds.push({
+          name: (r.rounds as any)?.name || '',
+          number: (r.rounds as any)?.round_number || 0,
+          pts: r.stableford_points,
+        });
       }
     }
 
     const players = Array.from(byPlayer.entries());
 
     // === Best single round ===
-    const allRounds: { name: string; value: number; detail: string }[] = [];
+    const allRounds: LeaderboardEntry[] = [];
     for (const r of results) {
       if (r.stableford_points != null) {
         allRounds.push({
@@ -85,40 +89,157 @@ const Stats = () => {
     regList.sort((a, b) => b.value - a.value);
     const top10Reg = regList.slice(0, 10);
 
-    // === Most consistent (lowest std dev, min 2 rounds) ===
-    const conList: { name: string; value: number; stdDev: number }[] = [];
+    // === Biggest ranking climb after a round ===
+    // Group results by round_number, rank players per round, find biggest position gain
+    const roundNumbers = new Set<number>();
     for (const [, p] of players) {
-      if (p.stableford.length >= 2) {
-        const avg = p.stableford.reduce((a, b) => a + b, 0) / p.stableford.length;
-        const variance = p.stableford.reduce((sum, v) => sum + (v - avg) ** 2, 0) / p.stableford.length;
-        const stdDev = Math.sqrt(variance);
-        conList.push({ name: p.name, value: Math.round(avg * 10) / 10, stdDev });
+      for (const rd of p.rounds) roundNumbers.add(rd.number);
+    }
+    const sortedRoundNums = Array.from(roundNumbers).sort((a, b) => a - b);
+
+    // Build cumulative rankings per round
+    const climbList: LeaderboardEntry[] = [];
+    if (sortedRoundNums.length >= 2) {
+      for (let i = 1; i < sortedRoundNums.length; i++) {
+        const prevRoundNum = sortedRoundNums[i - 1];
+        const currRoundNum = sortedRoundNums[i];
+
+        // Cumulative totals up to previous round
+        const prevTotals: { pid: string; name: string; total: number }[] = [];
+        const currTotals: { pid: string; name: string; total: number }[] = [];
+
+        for (const [pid, p] of players) {
+          const prevSum = p.rounds.filter(r => r.number <= prevRoundNum).reduce((s, r) => s + r.pts, 0);
+          const currSum = p.rounds.filter(r => r.number <= currRoundNum).reduce((s, r) => s + r.pts, 0);
+          if (p.rounds.some(r => r.number <= prevRoundNum)) {
+            prevTotals.push({ pid, name: p.name, total: prevSum });
+          }
+          if (p.rounds.some(r => r.number <= currRoundNum)) {
+            currTotals.push({ pid, name: p.name, total: currSum });
+          }
+        }
+
+        prevTotals.sort((a, b) => b.total - a.total);
+        currTotals.sort((a, b) => b.total - a.total);
+
+        const prevRank = new Map(prevTotals.map((e, idx) => [e.pid, idx + 1]));
+        const currRank = new Map(currTotals.map((e, idx) => [e.pid, idx + 1]));
+
+        const roundName = players.values().next().value?.rounds.find((r: any) => r.number === currRoundNum)?.name || `J${currRoundNum}`;
+
+        for (const [pid, pRank] of currRank) {
+          const prev = prevRank.get(pid);
+          if (prev != null) {
+            const climb = prev - pRank; // positive = climbed
+            if (climb > 0) {
+              const pName = byPlayer.get(pid)?.name || '';
+              climbList.push({
+                name: pName,
+                value: climb,
+                detail: `${roundName} (${prev}→${pRank})`,
+              });
+            }
+          }
+        }
       }
     }
-    conList.sort((a, b) => a.stdDev - b.stdDev);
-    const top10Con: LeaderboardEntry[] = conList.slice(0, 10).map(c => {
-      // Find player's min/max for range display
-      const playerData = players.find(([, p]) => p.name === c.name)?.[1];
-      const min = playerData ? Math.min(...playerData.stableford) : 0;
-      const max = playerData ? Math.max(...playerData.stableford) : 0;
-      return {
-        name: c.name,
-        value: c.value,
-        detail: `${min}–${max} pts · ±${c.stdDev.toFixed(1)}`,
+    climbList.sort((a, b) => b.value - a.value);
+    const top10Climb = climbList.slice(0, 10);
+
+    // === Course difficulty (avg stableford per course) ===
+    const byCourse = new Map<string, { scores: number[]; club: string }>();
+    for (const r of results) {
+      if (r.stableford_points == null) continue;
+      const course = (r.rounds as any)?.course || (r.rounds as any)?.club || 'Desconegut';
+      const club = (r.rounds as any)?.club || '';
+      if (!byCourse.has(course)) byCourse.set(course, { scores: [], club });
+      byCourse.get(course)!.scores.push(r.stableford_points);
+    }
+    const courseList: LeaderboardEntry[] = [];
+    for (const [course, data] of byCourse) {
+      const avg = data.scores.reduce((a, b) => a + b, 0) / data.scores.length;
+      courseList.push({
+        name: course,
+        value: Math.round(avg * 10) / 10,
+        detail: `${data.scores.length} targetes`,
+      });
+    }
+    // Most demanding = lowest avg stableford
+    const coursesByDifficulty = [...courseList].sort((a, b) => a.value - b.value);
+    const top10Courses = coursesByDifficulty.slice(0, 10);
+
+    // === Hardest / Easiest hole ===
+    // Analyze scorecard data: each scorecard has hole-by-hole gross scores
+    // Compare vs course_par to find avg strokes over/under par per hole
+    const holeStats = new Map<string, { totalOverPar: number; count: number; course: string }>();
+
+    for (const r of results) {
+      const scorecard = r.scorecard as any;
+      const coursePar = (r.rounds as any)?.course_par as any;
+      const courseName = (r.rounds as any)?.course || (r.rounds as any)?.club || '';
+      if (!scorecard || !coursePar) continue;
+
+      // scorecard and course_par can be arrays of 18 numbers or objects
+      const getHoleScores = (sc: any): number[] => {
+        if (Array.isArray(sc)) return sc.map(Number);
+        if (typeof sc === 'object') return Object.values(sc).map(Number);
+        return [];
       };
-    });
+
+      const scores = getHoleScores(scorecard);
+      const pars = getHoleScores(coursePar);
+
+      for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
+        if (isNaN(scores[h]) || isNaN(pars[h]) || scores[h] === 0 || pars[h] === 0) continue;
+        const key = `${courseName}#${h + 1}`;
+        if (!holeStats.has(key)) holeStats.set(key, { totalOverPar: 0, count: 0, course: courseName });
+        const stat = holeStats.get(key)!;
+        stat.totalOverPar += scores[h] - pars[h];
+        stat.count++;
+      }
+    }
+
+    const holeList: (LeaderboardEntry & { avgOver: number })[] = [];
+    for (const [key, data] of holeStats) {
+      if (data.count < 3) continue; // min samples
+      const [course, holeNum] = key.split('#');
+      const avgOver = data.totalOverPar / data.count;
+      holeList.push({
+        name: `Forat ${holeNum}`,
+        value: Math.round(avgOver * 100) / 100,
+        detail: `${course} (${data.count} targetes)`,
+        avgOver,
+      });
+    }
+
+    // Hardest holes (most over par)
+    const hardestHoles = [...holeList].sort((a, b) => b.avgOver - a.avgOver).slice(0, 10).map(h => ({
+      name: h.name,
+      value: h.value,
+      detail: h.detail,
+    }));
+
+    // Easiest holes (most under par or closest to 0)
+    const easiestHoles = [...holeList].sort((a, b) => a.avgOver - b.avgOver).slice(0, 10).map(h => ({
+      name: h.name,
+      value: h.value,
+      detail: h.detail,
+    }));
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
     const bestAvg = top10Avg[0] || { name: '—', value: 0 };
     const mostReg = top10Reg[0] || { name: '—', value: 0 };
-    const mostCon = top10Con[0] || { name: '—', value: 0 };
+    const bestClimb = top10Climb[0] || { name: '—', value: 0 };
+    const hardestCourse = top10Courses[0] || { name: '—', value: 0 };
+    const hardestHole = hardestHoles[0] || { name: '—', value: 0 };
+    const easiestHole = easiestHoles[0] || { name: '—', value: 0 };
 
     const totalPlayers = players.length;
     const totalResults = results.length;
 
     return {
-      stats: { bestRound, bestAvg, mostReg, mostCon, totalPlayers, totalResults },
-      leaderboards: [top10BestRound, top10Avg, top10Reg, top10Con, [] as LeaderboardEntry[]],
+      stats: { bestRound, bestAvg, mostReg, bestClimb, hardestCourse, hardestHole, easiestHole, totalPlayers, totalResults },
+      leaderboards: [top10BestRound, top10Avg, top10Reg, top10Climb, top10Courses, hardestHoles, easiestHoles, [] as LeaderboardEntry[]],
     };
   }, [results]);
 
@@ -126,8 +247,11 @@ const Stats = () => {
     { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, subtitle: '', unit: 'pts' },
     { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, subtitle: '', unit: 'pts' },
     { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, subtitle: '', unit: 'jornades' },
-    { icon: BarChart3, label: 'Més consistent', value: `${stats.mostCon.value} pts/avg`, detail: stats.mostCon.name, subtitle: 'Menor variació entre jornades (desviació estàndard més baixa)', unit: 'avg' },
-    { icon: Award, label: 'Participació', value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, subtitle: '', unit: '' },
+    { icon: ArrowUpRight, label: t('stats.biggestClimb', 'Major pujada de rànquing'), value: `+${stats.bestClimb.value} pos.`, detail: `${stats.bestClimb.name}`, subtitle: t('stats.biggestClimbDesc', 'Posicions guanyades al rànquing general després d\'una jornada'), unit: 'pos.' },
+    { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
+    { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `+${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per sobre del par'), unit: 'sobre par' },
+    { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value > 0 ? '+' : ''}${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops respecte al par'), unit: 'sobre par' },
+    { icon: Award, label: t('stats.participation', 'Participació'), value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, subtitle: '', unit: '' },
   ] : [];
 
   return (
@@ -140,7 +264,7 @@ const Stats = () => {
       ) : !stats ? (
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {statCards.map((card, idx) => {
             const lb = leaderboards[idx] || [];
             const hasLeaderboard = lb.length > 0;
@@ -195,7 +319,7 @@ const Stats = () => {
                                 {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
                               </span>
                               {entry.detail && (
-                                <span className="text-xs text-muted-foreground hidden sm:inline">({entry.detail})</span>
+                                <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[120px]">({entry.detail})</span>
                               )}
                             </div>
                           ))}
