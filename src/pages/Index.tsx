@@ -132,9 +132,12 @@ const Index = () => {
           <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.25em] uppercase mb-6">
             {t('common.season')} 2026
           </p>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-5 tracking-tight">
-            {t('home.title')}
-          </h1>
+          <img src={heroBg.replace('hero-bg', 'logo')} alt="Circuit Gastronòmic Golf" className="hidden" />
+          <img 
+            src={new URL('@/assets/logo.png', import.meta.url).href} 
+            alt="Circuit Gastronòmic Golf" 
+            className="h-16 md:h-20 lg:h-24 w-auto mx-auto mb-5 brightness-0 invert"
+          />
           <p className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
             {t('home.subtitle')}
           </p>
