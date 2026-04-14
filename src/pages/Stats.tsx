@@ -338,9 +338,9 @@ const Stats = () => {
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
-      <div className="bg-primary/10 rounded-lg px-5 py-4 mb-8 border border-primary/15">
-        <h1 className="font-display text-3xl font-bold text-primary">{t('stats.title')}</h1>
-        <p className="text-primary/70 mt-1">{t('common.season')} 2026</p>
+      <div className="bg-primary rounded-xl px-5 py-5 mb-8 shadow-md">
+        <h1 className="font-display text-3xl font-bold text-primary-foreground">{t('stats.title')}</h1>
+        <p className="text-primary-foreground/70 mt-1">{t('common.season')} 2026</p>
       </div>
 
       {isLoading ? (
@@ -359,9 +359,9 @@ const Stats = () => {
                 <Card className={cn('border-border/60 transition-shadow', hasLeaderboard && 'cursor-pointer hover:shadow-md')}>
                   <CollapsibleTrigger asChild disabled={!hasLeaderboard}>
                     <div>
-                      <CardHeader className="pb-2 flex-row items-center gap-3 space-y-0">
+                      <CardHeader className="pb-2 flex-row items-center gap-3 space-y-0 bg-muted/50 rounded-t-lg border-b border-border/30">
                         <card.icon className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-sm font-medium text-muted-foreground flex-1">{card.label}</CardTitle>
+                        <CardTitle className="text-sm font-medium text-foreground flex-1">{card.label}</CardTitle>
                         {hasLeaderboard && (
                           <ChevronDown
                             className={cn(
