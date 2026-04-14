@@ -165,7 +165,7 @@ const Index = () => {
           {/* Featured Round — clickable */}
           <Card className="border-border/40 lg:col-span-2">
             <CardContent className="p-7">
-              <h3 className="font-display text-lg font-semibold mb-5 tracking-tight bg-primary text-primary-foreground">
+              <h3 className="font-display text-lg font-semibold mb-5 tracking-tight bg-primary text-primary-foreground -mx-7 -mt-7 px-7 py-3 rounded-t-lg">
                 {nextRound ? t('home.nextRound') : t('home.lastRound')}
               </h3>
               {featuredRound ? (
@@ -206,7 +206,7 @@ const Index = () => {
           {/* Top classified by category */}
           <Card className="border-border/40 lg:col-span-3">
             <CardContent className="p-7">
-              <div className="flex items-center justify-between mb-5 bg-primary">
+              <div className="flex items-center justify-between mb-5 bg-primary -mx-7 -mt-7 px-7 py-3 rounded-t-lg">
                 <h3 className="font-display text-lg font-semibold tracking-tight bg-primary text-primary-foreground">{t('home.topPlayers')}</h3>
                 <Link to="/ranquings" className="text-xs text-accent font-medium hover:underline flex items-center gap-1">
                   Veure rànquings <ChevronRight className="h-3 w-3" />
