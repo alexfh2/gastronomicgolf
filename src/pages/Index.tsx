@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import heroBg from '@/assets/hero-bg.png';
+import logo from '@/assets/logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin, ChevronRight } from 'lucide-react';
@@ -132,9 +133,11 @@ const Index = () => {
           <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.25em] uppercase mb-6">
             {t('common.season')} 2026
           </p>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-5 tracking-tight">
-            {t('home.title')}
-          </h1>
+          <img 
+            src={logo} 
+            alt="Circuit Gastronòmic Golf" 
+            className="h-16 md:h-20 lg:h-24 w-auto mx-auto mb-5 brightness-0 invert"
+          />
           <p className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
             {t('home.subtitle')}
           </p>
