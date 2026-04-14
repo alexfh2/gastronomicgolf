@@ -200,7 +200,7 @@ const PlayerDetail = () => {
                 const chartH = 60;
                 const chartW = Math.max(200, hcpData.length * 60);
                 const padX = 30;
-                const padY = 10;
+                const padY = 22;
                 const usableW = chartW - padX * 2;
                 const usableH = chartH - padY * 2;
 
