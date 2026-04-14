@@ -5,7 +5,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Trophy, Bird, Target, Square, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
@@ -159,12 +159,12 @@ const PlayerDetail = () => {
         const bestStableford = stablefordScores.length > 0 ? Math.max(...stablefordScores) : '—';
 
         const stats = [
-          { label: 'Mitjana Stb.', value: avgStableford, icon: '⛳' },
-          { label: 'Millor Stb.', value: bestStableford, icon: '🏆' },
-          { label: 'Birdies/ronda', value: (birdies / n).toFixed(1), icon: '🐦' },
-          { label: 'Pars/ronda', value: (pars / n).toFixed(1), icon: '✅' },
-          { label: 'Bogeys/ronda', value: (bogeys / n).toFixed(1), icon: '📦' },
-          { label: 'Doble+/ronda', value: (doublePlus / n).toFixed(1), icon: '💥' },
+          { label: 'Mitjana Stb.', value: avgStableford, icon: TrendingUp },
+          { label: 'Millor Stb.', value: bestStableford, icon: Trophy },
+          { label: 'Birdies/ronda', value: (birdies / n).toFixed(1), icon: Bird },
+          { label: 'Pars/ronda', value: (pars / n).toFixed(1), icon: Target },
+          { label: 'Bogeys/ronda', value: (bogeys / n).toFixed(1), icon: Square },
+          { label: 'Doble+/ronda', value: (doublePlus / n).toFixed(1), icon: AlertTriangle },
         ];
 
         return (
@@ -176,7 +176,7 @@ const PlayerDetail = () => {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
                 {stats.map(s => (
                   <div key={s.label} className="text-center">
-                    <div className="text-2xl mb-1">{s.icon}</div>
+                    <div className="text-muted-foreground/60 mb-1"><s.icon className="h-5 w-5 mx-auto" strokeWidth={1.5} /></div>
                     <div className="font-display font-extrabold text-lg text-primary tabular-nums">{s.value}</div>
                     <div className="text-[11px] text-muted-foreground leading-tight">{s.label}</div>
                   </div>
