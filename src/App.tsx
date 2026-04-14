@@ -13,7 +13,7 @@ import Rankings from "./pages/Rankings";
 import Rounds from "./pages/Rounds";
 import Players from "./pages/Players";
 import PlayerDetail from "./pages/PlayerDetail";
-import Compare from "./pages/Compare";
+
 import Stats from "./pages/Stats";
 import News from "./pages/News";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -42,7 +42,7 @@ const App = () => (
               <Route path="/jornades" element={<Rounds />} />
               <Route path="/jugadors" element={<Players />} />
               <Route path="/jugadors/:id" element={<PlayerDetail />} />
-              <Route path="/comparador" element={<Compare />} />
+              
               <Route path="/estadistiques" element={<Stats />} />
               <Route path="/noticies" element={<News />} />
             </Route>

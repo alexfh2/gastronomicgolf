@@ -12,7 +12,7 @@ const navItems = [
   { key: 'rankings', path: '/ranquings' },
   { key: 'rounds', path: '/jornades' },
   { key: 'players', path: '/jugadors' },
-  { key: 'compare', path: '/comparador' },
+  
   { key: 'stats', path: '/estadistiques' },
   { key: 'news', path: '/noticies' },
 ] as const;
