@@ -123,11 +123,11 @@ const Stats = () => {
   }, [results]);
 
   const statCards = stats ? [
-    { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
-    { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, unit: 'pts' },
-    { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, unit: 'jornades' },
-    { icon: BarChart3, label: 'Més consistent', value: `${stats.mostCon.value} pts/avg`, detail: `${stats.mostCon.name}`, subtitle: 'Menor variació entre jornades (desviació estàndard més baixa)', unit: 'avg' },
-    { icon: Award, label: 'Participació', value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, unit: '' },
+    { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, subtitle: '', unit: 'pts' },
+    { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, subtitle: '', unit: 'pts' },
+    { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, subtitle: '', unit: 'jornades' },
+    { icon: BarChart3, label: 'Més consistent', value: `${stats.mostCon.value} pts/avg`, detail: stats.mostCon.name, subtitle: 'Menor variació entre jornades (desviació estàndard més baixa)', unit: 'avg' },
+    { icon: Award, label: 'Participació', value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, subtitle: '', unit: '' },
   ] : [];
 
   return (
