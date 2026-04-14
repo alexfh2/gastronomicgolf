@@ -176,7 +176,6 @@ const PlayerDetail = () => {
               </div>
               <div className="flex gap-4 mt-4 pt-3 border-t border-border/40 text-xs text-muted-foreground">
                 <span>{n} rondes amb targeta</span>
-                <span>{totalHoles} forats jugats</span>
               </div>
             </CardContent>
           </Card>
