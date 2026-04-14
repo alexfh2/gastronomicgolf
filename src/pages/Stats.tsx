@@ -360,26 +360,52 @@ const Stats = () => {
                       <CardContent className="pt-0 pb-4">
                         <div className="border-t border-border/60 pt-3 space-y-1.5">
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top 10</p>
-                          {lb.map((entry, i) => (
-                            <div key={`${entry.name}-${i}`} className="flex items-start gap-2 text-sm">
-                              <span
-                                className={cn(
-                                  'w-6 text-center font-bold text-xs rounded-full py-0.5',
-                                  i === 0 && 'bg-primary/15 text-primary',
-                                  i === 1 && 'bg-muted text-muted-foreground',
-                                  i === 2 && 'bg-muted text-muted-foreground',
-                                  i > 2 && 'text-muted-foreground',
+                          {lb.map((entry, i) => {
+                            const isHoleStat = card.unit === 'cops';
+                            return (
+                              <div key={`${entry.name}-${i}`} className={cn('text-sm', isHoleStat ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-b-0' : 'flex items-start gap-2')}>
+                                {isHoleStat ? (
+                                  <>
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className={cn(
+                                          'w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0',
+                                          i === 0 && 'bg-primary/15 text-primary',
+                                          i <= 2 && i > 0 && 'bg-muted text-muted-foreground',
+                                          i > 2 && 'text-muted-foreground',
+                                        )}
+                                      >
+                                        {i + 1}
+                                      </span>
+                                      <span className="font-semibold text-foreground tabular-nums">
+                                        {entry.value} <span className="text-xs font-normal text-muted-foreground">{card.unit}</span>
+                                      </span>
+                                      {entry.detail && <span className="text-xs text-muted-foreground">· {entry.detail}</span>}
+                                    </div>
+                                    <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.name}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span
+                                      className={cn(
+                                        'w-6 text-center font-bold text-xs rounded-full py-0.5',
+                                        i === 0 && 'bg-primary/15 text-primary',
+                                        i <= 2 && i > 0 && 'bg-muted text-muted-foreground',
+                                        i > 2 && 'text-muted-foreground',
+                                      )}
+                                    >
+                                      {i + 1}
+                                    </span>
+                                    <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>
+                                    <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
+                                      {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
+                                    </span>
+                                    {entry.detail && <span className="hidden sm:inline text-xs text-muted-foreground whitespace-nowrap">({entry.detail})</span>}
+                                  </>
                                 )}
-                              >
-                                {i + 1}
-                              </span>
-                              <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>
-                              <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
-                                {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
-                              </span>
-                              {entry.detail && <span className="hidden sm:inline text-xs text-muted-foreground whitespace-nowrap">({entry.detail})</span>}
-                            </div>
-                          ))}
+                              </div>
+                            );
+                          })}
                         </div>
                       </CardContent>
                     </CollapsibleContent>
