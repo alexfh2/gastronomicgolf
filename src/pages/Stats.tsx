@@ -180,15 +180,11 @@ const Stats = () => {
       const courseName = (r.rounds as any)?.course || (r.rounds as any)?.club || '';
       if (!scorecard || !coursePar) continue;
 
-      // scorecard and course_par can be arrays of 18 numbers or objects
-      const getHoleScores = (sc: any): number[] => {
-        if (Array.isArray(sc)) return sc.map(Number);
-        if (typeof sc === 'object') return Object.values(sc).map(Number);
-        return [];
-      };
-
-      const scores = getHoleScores(scorecard);
-      const pars = getHoleScores(coursePar);
+      // scorecard is {scores: [...], handicap_play: N}, course_par is array
+      const scores: number[] = Array.isArray(scorecard?.scores) ? scorecard.scores.map(Number) : 
+        Array.isArray(scorecard) ? scorecard.map(Number) : [];
+      const pars: number[] = Array.isArray(coursePar) ? coursePar.map(Number) :
+        Array.isArray(coursePar?.scores) ? coursePar.scores.map(Number) : [];
 
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (isNaN(scores[h]) || isNaN(pars[h]) || scores[h] === 0 || pars[h] === 0) continue;
