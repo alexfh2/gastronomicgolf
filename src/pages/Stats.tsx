@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type LeaderboardEntry = { name: string; value: number; detail?: string };
+type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number> };
 type CourseAggregate = {
   displayName: string;
