@@ -170,6 +170,7 @@ const Stats = () => {
                         {card.subtitle && (
                           <p className="text-xs text-muted-foreground/70 mt-2 italic">{card.subtitle}</p>
                         )}
+                      </CardContent>
                     </div>
                   </CollapsibleTrigger>
 
