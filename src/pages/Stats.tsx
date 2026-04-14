@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type LeaderboardEntry = { name: string; value: number; detail?: string };
+type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number> };
 type CourseAggregate = {
   displayName: string;
@@ -102,11 +103,11 @@ const Stats = () => {
         if (pars[h] > 0 && scores[h] > 0) {
           const diff = scores[h] - pars[h];
           if (scores[h] === 1) {
-            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}` });
+            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}`, playerId: pid });
           } else if (diff <= -3) {
-            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}`, playerId: pid });
           } else if (diff === -2) {
-            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}`, playerId: pid });
           }
         }
       }
@@ -130,6 +131,7 @@ const Stats = () => {
           name: (r.players as any)?.name || '',
           value: r.stableford_points,
           detail: (r.rounds as any)?.name || '',
+          playerId: r.player_id,
         });
       }
     }
@@ -137,13 +139,14 @@ const Stats = () => {
     const top10BestRound = allRounds.slice(0, 10);
 
     const avgList: LeaderboardEntry[] = [];
-    for (const [, player] of players) {
+    for (const [pid, player] of players) {
       if (player.stableford.length >= 2) {
         const avg = player.stableford.reduce((a, b) => a + b, 0) / player.stableford.length;
         avgList.push({
           name: player.name,
           value: Math.round(avg * 10) / 10,
           detail: `${player.stableford.length} jornades`,
+          playerId: pid,
         });
       }
     }
@@ -158,9 +161,9 @@ const Stats = () => {
     const top10Reg = regList.slice(0, 10);
 
     const birdieList: LeaderboardEntry[] = [];
-    for (const [, player] of players) {
+    for (const [pid, player] of players) {
       if (player.birdies > 0) {
-        birdieList.push({ name: player.name, value: player.birdies });
+        birdieList.push({ name: player.name, value: player.birdies, playerId: pid });
       }
     }
     birdieList.sort((a, b) => b.value - a.value);
@@ -404,7 +407,7 @@ const Stats = () => {
                                   <>
                                     <div className="flex items-center gap-2">
                                       <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
-                                      <span className="font-semibold text-foreground">{entry.name}</span>
+                                      {entry.playerId ? <Link to={`/jugadors/${entry.playerId}`} className="font-semibold text-foreground hover:text-primary transition-colors">{entry.name}</Link> : <span className="font-semibold text-foreground">{entry.name}</span>}
                                     </div>
                                     {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
                                   </>
@@ -440,7 +443,7 @@ const Stats = () => {
                                     >
                                       {i + 1}
                                     </span>
-                                    <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>
+                                    {entry.playerId ? <Link to={`/jugadors/${entry.playerId}`} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors">{entry.name}</Link> : <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>}
                                     <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
                                       {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
                                     </span>
