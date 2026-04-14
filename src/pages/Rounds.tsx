@@ -171,8 +171,9 @@ const Rounds = () => {
                     {/* Results status line */}
                     <div className="pt-1">
                       {hasResults ? (
-                        <span className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1 cursor-pointer hover:underline">
-                          📊 {t('rounds.viewResults', 'Veure resultats')}
+                        <span className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5 cursor-pointer hover:underline">
+                          <BarChart3 className="h-3.5 w-3.5" />
+                          {t('rounds.viewResults', 'Veure resultats')}
                           <ChevronDown className={`h-3 w-3 transition-transform ${expandedRound === round.id ? 'rotate-180' : ''}`} />
                         </span>
                       ) : played ? (
