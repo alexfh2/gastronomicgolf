@@ -249,8 +249,8 @@ const Stats = () => {
     { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, subtitle: '', unit: 'jornades' },
     { icon: ArrowUpRight, label: t('stats.biggestClimb', 'Major pujada de rànquing'), value: `+${stats.bestClimb.value} pos.`, detail: `${stats.bestClimb.name}`, subtitle: t('stats.biggestClimbDesc', 'Posicions guanyades al rànquing general després d\'una jornada'), unit: 'pos.' },
     { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
-    { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `+${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per sobre del par'), unit: 'sobre par' },
-    { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value > 0 ? '+' : ''}${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops respecte al par'), unit: 'sobre par' },
+    { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `+${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per sobre del par'), unit: 'sobre par' },
+    { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value > 0 ? '+' : ''}${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops respecte al par'), unit: 'sobre par' },
     { icon: Award, label: t('stats.participation', 'Participació'), value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, subtitle: '', unit: '' },
   ] : [];
 
