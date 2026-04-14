@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird } from 'lucide-react';
+import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string };
@@ -81,6 +81,7 @@ const Stats = () => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
 
     const byPlayer = new Map<string, { name: string; stableford: number[]; birdies: number; rounds: { name: string; number: number; pts: number }[] }>();
+    const specialShots: LeaderboardEntry[] = []; // hole-in-ones, albatrosses, eagles
 
     for (const r of results) {
       const name = (r.players as any)?.name || 'Desconegut';
@@ -90,12 +91,23 @@ const Stats = () => {
       }
       const player = byPlayer.get(pid)!;
 
-      // Count birdies from scorecard vs course_par
+      // Count birdies and special shots from scorecard vs course_par
       const pars = getHoleScores((r.rounds as any)?.course_par);
       const scores = getHoleScores(r.scorecard);
+      const roundClub = (r.rounds as any)?.club || (r.rounds as any)?.name || '';
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) {
           player.birdies++;
+        }
+        if (pars[h] > 0 && scores[h] > 0) {
+          const diff = scores[h] - pars[h];
+          if (scores[h] === 1) {
+            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}` });
+          } else if (diff <= -3) {
+            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+          } else if (diff === -2) {
+            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+          }
         }
       }
 
@@ -317,8 +329,9 @@ const Stats = () => {
         easiestHole,
         totalPlayers: players.length,
         totalResults: results.length,
+        specialShots,
       },
-      leaderboards: [top10BestRound, top10Avg, top10Birdies, top10Courses, hardestHoles, easiestHoles],
+      leaderboards: [top10BestRound, top10Avg, top10Birdies, top10Courses, hardestHoles, easiestHoles, specialShots],
     };
   }, [results]);
 
@@ -330,6 +343,7 @@ const Stats = () => {
         { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
         { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value} cops`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
         { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value} cops`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
+        { icon: Star, label: 'Hole-in-One / Eagles / Albatros', value: stats.specialShots.length > 0 ? `${stats.specialShots.length}` : 'Cap encara', detail: stats.specialShots.length > 0 ? stats.specialShots[0].detail || '' : 'Encara no s\'ha aconseguit cap cop especial al circuit', subtitle: '', unit: 'special' },
       ]
     : [];
 
@@ -380,7 +394,7 @@ const Stats = () => {
                     <CollapsibleContent>
                       <CardContent className="pt-0 pb-4">
                         <div className="border-t border-border/60 pt-3 space-y-1.5">
-                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Top 10</p>
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
                           {lb.map((entry, i) => {
                             const isHoleStat = card.unit === 'cops';
                             return (
