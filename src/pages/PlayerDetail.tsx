@@ -102,11 +102,11 @@ const PlayerDetail = () => {
                     const round = r.rounds as any;
                     return (
                       <tr key={r.id} className="border-b border-border/20 last:border-0 cursor-pointer hover:bg-muted/40 transition-colors" onClick={() => scrollToAndOpen(r.id)}>
-                        <td className="py-2 font-medium">
-                          {round?.name}
+                        <td className="py-2 font-medium font-mono">
+                          J{round?.round_number}
                           {round?.is_master && <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0 bg-accent/20 text-accent border-0">M</Badge>}
                         </td>
-                        <td className="py-2 px-2 text-muted-foreground">{round?.club || '—'}</td>
+                        <td className="py-2 px-2 text-muted-foreground">{round?.club || round?.name || '—'}</td>
                         <td className="py-2 px-2 text-muted-foreground">
                           {round?.date ? format(new Date(round.date), 'dd MMM yy', { locale }) : '—'}
                         </td>
