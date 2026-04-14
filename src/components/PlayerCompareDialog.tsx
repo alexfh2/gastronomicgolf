@@ -129,7 +129,7 @@ const PlayerCompareDialog: React.FC<PlayerCompareProps> = ({ currentPlayerId, cu
   const rows: { label: string; a: string; b: string; betterIs: 'lower' | 'higher'; aVal: number | null; bVal: number | null }[] = [];
   if (statsA && statsB) {
     rows.push(
-      { label: 'Handicap', a: statsA.handicap != null ? `Hdcp ${statsA.handicap}` : '—', b: statsB.handicap != null ? `Hdcp ${statsB.handicap}` : '—', betterIs: 'lower', aVal: statsA.handicap, bVal: statsB.handicap },
+      { label: 'Últim Handicap', a: statsA.handicap != null ? `Hdcp ${statsA.handicap}` : '—', b: statsB.handicap != null ? `Hdcp ${statsB.handicap}` : '—', betterIs: 'lower', aVal: statsA.handicap, bVal: statsB.handicap },
       { label: 'Mitjana Stableford', a: statsA.avgStableford != null ? `${statsA.avgStableford} pts` : '—', b: statsB.avgStableford != null ? `${statsB.avgStableford} pts` : '—', betterIs: 'higher', aVal: statsA.avgStableford, bVal: statsB.avgStableford },
       { label: 'Millor resultat', a: statsA.bestStableford != null ? `${statsA.bestStableford} pts` : '—', b: statsB.bestStableford != null ? `${statsB.bestStableford} pts` : '—', betterIs: 'higher', aVal: statsA.bestStableford, bVal: statsB.bestStableford },
       { label: 'Regularitat (σ)', a: statsA.stdDev != null ? `${statsA.stdDev}` : '—', b: statsB.stdDev != null ? `${statsB.stdDev}` : '—', betterIs: 'lower', aVal: statsA.stdDev, bVal: statsB.stdDev },
@@ -181,8 +181,8 @@ const PlayerCompareDialog: React.FC<PlayerCompareProps> = ({ currentPlayerId, cu
       </DialogTrigger>
       <DialogContent className="max-w-lg sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-display text-xl">
-            <GitCompare className="h-5 w-5 text-primary" />
+          <DialogTitle className="font-semibold tracking-tight flex items-center gap-2 font-display text-xl text-primary-foreground bg-primary p-4 -m-6 mb-4 rounded-t-lg">
+            <GitCompare className="h-5 w-5 text-primary-foreground" />
             Comparador de Jugadors
           </DialogTitle>
         </DialogHeader>
