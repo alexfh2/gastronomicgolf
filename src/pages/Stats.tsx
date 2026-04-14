@@ -397,9 +397,18 @@ const Stats = () => {
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
                           {lb.map((entry, i) => {
                             const isHoleStat = card.unit === 'cops';
+                            const isSpecial = card.unit === 'special';
                             return (
-                              <div key={`${entry.name}-${i}`} className={cn('text-sm', isHoleStat ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-b-0' : 'flex items-start gap-2')}>
-                                {isHoleStat ? (
+                              <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-b-0' : 'flex items-start gap-2')}>
+                                {isSpecial ? (
+                                  <>
+                                    <div className="flex items-center gap-2">
+                                      <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
+                                      <span className="font-semibold text-foreground">{entry.name}</span>
+                                    </div>
+                                    {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
+                                  </>
+                                ) : isHoleStat ? (
                                   <>
                                     <div className="flex items-center gap-2">
                                       <span
