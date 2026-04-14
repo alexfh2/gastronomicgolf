@@ -206,7 +206,8 @@ const Rounds = () => {
                 </div>
               )}
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
