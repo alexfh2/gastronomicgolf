@@ -103,11 +103,11 @@ const Stats = () => {
         if (pars[h] > 0 && scores[h] > 0) {
           const diff = scores[h] - pars[h];
           if (scores[h] === 1) {
-            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}` });
+            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}`, playerId: pid });
           } else if (diff <= -3) {
-            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}`, playerId: pid });
           } else if (diff === -2) {
-            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}`, playerId: pid });
           }
         }
       }
@@ -131,6 +131,7 @@ const Stats = () => {
           name: (r.players as any)?.name || '',
           value: r.stableford_points,
           detail: (r.rounds as any)?.name || '',
+          playerId: r.player_id,
         });
       }
     }
@@ -138,13 +139,14 @@ const Stats = () => {
     const top10BestRound = allRounds.slice(0, 10);
 
     const avgList: LeaderboardEntry[] = [];
-    for (const [, player] of players) {
+    for (const [pid, player] of players) {
       if (player.stableford.length >= 2) {
         const avg = player.stableford.reduce((a, b) => a + b, 0) / player.stableford.length;
         avgList.push({
           name: player.name,
           value: Math.round(avg * 10) / 10,
           detail: `${player.stableford.length} jornades`,
+          playerId: pid,
         });
       }
     }
@@ -159,9 +161,9 @@ const Stats = () => {
     const top10Reg = regList.slice(0, 10);
 
     const birdieList: LeaderboardEntry[] = [];
-    for (const [, player] of players) {
+    for (const [pid, player] of players) {
       if (player.birdies > 0) {
-        birdieList.push({ name: player.name, value: player.birdies });
+        birdieList.push({ name: player.name, value: player.birdies, playerId: pid });
       }
     }
     birdieList.sort((a, b) => b.value - a.value);
