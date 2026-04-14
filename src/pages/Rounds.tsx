@@ -127,7 +127,7 @@ const Rounds = () => {
             const played = round.date < today || (round.end_date && round.end_date < today);
             const hasResults = round.status === 'published';
             return (
-            <Card key={round.id} className={`border-border/60 overflow-hidden ${!played ? 'opacity-80' : ''}`}>
+            <Card key={round.id} className={`overflow-hidden ${played ? 'border-green-500/40 bg-green-50/30 dark:bg-green-950/10' : 'border-border/40 bg-background'}`}>
               <button
                 onClick={() => hasResults ? setExpandedRound(expandedRound === round.id ? null : round.id) : null}
                 className={`w-full text-left ${!hasResults ? 'cursor-default' : ''}`}
@@ -135,25 +135,25 @@ const Rounds = () => {
                 <CardContent className="p-4 sm:p-6 flex items-center justify-between">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs text-muted-foreground/60 w-6">J{round.round_number}</span>
-                      <span className="font-display text-lg font-bold">{round.name}</span>
+                      <span className={`font-mono text-xs w-6 ${played ? 'text-green-600/60' : 'text-muted-foreground/40'}`}>J{round.round_number}</span>
+                      <span className={`font-display text-lg font-bold ${played ? 'text-foreground' : 'text-muted-foreground/50'}`}>{round.name}</span>
                       {round.is_master && (
                         <Badge variant="secondary" className="text-xs bg-accent/20 text-accent border-0">MASTER</Badge>
                       )}
                       {played ? (
-                        <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary border-0">
+                        <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">
                           ✓ {t('rounds.played', 'Jugada')}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-[10px] border-muted-foreground/30 text-muted-foreground">
+                        <Badge variant="outline" className="text-[10px] border-muted-foreground/20 text-muted-foreground/50">
                           {t('rounds.pending', 'Pendent')}
                         </Badge>
                       )}
                       {round.sponsor && (
-                        <span className="text-xs text-muted-foreground">· {round.sponsor}</span>
+                        <span className={`text-xs ${played ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>· {round.sponsor}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className={`flex items-center gap-4 text-sm ${played ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />
                         {format(new Date(round.date), 'dd MMM yyyy', { locale })}
@@ -168,12 +168,23 @@ const Rounds = () => {
                         </span>
                       )}
                     </div>
+                    {/* Results status line */}
+                    <div className="pt-1">
+                      {hasResults ? (
+                        <span className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1 cursor-pointer hover:underline">
+                          📊 {t('rounds.viewResults', 'Veure resultats')}
+                          <ChevronDown className={`h-3 w-3 transition-transform ${expandedRound === round.id ? 'rotate-180' : ''}`} />
+                        </span>
+                      ) : played ? (
+                        <span className="text-xs text-amber-500/80 italic">{t('rounds.pendingResults', 'Pendent de pujar resultats')}</span>
+                      ) : null}
+                    </div>
                   </div>
                   {hasResults && (
                     expandedRound === round.id ? (
-                      <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                      <ChevronUp className="h-5 w-5 text-green-600" />
                     ) : (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      <ChevronDown className="h-5 w-5 text-muted-foreground/40" />
                     )
                   )}
                 </CardContent>
