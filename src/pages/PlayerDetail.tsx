@@ -8,6 +8,7 @@ import { ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,14 +117,13 @@ const PlayerDetail = () => {
 
       {/* Individual scorecards */}
       <h2 className="font-display text-xl font-semibold mb-4">Targetes</h2>
-      <div className="space-y-4">
+      <Accordion type="single" collapsible className="space-y-3">
         {results?.map(r => {
           const round = r.rounds as any;
           const rawScorecard = r.scorecard as any;
           const scorecard: number[] | null = Array.isArray(rawScorecard) ? rawScorecard : rawScorecard?.scores ?? null;
           const handicapPlay: number | null = rawScorecard?.handicap_play ?? null;
 
-          // Calculate scratch stableford (no handicap strokes)
           const coursePar: number[] | undefined = Array.isArray(round?.course_par) ? round.course_par : undefined;
           const scratchStableford = scorecard && coursePar && scorecard.length === coursePar.length
             ? scorecard.reduce((total, s, i) => {
@@ -139,17 +139,18 @@ const PlayerDetail = () => {
             : null;
 
           return (
-            <Card key={r.id} className="border-border/60">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  {round?.name}
+            <AccordionItem key={r.id} value={r.id} className="border border-border/60 rounded-lg overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2 text-left">
+                  <span className="font-semibold">{round?.name}</span>
                   {round?.is_master && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-accent/20 text-accent border-0">MASTER</Badge>}
-                  <span className="text-sm font-normal text-muted-foreground ml-auto">
+                  <span className="text-sm text-muted-foreground ml-2">
                     {round?.date ? format(new Date(round.date), 'dd MMM yyyy', { locale }) : ''}
                   </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                  <span className="ml-auto mr-2 font-mono font-bold text-primary">{r.stableford_points ?? '—'} pts</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
                 <div className="flex gap-6 mb-3 text-sm items-baseline">
                    <span>HCP Stableford: <strong className="text-primary text-lg">{r.stableford_points ?? '—'}</strong></span>
                    <span className="text-muted-foreground">Scratch Stableford: <strong>{scratchStableford ?? '—'}</strong></span>
@@ -171,11 +172,11 @@ const PlayerDetail = () => {
                 ) : (
                   <p className="text-xs text-muted-foreground">Sense targeta hoyo a hoyo</p>
                 )}
-              </CardContent>
-            </Card>
+              </AccordionContent>
+            </AccordionItem>
           );
         })}
-      </div>
+      </Accordion>
     </div>
   );
 };
