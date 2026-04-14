@@ -231,8 +231,8 @@ const Stats = () => {
     const mostReg = top10Reg[0] || { name: '—', value: 0 };
     const bestClimb = top10Climb[0] || { name: '—', value: 0 };
     const hardestCourse = top10Courses[0] || { name: '—', value: 0 };
-    const hardestHole = hardestHoles[0] || { name: '—', value: 0 };
-    const easiestHole = easiestHoles[0] || { name: '—', value: 0 };
+    const hardestHole = hardestHoles[0] || { name: '—', value: 0, detail: '' };
+    const easiestHole = easiestHoles[0] || { name: '—', value: 0, detail: '' };
 
     const totalPlayers = players.length;
     const totalResults = results.length;
