@@ -9,7 +9,7 @@ import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
-type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number> };
+type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
 type CourseAggregate = {
   displayName: string;
   scores: number[];
@@ -72,7 +72,7 @@ const Stats = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, scorecard, rounds!inner(status, name, round_number, club, course, course_par), players(name)')
+        .select('player_id, stableford_points, scorecard, rounds!inner(status, name, round_number, club, course, course_par, course_handicap), players(name)')
         .eq('rounds.status', 'published');
       return data || [];
     },
@@ -244,6 +244,7 @@ const Stats = () => {
 
       const pars = getHoleScores((r.rounds as any)?.course_par);
       const scores = getHoleScores(r.scorecard);
+      const hcps = getHoleScores((r.rounds as any)?.course_handicap);
 
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (isNaN(pars[h]) || pars[h] === 0) continue;
@@ -252,12 +253,16 @@ const Stats = () => {
           totalOverPar: 0,
           count: 0,
           parCounts: {},
+          hcpCounts: {},
         };
 
         const holeScore = !scores[h] || isNaN(scores[h]) || scores[h] === 0 ? pars[h] + 4 : scores[h];
         holeAggregate.totalOverPar += holeScore - pars[h];
         holeAggregate.count += 1;
         holeAggregate.parCounts[String(pars[h])] = (holeAggregate.parCounts[String(pars[h])] || 0) + 1;
+        if (hcps[h] > 0) {
+          holeAggregate.hcpCounts[String(hcps[h])] = (holeAggregate.hcpCounts[String(hcps[h])] || 0) + 1;
+        }
 
         courseAggregate.holes.set(h + 1, holeAggregate);
       }
