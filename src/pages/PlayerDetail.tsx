@@ -5,7 +5,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Trophy, Bird, Target, Square, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
@@ -159,12 +159,12 @@ const PlayerDetail = () => {
         const bestStableford = stablefordScores.length > 0 ? Math.max(...stablefordScores) : '—';
 
         const stats = [
-          { label: 'Mitjana Stb.', value: avgStableford, icon: '⛳' },
-          { label: 'Millor Stb.', value: bestStableford, icon: '🏆' },
-          { label: 'Birdies/ronda', value: (birdies / n).toFixed(1), icon: '🐦' },
-          { label: 'Pars/ronda', value: (pars / n).toFixed(1), icon: '✅' },
-          { label: 'Bogeys/ronda', value: (bogeys / n).toFixed(1), icon: '📦' },
-          { label: 'Doble+/ronda', value: (doublePlus / n).toFixed(1), icon: '💥' },
+          { label: 'Mitjana Stb.', value: avgStableford, icon: TrendingUp },
+          { label: 'Millor Stb.', value: bestStableford, icon: Trophy },
+          { label: 'Birdies/ronda', value: (birdies / n).toFixed(1), icon: Bird },
+          { label: 'Pars/ronda', value: (pars / n).toFixed(1), icon: Target },
+          { label: 'Bogeys/ronda', value: (bogeys / n).toFixed(1), icon: Square },
+          { label: 'Doble+/ronda', value: (doublePlus / n).toFixed(1), icon: AlertTriangle },
         ];
 
         return (
