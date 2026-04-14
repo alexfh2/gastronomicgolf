@@ -124,9 +124,10 @@ const Index = () => {
     <div className="animate-fade-in">
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary py-24 lg:py-32">
-        <div className="absolute inset-0 opacity-[0.07]" style={{
-          backgroundImage: 'radial-gradient(circle at 25% 40%, hsl(38 60% 55%), transparent 50%), radial-gradient(circle at 75% 60%, hsl(38 60% 55%), transparent 50%)',
-        }} />
+        <div className="absolute inset-0">
+          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-15" />
+        </div>
+        <div className="absolute inset-0 bg-primary/60" />
         <div className="container relative text-center">
           <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.25em] uppercase mb-6">
             {t('common.season')} 2026
