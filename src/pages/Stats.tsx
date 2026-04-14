@@ -200,11 +200,13 @@ const Stats = () => {
         Array.isArray(coursePar?.scores) ? coursePar.scores.map(Number) : [];
 
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
-        if (isNaN(scores[h]) || isNaN(pars[h]) || scores[h] === 0 || pars[h] === 0) continue;
+        if (isNaN(pars[h]) || pars[h] === 0) continue;
         const key = `${normalizedCourse}#${h + 1}`;
         if (!holeStats.has(key)) holeStats.set(key, { totalOverPar: 0, count: 0, course: normalizedCourse, par: pars[h] });
         const stat = holeStats.get(key)!;
-        stat.totalOverPar += scores[h] - pars[h];
+        // Bola levantada (0 o NaN) = par + 4
+        const holeScore = (!scores[h] || isNaN(scores[h]) || scores[h] === 0) ? pars[h] + 4 : scores[h];
+        stat.totalOverPar += holeScore - pars[h];
         stat.count++;
       }
     }
