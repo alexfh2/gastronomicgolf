@@ -125,7 +125,8 @@ const Stats = () => {
         const prevRank = new Map(prevTotals.map((e, idx) => [e.pid, idx + 1]));
         const currRank = new Map(currTotals.map((e, idx) => [e.pid, idx + 1]));
 
-        const roundName = players.values().next().value?.rounds.find((r: any) => r.number === currRoundNum)?.name || `J${currRoundNum}`;
+        const firstPlayer = players[0]?.[1];
+        const roundName = firstPlayer?.rounds.find((r: any) => r.number === currRoundNum)?.name || `J${currRoundNum}`;
 
         for (const [pid, pRank] of currRank) {
           const prev = prevRank.get(pid);
