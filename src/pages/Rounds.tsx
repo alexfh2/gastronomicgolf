@@ -16,16 +16,17 @@ const Rounds = () => {
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
 
   const { data: rounds, isLoading } = useQuery({
-    queryKey: ['public-rounds'],
+    queryKey: ['public-rounds-all'],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
         .select('*')
-        .eq('status', 'published')
         .order('date', { ascending: true });
       return data || [];
     },
   });
+
+  const today = new Date().toISOString().split('T')[0];
 
   const { data: roundResults } = useQuery({
     queryKey: ['public-round-results', expandedRound],
