@@ -145,6 +145,15 @@ const Stats = () => {
     regList.sort((a, b) => b.value - a.value);
     const top10Reg = regList.slice(0, 10);
 
+    const birdieList: LeaderboardEntry[] = [];
+    for (const [, player] of players) {
+      if (player.birdies > 0) {
+        birdieList.push({ name: player.name, value: player.birdies });
+      }
+    }
+    birdieList.sort((a, b) => b.value - a.value);
+    const top10Birdies = birdieList.slice(0, 10);
+
     const roundNumbers = new Set<number>();
     for (const [, player] of players) {
       for (const round of player.rounds) roundNumbers.add(round.number);
