@@ -101,7 +101,7 @@ const PlayerDetail = () => {
                   {results.map(r => {
                     const round = r.rounds as any;
                     return (
-                      <tr key={r.id} className="border-b border-border/20 last:border-0">
+                      <tr key={r.id} className="border-b border-border/20 last:border-0 cursor-pointer hover:bg-muted/40 transition-colors" onClick={() => scrollToAndOpen(r.id)}>
                         <td className="py-2 font-medium">
                           {round?.name}
                           {round?.is_master && <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0 bg-accent/20 text-accent border-0">M</Badge>}
@@ -192,7 +192,7 @@ const PlayerDetail = () => {
 
       {/* Individual scorecards */}
       <h2 className="font-display text-xl font-semibold mb-4">Targetes</h2>
-      <Accordion type="multiple" className="space-y-3">
+      <Accordion type="multiple" value={openCards} onValueChange={setOpenCards} className="space-y-3">
         {results?.map(r => {
           const round = r.rounds as any;
           const rawScorecard = r.scorecard as any;
@@ -214,7 +214,7 @@ const PlayerDetail = () => {
             : null;
 
           return (
-            <AccordionItem key={r.id} value={r.id} className="border border-border/60 rounded-lg overflow-hidden">
+            <AccordionItem key={r.id} value={r.id} id={`scorecard-${r.id}`} className="border border-border/60 rounded-lg overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-left">
                   <Badge variant="outline" className="text-xs font-mono shrink-0">J{round?.round_number}</Badge>
