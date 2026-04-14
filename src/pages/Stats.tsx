@@ -172,15 +172,28 @@ const Stats = () => {
     // === Hardest / Easiest hole ===
     // Analyze scorecard data: each scorecard has hole-by-hole gross scores
     // Compare vs course_par to find avg strokes over/under par per hole
-    const holeStats = new Map<string, { totalOverPar: number; count: number; course: string }>();
+    const holeStats = new Map<string, { totalOverPar: number; count: number; course: string; par: number }>();
+
+    // Normalize course names to avoid duplicates from typos (e.g. "Gaud" vs "Gaudí")
+    const normalizeCourse = (name: string) => {
+      return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    };
+    // Map normalized -> display name (pick the longest/most complete version)
+    const courseDisplayNames = new Map<string, string>();
 
     for (const r of results) {
       const scorecard = r.scorecard as any;
       const coursePar = (r.rounds as any)?.course_par as any;
-      const courseName = (r.rounds as any)?.course || (r.rounds as any)?.club || '';
+      const rawCourseName = (r.rounds as any)?.course || (r.rounds as any)?.club || '';
       if (!scorecard || !coursePar) continue;
 
-      // scorecard is {scores: [...], handicap_play: N}, course_par is array
+      const normalizedCourse = normalizeCourse(rawCourseName);
+      // Keep the longest version as display name
+      const existing = courseDisplayNames.get(normalizedCourse);
+      if (!existing || rawCourseName.length > existing.length) {
+        courseDisplayNames.set(normalizedCourse, rawCourseName);
+      }
+
       const scores: number[] = Array.isArray(scorecard?.scores) ? scorecard.scores.map(Number) : 
         Array.isArray(scorecard) ? scorecard.map(Number) : [];
       const pars: number[] = Array.isArray(coursePar) ? coursePar.map(Number) :
@@ -188,8 +201,8 @@ const Stats = () => {
 
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (isNaN(scores[h]) || isNaN(pars[h]) || scores[h] === 0 || pars[h] === 0) continue;
-        const key = `${courseName}#${h + 1}`;
-        if (!holeStats.has(key)) holeStats.set(key, { totalOverPar: 0, count: 0, course: courseName });
+        const key = `${normalizedCourse}#${h + 1}`;
+        if (!holeStats.has(key)) holeStats.set(key, { totalOverPar: 0, count: 0, course: normalizedCourse, par: pars[h] });
         const stat = holeStats.get(key)!;
         stat.totalOverPar += scores[h] - pars[h];
         stat.count++;
@@ -198,13 +211,14 @@ const Stats = () => {
 
     const holeList: (LeaderboardEntry & { avgOver: number })[] = [];
     for (const [key, data] of holeStats) {
-      if (data.count < 3) continue; // min samples
-      const [course, holeNum] = key.split('#');
+      if (data.count < 3) continue;
+      const [normalizedCourse, holeNum] = key.split('#');
+      const displayCourse = courseDisplayNames.get(normalizedCourse) || normalizedCourse;
       const avgOver = data.totalOverPar / data.count;
       holeList.push({
-        name: `Forat ${holeNum}`,
+        name: `Forat ${holeNum} (${displayCourse})`,
         value: Math.round(avgOver * 100) / 100,
-        detail: `${course} (${data.count} targetes)`,
+        detail: `Par ${data.par} · ${data.count} targetes · +${avgOver.toFixed(2)} sobre par`,
         avgOver,
       });
     }
