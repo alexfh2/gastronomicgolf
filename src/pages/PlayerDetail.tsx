@@ -117,7 +117,7 @@ const PlayerDetail = () => {
 
       {/* Individual scorecards */}
       <h2 className="font-display text-xl font-semibold mb-4">Targetes</h2>
-      <Accordion type="single" collapsible className="space-y-3">
+      <Accordion type="multiple" className="space-y-3">
         {results?.map(r => {
           const round = r.rounds as any;
           const rawScorecard = r.scorecard as any;
