@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, Award, Repeat, ChevronDown, ArrowUpRight, Mountain, CircleDot } from 'lucide-react';
+import { Trophy, TrendingUp, Award, Repeat, ChevronDown, ArrowUpRight, Mountain, CircleDot, Bird } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string };
@@ -80,15 +80,25 @@ const Stats = () => {
   const { stats, leaderboards } = useMemo(() => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
 
-    const byPlayer = new Map<string, { name: string; stableford: number[]; rounds: { name: string; number: number; pts: number }[] }>();
+    const byPlayer = new Map<string, { name: string; stableford: number[]; birdies: number; rounds: { name: string; number: number; pts: number }[] }>();
 
     for (const r of results) {
       const name = (r.players as any)?.name || 'Desconegut';
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
-        byPlayer.set(pid, { name, stableford: [], rounds: [] });
+        byPlayer.set(pid, { name, stableford: [], birdies: 0, rounds: [] });
       }
       const player = byPlayer.get(pid)!;
+
+      // Count birdies from scorecard vs course_par
+      const pars = getHoleScores((r.rounds as any)?.course_par);
+      const scores = getHoleScores(r.scorecard);
+      for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
+        if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) {
+          player.birdies++;
+        }
+      }
+
       if (r.stableford_points != null) {
         player.stableford.push(r.stableford_points);
         player.rounds.push({
