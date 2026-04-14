@@ -281,12 +281,13 @@ const Stats = () => {
     const coursesByDifficulty = [...courseList].sort((a, b) => a.value - b.value);
     const top10Courses = coursesByDifficulty.slice(0, 10);
 
-    const holeList: { name: string; avgStrokes: number; avgOver: number; par: number }[] = [];
+    const holeList: { name: string; avgStrokes: number; avgOver: number; par: number; hcp: number | null }[] = [];
     for (const [, course] of courseAggregates) {
       for (const [holeNum, hole] of course.holes) {
         if (hole.count < 3) continue;
 
         const par = getMostCommonPar(hole.parCounts);
+        const hcp = getMostCommonPar(hole.hcpCounts);
         const avgOver = hole.totalOverPar / hole.count;
         const avgStrokes = par + avgOver;
         holeList.push({
@@ -294,6 +295,7 @@ const Stats = () => {
           avgStrokes: Math.round(avgStrokes * 100) / 100,
           avgOver,
           par,
+          hcp: Object.keys(hole.hcpCounts).length > 0 ? hcp : null,
         });
       }
     }
@@ -304,7 +306,7 @@ const Stats = () => {
       .map(hole => ({
         name: hole.name,
         value: hole.avgStrokes,
-        detail: `Par ${hole.par}`,
+        detail: `Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
       }));
 
     const easiestHoles: LeaderboardEntry[] = [...holeList]
@@ -313,7 +315,7 @@ const Stats = () => {
       .map(hole => ({
         name: hole.name,
         value: hole.avgStrokes,
-        detail: `Par ${hole.par}`,
+        detail: `Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
       }));
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
