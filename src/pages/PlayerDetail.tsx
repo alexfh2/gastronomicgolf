@@ -142,6 +142,7 @@ const PlayerDetail = () => {
             <AccordionItem key={r.id} value={r.id} className="border border-border/60 rounded-lg overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-left">
+                  <Badge variant="outline" className="text-xs font-mono shrink-0">J{round?.round_number}</Badge>
                   <span className="font-semibold">{round?.name}</span>
                   {round?.is_master && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-accent/20 text-accent border-0">MASTER</Badge>}
                   <span className="text-sm text-muted-foreground ml-2">
