@@ -52,8 +52,10 @@ const Players = () => {
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
-      <h1 className="font-display text-3xl font-bold mb-2">{t('players.title')}</h1>
-      <p className="text-muted-foreground mb-6">{t('common.season')} 2026 — {players?.length || 0} jugadors</p>
+      <div className="bg-primary/10 rounded-lg px-5 py-4 mb-6 border border-primary/15">
+        <h1 className="font-display text-3xl font-bold text-primary">{t('players.title')}</h1>
+        <p className="text-primary/70 mt-1">{t('common.season')} 2026 — {players?.length || 0} jugadors</p>
+      </div>
 
       <div className="relative mb-6 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

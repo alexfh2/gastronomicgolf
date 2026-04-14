@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import SectionHeader from '@/components/SectionHeader';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -81,8 +82,8 @@ const PlayerDetail = () => {
 
       {/* Summary table */}
       <Card className="border-border/60 mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Resum de jornades</CardTitle>
+        <CardHeader className="pb-2 px-0 pt-0">
+          <SectionHeader className="rounded-b-none mb-0">Resum de jornades</SectionHeader>
         </CardHeader>
         <CardContent>
           {results && results.length > 0 ? (
@@ -168,9 +169,9 @@ const PlayerDetail = () => {
         ];
 
         return (
-          <Card className="border-border/60 mb-6">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Estadístiques</CardTitle>
+           <Card className="border-border/60 mb-6">
+            <CardHeader className="pb-2 px-0 pt-0">
+              <SectionHeader className="rounded-b-none mb-0">Estadístiques</SectionHeader>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
@@ -191,7 +192,7 @@ const PlayerDetail = () => {
       })()}
 
       {/* Individual scorecards */}
-      <h2 className="font-display text-xl font-semibold mb-4">Targetes</h2>
+      <SectionHeader>Targetes</SectionHeader>
       <Accordion type="multiple" value={openCards} onValueChange={setOpenCards} className="space-y-3">
         {results?.map(r => {
           const round = r.rounds as any;
