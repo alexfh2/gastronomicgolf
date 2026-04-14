@@ -176,7 +176,7 @@ const PlayerDetail = () => {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
                 {stats.map(s => (
                   <div key={s.label} className="text-center">
-                    <div className="text-2xl mb-1">{s.icon}</div>
+                    <div className="text-muted-foreground/60 mb-1"><s.icon className="h-5 w-5 mx-auto" strokeWidth={1.5} /></div>
                     <div className="font-display font-extrabold text-lg text-primary tabular-nums">{s.value}</div>
                     <div className="text-[11px] text-muted-foreground leading-tight">{s.label}</div>
                   </div>
