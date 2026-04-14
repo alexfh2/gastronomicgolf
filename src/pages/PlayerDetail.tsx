@@ -11,6 +11,7 @@ import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import SectionHeader from '@/components/SectionHeader';
+import PlayerCompareDialog from '@/components/PlayerCompareDialog';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -68,15 +69,20 @@ const PlayerDetail = () => {
       </Link>
 
       <div className="mb-8 bg-primary rounded-xl px-6 py-5 shadow-md">
-        <h1 className="font-display text-3xl font-bold text-primary-foreground">
-          {player.name}
-          {player.gender === 'F' && <Badge variant="outline" className="ml-2 text-xs border-primary-foreground/40 text-primary-foreground">F</Badge>}
-          {player.is_senior && <Badge variant="outline" className="ml-2 text-xs border-primary-foreground/40 text-primary-foreground">SR</Badge>}
-        </h1>
-        <div className="flex gap-4 mt-2 text-sm text-primary-foreground/80">
-          {player.club && <span>{player.club}</span>}
-          {player.license && <span>Llicència: {player.license}</span>}
-          {player.current_handicap != null && <span>Últim HCP participació: {player.current_handicap}</span>}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-primary-foreground">
+              {player.name}
+              {player.gender === 'F' && <Badge variant="outline" className="ml-2 text-xs border-primary-foreground/40 text-primary-foreground">F</Badge>}
+              {player.is_senior && <Badge variant="outline" className="ml-2 text-xs border-primary-foreground/40 text-primary-foreground">SR</Badge>}
+            </h1>
+            <div className="flex gap-4 mt-2 text-sm text-primary-foreground/80">
+              {player.club && <span>{player.club}</span>}
+              {player.license && <span>Llicència: {player.license}</span>}
+              {player.current_handicap != null && <span>Últim HCP participació: {player.current_handicap}</span>}
+            </div>
+          </div>
+          <PlayerCompareDialog currentPlayerId={id!} currentPlayerName={player.name} />
         </div>
       </div>
 
