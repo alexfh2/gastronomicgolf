@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import heroBg from '@/assets/hero-bg.png';
-import sponsors from '@/assets/sponsors.png';
+import sponsors from '@/assets/sponsors-row.png';
 import logo from '@/assets/logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -142,12 +142,11 @@ const Index = () => {
           <p className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
             {t('home.subtitle')}
           </p>
-          <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="mt-12 pt-6 border-t border-white/10">
             <img 
               src={sponsors} 
               alt="Patrocinadors" 
-              className="max-w-3xl w-full mx-auto opacity-70 invert"
-              style={{ filter: 'invert(1) brightness(2)' }}
+              className="max-w-4xl w-full mx-auto opacity-70"
             />
           </div>
         </div>
