@@ -146,7 +146,8 @@ const Index = () => {
             <img 
               src={sponsors} 
               alt="Patrocinadors" 
-              className="max-w-2xl w-full mx-auto opacity-60 brightness-0 invert"
+              className="max-w-3xl w-full mx-auto opacity-70 invert"
+              style={{ filter: 'invert(1) brightness(2)' }}
             />
           </div>
         </div>
