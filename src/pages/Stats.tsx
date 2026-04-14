@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, Award, Repeat, ChevronDown, ArrowUpRight, Mountain, CircleDot } from 'lucide-react';
+import { Trophy, TrendingUp, Award, Repeat, ChevronDown, ArrowUpRight, Mountain, CircleDot, Bird } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string };
@@ -80,15 +80,25 @@ const Stats = () => {
   const { stats, leaderboards } = useMemo(() => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
 
-    const byPlayer = new Map<string, { name: string; stableford: number[]; rounds: { name: string; number: number; pts: number }[] }>();
+    const byPlayer = new Map<string, { name: string; stableford: number[]; birdies: number; rounds: { name: string; number: number; pts: number }[] }>();
 
     for (const r of results) {
       const name = (r.players as any)?.name || 'Desconegut';
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
-        byPlayer.set(pid, { name, stableford: [], rounds: [] });
+        byPlayer.set(pid, { name, stableford: [], birdies: 0, rounds: [] });
       }
       const player = byPlayer.get(pid)!;
+
+      // Count birdies from scorecard vs course_par
+      const pars = getHoleScores((r.rounds as any)?.course_par);
+      const scores = getHoleScores(r.scorecard);
+      for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
+        if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) {
+          player.birdies++;
+        }
+      }
+
       if (r.stableford_points != null) {
         player.stableford.push(r.stableford_points);
         player.rounds.push({
@@ -134,6 +144,15 @@ const Stats = () => {
     }
     regList.sort((a, b) => b.value - a.value);
     const top10Reg = regList.slice(0, 10);
+
+    const birdieList: LeaderboardEntry[] = [];
+    for (const [, player] of players) {
+      if (player.birdies > 0) {
+        birdieList.push({ name: player.name, value: player.birdies });
+      }
+    }
+    birdieList.sort((a, b) => b.value - a.value);
+    const top10Birdies = birdieList.slice(0, 10);
 
     const roundNumbers = new Set<number>();
     for (const [, player] of players) {
@@ -281,6 +300,7 @@ const Stats = () => {
     const bestAvg = top10Avg[0] || { name: '—', value: 0 };
     const mostReg = top10Reg[0] || { name: '—', value: 0 };
     const bestClimb = top10Climb[0] || { name: '—', value: 0 };
+    const topBirdie = top10Birdies[0] || { name: '—', value: 0 };
     const hardestCourse = top10Courses[0] || { name: '—', value: 0 };
     const hardestHole = hardestHoles[0] || { name: '—', value: 0, detail: '' };
     const easiestHole = easiestHoles[0] || { name: '—', value: 0, detail: '' };
@@ -291,13 +311,14 @@ const Stats = () => {
         bestAvg,
         mostReg,
         bestClimb,
+        topBirdie,
         hardestCourse,
         hardestHole,
         easiestHole,
         totalPlayers: players.length,
         totalResults: results.length,
       },
-      leaderboards: [top10BestRound, top10Avg, top10Reg, top10Climb, top10Courses, hardestHoles, easiestHoles, [] as LeaderboardEntry[]],
+      leaderboards: [top10BestRound, top10Avg, top10Reg, top10Birdies, top10Climb, top10Courses, hardestHoles, easiestHoles, [] as LeaderboardEntry[]],
     };
   }, [results]);
 
@@ -306,6 +327,7 @@ const Stats = () => {
         { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, subtitle: '', unit: 'pts' },
         { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, subtitle: '', unit: 'pts' },
         { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, subtitle: '', unit: 'jornades' },
+        { icon: Bird, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, subtitle: t('stats.birdiesDesc', 'Birdies o millor aconseguits al circuit'), unit: 'birdies' },
         { icon: ArrowUpRight, label: t('stats.biggestClimb', 'Major pujada de rànquing'), value: `+${stats.bestClimb.value} pos.`, detail: `${stats.bestClimb.name}`, subtitle: t('stats.biggestClimbDesc', 'Posicions guanyades al rànquing general després d\'una jornada'), unit: 'pos.' },
         { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
         { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value} cops`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
