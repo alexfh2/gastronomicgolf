@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import heroBg from '@/assets/hero-bg.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin, ChevronRight } from 'lucide-react';
