@@ -125,7 +125,7 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary py-24 lg:py-32">
         <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-15" />
+          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-40" />
         </div>
         <div className="absolute inset-0 bg-primary/60" />
         <div className="container relative text-center">
