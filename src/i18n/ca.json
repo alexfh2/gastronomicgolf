@@ -110,7 +110,16 @@
     "avgScratch": "Mitjana Scratch",
     "bestRound": "Millor volta",
     "regularity": "Regularitat",
-    "top10Frequency": "Top 10 freqüents"
+    "top10Frequency": "Top 10 freqüents",
+    "biggestClimb": "Major pujada de rànquing",
+    "biggestClimbDesc": "Posicions guanyades al rànquing general després d'una jornada",
+    "courseDifficulty": "Camps per dificultat",
+    "courseDifficultyDesc": "Mitjana Stableford per camp (menor = més exigent)",
+    "hardestHole": "Forat més difícil",
+    "hardestHoleDesc": "Mitjana de cops per sobre del par",
+    "easiestHole": "Forat més fàcil",
+    "easiestHoleDesc": "Mitjana de cops respecte al par",
+    "participation": "Participació"
   },
   "news": {
     "title": "Notícies",
