@@ -133,9 +133,8 @@ const Index = () => {
           <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.25em] uppercase mb-6">
             {t('common.season')} 2026
           </p>
-          <img src={heroBg.replace('hero-bg', 'logo')} alt="Circuit Gastronòmic Golf" className="hidden" />
           <img 
-            src={new URL('@/assets/logo.png', import.meta.url).href} 
+            src={logo} 
             alt="Circuit Gastronòmic Golf" 
             className="h-16 md:h-20 lg:h-24 w-auto mx-auto mb-5 brightness-0 invert"
           />
