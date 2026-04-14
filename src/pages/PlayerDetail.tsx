@@ -15,6 +15,14 @@ const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'ca' ? ca : es;
+  const [openCards, setOpenCards] = useState<string[]>([]);
+
+  const scrollToAndOpen = useCallback((resultId: string) => {
+    setOpenCards(prev => prev.includes(resultId) ? prev : [...prev, resultId]);
+    setTimeout(() => {
+      document.getElementById(`scorecard-${resultId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  }, []);
 
   const { data: player } = useQuery({
     queryKey: ['player-detail', id],
