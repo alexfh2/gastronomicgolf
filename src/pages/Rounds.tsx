@@ -114,8 +114,10 @@ const Rounds = () => {
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
-      <h1 className="font-display text-3xl font-bold mb-2">{t('rounds.title')}</h1>
-      <p className="text-muted-foreground mb-8">{t('rounds.calendar')} — {t('common.season')} 2026</p>
+      <div className="bg-primary/10 rounded-lg px-5 py-4 mb-8 border border-primary/15">
+        <h1 className="font-display text-3xl font-bold text-primary">{t('rounds.title')}</h1>
+        <p className="text-primary/70 mt-1">{t('rounds.calendar')} — {t('common.season')} 2026</p>
+      </div>
 
       {isLoading ? (
         <p className="text-muted-foreground">{t('common.loading')}</p>
