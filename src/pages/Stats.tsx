@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, Award, Repeat, ChevronDown, ArrowUpRight, Mountain, CircleDot, Bird } from 'lucide-react';
+import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string };
@@ -318,7 +318,7 @@ const Stats = () => {
         totalPlayers: players.length,
         totalResults: results.length,
       },
-      leaderboards: [top10BestRound, top10Avg, top10Reg, top10Birdies, top10Climb, top10Courses, hardestHoles, easiestHoles, [] as LeaderboardEntry[]],
+      leaderboards: [top10BestRound, top10Avg, top10Birdies, top10Courses, hardestHoles, easiestHoles],
     };
   }, [results]);
 
@@ -326,13 +326,10 @@ const Stats = () => {
     ? [
         { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, subtitle: '', unit: 'pts' },
         { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, subtitle: '', unit: 'pts' },
-        { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, subtitle: '', unit: 'jornades' },
         { icon: Bird, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, subtitle: t('stats.birdiesDesc', 'Birdies o millor aconseguits al circuit'), unit: 'birdies' },
-        { icon: ArrowUpRight, label: t('stats.biggestClimb', 'Major pujada de rànquing'), value: `+${stats.bestClimb.value} pos.`, detail: `${stats.bestClimb.name}`, subtitle: t('stats.biggestClimbDesc', 'Posicions guanyades al rànquing general després d\'una jornada'), unit: 'pos.' },
         { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
         { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value} cops`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
         { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value} cops`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
-        { icon: Award, label: t('stats.participation', 'Participació'), value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, subtitle: '', unit: '' },
       ]
     : [];
 
