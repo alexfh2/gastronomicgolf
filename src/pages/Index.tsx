@@ -85,7 +85,7 @@ const Index = () => {
   const quickLinks = [
     { icon: Trophy, label: t('home.viewRankings'), path: '/ranquings' },
     { icon: BarChart3, label: t('home.viewStats'), path: '/estadistiques' },
-    { icon: Users, label: t('home.comparePlayers'), path: '/comparador' },
+    { icon: Calendar, label: t('home.calendar', 'Calendari'), path: '/jornades' },
   ];
 
   const categories = [
