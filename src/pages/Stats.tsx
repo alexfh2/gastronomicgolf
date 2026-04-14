@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird } from 'lucide-react';
+import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string };
@@ -81,6 +81,7 @@ const Stats = () => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
 
     const byPlayer = new Map<string, { name: string; stableford: number[]; birdies: number; rounds: { name: string; number: number; pts: number }[] }>();
+    const specialShots: LeaderboardEntry[] = []; // hole-in-ones, albatrosses, eagles
 
     for (const r of results) {
       const name = (r.players as any)?.name || 'Desconegut';
@@ -90,12 +91,23 @@ const Stats = () => {
       }
       const player = byPlayer.get(pid)!;
 
-      // Count birdies from scorecard vs course_par
+      // Count birdies and special shots from scorecard vs course_par
       const pars = getHoleScores((r.rounds as any)?.course_par);
       const scores = getHoleScores(r.scorecard);
+      const roundClub = (r.rounds as any)?.club || (r.rounds as any)?.name || '';
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) {
           player.birdies++;
+        }
+        if (pars[h] > 0 && scores[h] > 0) {
+          const diff = scores[h] - pars[h];
+          if (scores[h] === 1) {
+            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}` });
+          } else if (diff <= -3) {
+            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+          } else if (diff === -2) {
+            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}` });
+          }
         }
       }
 
