@@ -242,37 +242,39 @@ const Stats = () => {
     const coursesByDifficulty = [...courseList].sort((a, b) => a.value - b.value);
     const top10Courses = coursesByDifficulty.slice(0, 10);
 
-    const holeList: (LeaderboardEntry & { avgOver: number })[] = [];
+    const holeList: { name: string; avgStrokes: number; avgOver: number; par: number }[] = [];
     for (const [, course] of courseAggregates) {
       for (const [holeNum, hole] of course.holes) {
         if (hole.count < 3) continue;
 
+        const par = getMostCommonPar(hole.parCounts);
         const avgOver = hole.totalOverPar / hole.count;
+        const avgStrokes = par + avgOver;
         holeList.push({
           name: `Forat ${holeNum} (${course.displayName})`,
-          value: Math.round(avgOver * 100) / 100,
-          detail: `Par ${getMostCommonPar(hole.parCounts)}`,
+          avgStrokes: Math.round(avgStrokes * 100) / 100,
           avgOver,
+          par,
         });
       }
     }
 
-    const hardestHoles = [...holeList]
+    const hardestHoles: LeaderboardEntry[] = [...holeList]
       .sort((a, b) => b.avgOver - a.avgOver)
       .slice(0, 10)
       .map(hole => ({
         name: hole.name,
-        value: hole.value,
-        detail: hole.detail,
+        value: hole.avgStrokes,
+        detail: `Par ${hole.par}`,
       }));
 
-    const easiestHoles = [...holeList]
+    const easiestHoles: LeaderboardEntry[] = [...holeList]
       .sort((a, b) => a.avgOver - b.avgOver)
       .slice(0, 10)
       .map(hole => ({
         name: hole.name,
-        value: hole.value,
-        detail: hole.detail,
+        value: hole.avgStrokes,
+        detail: `Par ${hole.par}`,
       }));
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
@@ -306,8 +308,8 @@ const Stats = () => {
         { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, subtitle: '', unit: 'jornades' },
         { icon: ArrowUpRight, label: t('stats.biggestClimb', 'Major pujada de rànquing'), value: `+${stats.bestClimb.value} pos.`, detail: `${stats.bestClimb.name}`, subtitle: t('stats.biggestClimbDesc', 'Posicions guanyades al rànquing general després d\'una jornada'), unit: 'pos.' },
         { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
-        { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `+${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per sobre del par'), unit: 'sobre par' },
-        { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value > 0 ? '+' : ''}${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops respecte al par'), unit: 'sobre par' },
+        { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value} cops`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
+        { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value} cops`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
         { icon: Award, label: t('stats.participation', 'Participació'), value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, subtitle: '', unit: '' },
       ]
     : [];
