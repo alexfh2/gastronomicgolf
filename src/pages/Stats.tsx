@@ -96,11 +96,17 @@ const Stats = () => {
       }
     }
     conList.sort((a, b) => a.stdDev - b.stdDev);
-    const top10Con: LeaderboardEntry[] = conList.slice(0, 10).map(c => ({
-      name: c.name,
-      value: c.value,
-      detail: `σ ${c.stdDev.toFixed(1)}`,
-    }));
+    const top10Con: LeaderboardEntry[] = conList.slice(0, 10).map(c => {
+      // Find player's min/max for range display
+      const playerData = players.find(([, p]) => p.name === c.name)?.[1];
+      const min = playerData ? Math.min(...playerData.stableford) : 0;
+      const max = playerData ? Math.max(...playerData.stableford) : 0;
+      return {
+        name: c.name,
+        value: c.value,
+        detail: `${min}–${max} pts · ±${c.stdDev.toFixed(1)}`,
+      };
+    });
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
     const bestAvg = top10Avg[0] || { name: '—', value: 0 };
@@ -120,7 +126,7 @@ const Stats = () => {
     { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
     { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, unit: 'pts' },
     { icon: Repeat, label: t('stats.regularity'), value: `${stats.mostReg.value} jornades`, detail: stats.mostReg.name, unit: 'jornades' },
-    { icon: BarChart3, label: 'Més consistent', value: `${stats.mostCon.value} pts/avg`, detail: stats.mostCon.name, unit: 'pts/avg' },
+    { icon: BarChart3, label: 'Més consistent', value: `${stats.mostCon.value} pts/avg`, detail: `${stats.mostCon.name}`, subtitle: 'Menor variació entre jornades (desviació estàndard més baixa)', unit: 'avg' },
     { icon: Award, label: 'Participació', value: `${stats.totalPlayers} jugadors`, detail: `${stats.totalResults} resultats totals`, unit: '' },
   ] : [];
 
