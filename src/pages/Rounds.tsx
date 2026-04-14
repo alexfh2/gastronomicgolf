@@ -16,16 +16,17 @@ const Rounds = () => {
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
 
   const { data: rounds, isLoading } = useQuery({
-    queryKey: ['public-rounds'],
+    queryKey: ['public-rounds-all'],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
         .select('*')
-        .eq('status', 'published')
         .order('date', { ascending: true });
       return data || [];
     },
   });
+
+  const today = new Date().toISOString().split('T')[0];
 
   const { data: roundResults } = useQuery({
     queryKey: ['public-round-results', expandedRound],
@@ -122,18 +123,31 @@ const Rounds = () => {
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
         <div className="space-y-3">
-          {rounds.map((round) => (
-            <Card key={round.id} className="border-border/60 overflow-hidden">
+          {rounds.map((round) => {
+            const played = round.date < today || (round.end_date && round.end_date < today);
+            const hasResults = round.status === 'published';
+            return (
+            <Card key={round.id} className={`border-border/60 overflow-hidden ${!played ? 'opacity-80' : ''}`}>
               <button
-                onClick={() => setExpandedRound(expandedRound === round.id ? null : round.id)}
-                className="w-full text-left"
+                onClick={() => hasResults ? setExpandedRound(expandedRound === round.id ? null : round.id) : null}
+                className={`w-full text-left ${!hasResults ? 'cursor-default' : ''}`}
               >
                 <CardContent className="p-4 sm:p-6 flex items-center justify-between">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs text-muted-foreground/60 w-6">J{round.round_number}</span>
                       <span className="font-display text-lg font-bold">{round.name}</span>
                       {round.is_master && (
                         <Badge variant="secondary" className="text-xs bg-accent/20 text-accent border-0">MASTER</Badge>
+                      )}
+                      {played ? (
+                        <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary border-0">
+                          ✓ {t('rounds.played', 'Jugada')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] border-muted-foreground/30 text-muted-foreground">
+                          {t('rounds.pending', 'Pendent')}
+                        </Badge>
                       )}
                       {round.sponsor && (
                         <span className="text-xs text-muted-foreground">· {round.sponsor}</span>
@@ -147,18 +161,20 @@ const Rounds = () => {
                           <> — {format(new Date(round.end_date), 'dd MMM yyyy', { locale })}</>
                         )}
                       </span>
-                      {round.club && (
+                      {round.course && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3.5 w-3.5" />
-                          {round.club}
+                          {round.course}
                         </span>
                       )}
                     </div>
                   </div>
-                  {expandedRound === round.id ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  {hasResults && (
+                    expandedRound === round.id ? (
+                      <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    )
                   )}
                 </CardContent>
               </button>
@@ -190,7 +206,8 @@ const Rounds = () => {
                 </div>
               )}
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
