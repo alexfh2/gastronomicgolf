@@ -82,7 +82,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   };
 
   const renderScore = (score: number, holePar: number) => {
-    if (score === 0) return <span className="text-muted-foreground font-semibold">—</span>;
+    if (score == null || score === 0) return <span className="text-muted-foreground font-semibold">—</span>;
 
     const diff = score - holePar;
 
