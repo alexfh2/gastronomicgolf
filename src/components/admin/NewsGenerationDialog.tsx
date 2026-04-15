@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Copy, Sparkles, ImagePlus, X } from 'lucide-react';
+import { Loader2, Copy, Sparkles, ImagePlus, X, Instagram, MessageCircle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Round = Tables<'rounds'>;
@@ -45,6 +45,8 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
   const [tone, setTone] = useState<'journalistic' | 'friendly'>('journalistic');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
+  const [generatedInstagram, setGeneratedInstagram] = useState<string | null>(null);
+  const [generatedWhatsapp, setGeneratedWhatsapp] = useState<string | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
