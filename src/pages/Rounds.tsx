@@ -216,13 +216,27 @@ const Rounds = () => {
                       ) : null}
                     </div>
                   </div>
-                  {hasResults && (
-                    expandedRound === round.id ? (
-                      <ChevronUp className="h-5 w-5 text-primary" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground/40" />
-                    )
-                  )}
+                  <div className="flex items-center gap-2">
+                    {!played && (
+                      <a
+                        href={buildGoogleCalUrl(round)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-md hover:bg-muted/50 transition-colors"
+                        title="Afegir al Google Calendar"
+                      >
+                        <CalendarPlus className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                      </a>
+                    )}
+                    {hasResults && (
+                      expandedRound === round.id ? (
+                        <ChevronUp className="h-5 w-5 text-primary" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground/40" />
+                      )
+                    )}
+                  </div>
                 </CardContent>
               </button>
 
@@ -256,8 +270,8 @@ const Rounds = () => {
             );
           })}
         </div>
+        </>
       )}
-    </div>
   );
 };
 
