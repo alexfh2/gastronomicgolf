@@ -29,6 +29,21 @@ const Rounds = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
+  const buildGoogleCalUrl = (round: any) => {
+    const startDate = round.date.replace(/-/g, '');
+    const endRaw = round.end_date || round.date;
+    // Google all-day events need end = day after last day
+    const endNext = new Date(endRaw);
+    endNext.setDate(endNext.getDate() + 1);
+    const endDate = endNext.toISOString().split('T')[0].replace(/-/g, '');
+    const title = encodeURIComponent(`${round.name} — Circuit Gastronòmic Golf`);
+    const location = encodeURIComponent([round.club, round.course].filter(Boolean).join(' — '));
+    const details = encodeURIComponent(
+      [round.sponsor ? `Patrocinador: ${round.sponsor}` : '', round.is_master ? 'Jornada MASTER (x1.25)' : ''].filter(Boolean).join('\n')
+    );
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&location=${location}&details=${details}`;
+  };
+
   const { data: roundResults } = useQuery({
     queryKey: ['public-round-results', expandedRound],
     queryFn: async () => {
