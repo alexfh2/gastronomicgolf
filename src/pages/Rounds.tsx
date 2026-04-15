@@ -193,14 +193,10 @@ const Rounds = () => {
               variant="outline"
               size="sm"
               className="gap-2 text-xs"
-              onClick={() => {
-                rounds.forEach((r, i) => {
-                  setTimeout(() => window.open(buildGoogleCalUrl(r), '_blank'), i * 300);
-                });
-              }}
+              onClick={downloadAllIcs}
             >
               <CalendarPlus className="h-4 w-4" />
-              Afegir totes al Google Calendar
+              Afegir totes al calendari
             </Button>
           </div>
         <div className="space-y-3">
@@ -264,16 +260,16 @@ const Rounds = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {!played && (
-                      <a
-                        href={buildGoogleCalUrl(round)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadIcs(buildIcsContent(round), `${round.name.replace(/\s+/g, '-').toLowerCase()}.ics`);
+                        }}
                         className="p-1.5 rounded-md hover:bg-muted/50 transition-colors"
-                        title="Afegir al Google Calendar"
+                        title="Afegir al calendari"
                       >
                         <CalendarPlus className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
-                      </a>
+                      </button>
                     )}
                     {hasResults && (
                       expandedRound === round.id ? (
