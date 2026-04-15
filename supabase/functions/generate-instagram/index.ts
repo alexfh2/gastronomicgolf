@@ -113,8 +113,8 @@ ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 CLASSIFICACIÓ HANDICAP ALT (15.1–36.0):
 ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
-${females.length > 0 ? `PREMI FEMENÍ:\n${females.slice(0, 1).map((r: any) => `1. ${r.players?.name} — ${r.stableford_points} pts`).join("\n")}` : ""}
-${seniors.length > 0 ? `PREMI SÈNIOR:\n${seniors.slice(0, 1).map((r: any) => `1. ${r.players?.name} — ${r.stableford_points} pts`).join("\n")}` : ""}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ""}
 
 Total participants: ${results.length}
