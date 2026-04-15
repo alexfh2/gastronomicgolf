@@ -140,6 +140,23 @@ const Rounds = () => {
       ) : !rounds?.length ? (
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
+        <>
+          {/* Add all to Google Calendar */}
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs"
+              onClick={() => {
+                rounds.forEach((r, i) => {
+                  setTimeout(() => window.open(buildGoogleCalUrl(r), '_blank'), i * 300);
+                });
+              }}
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Afegir totes al Google Calendar
+            </Button>
+          </div>
         <div className="space-y-3">
           {rounds.map((round) => {
             const played = round.date < today || (round.end_date && round.end_date < today);
