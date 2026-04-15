@@ -53,70 +53,46 @@ serve(async (req) => {
       .sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     const langLabel = language === "ca" ? "català" : "castellà";
+    const publishedUrl = "https://verdant-stats.lovable.app/rankings";
 
     const prompt = `Genera un missatge de WhatsApp en ${langLabel} per compartir els RESULTATS d'una jornada de golf del circuit Gastronòmic Golf Experience.
 
-ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, amb format WhatsApp *negretes*):
-🏌️‍♂️✨ *GASTRONÒMIC GOLF EXPERIENCE* ✨🏌️‍♀️
-🍷 *${round.name}* — J${round.round_number}
-📍 ${round.club || ""}${round.course ? ` · ${round.course}` : ""}
-📅 ${round.date}
-${round.is_master ? "\n⭐ *JORNADA MASTER (x1.25)*" : ""}
+IMPORTANT: La competició és en modalitat STABLEFORD. Tots els resultats són en PUNTS STABLEFORD, NO en cops. No mencionIs "cops" ni "scratch".
 
-[1-2 frases resum de com va anar la jornada]
+TEXT DE REFERÈNCIA (adapta l'estil però amb dades Stableford):
+---
+Resultats ${round.name} — Temporada ${season?.year || "N/A"}
 
-🏆 *RESULTATS*
+RESULTATS DE LA ${round.name} DEL GASTRONÒMIC GOLF EXPERIENCE ${season?.year || ""}
 
-🥇 *Hàndicap Baix (≤15)*
-[Top 3 amb punts]
+El ${round.club || "club"} ha acollit la ${round.name} del Gastronòmic Golf Experience, disputada el ${round.date}, amb la participació de ${results.length} jugadors.
+${round.sponsor ? `Jornada patrocinada per ${round.sponsor}.` : ""}
+${round.is_master ? "⭐ JORNADA MASTER — Punts x1.25!" : ""}
 
-🥇 *Hàndicap Alt (15.1–36)*
-[Top 3 amb punts]
+En la classificació Hàndicap Baix (≤15), [NOM] s'ha imposat amb [X] punts Stableford, seguit de [NOM] ([X]) i [NOM] ([X]). En la classificació Hàndicap Alt (15.1–36), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X]).${females.length > 0 ? " En la classificació Femenina, [NOM] s'ha imposat amb [X] punts, seguida de [NOM] ([X]) i [NOM] ([X])." : ""}${seniors.length > 0 ? " En la classificació Sènior (+65), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X])." : ""}
 
-👩 *Classificació Femenina*
-🥇 [Nom] — [Punts] pts
-🥈 [Nom] — [Punts] pts (si aplica)
-🥉 [Nom] — [Punts] pts (si aplica)
+Les classificacions completes i estadístiques detallades es poden consultar a: ${publishedUrl}
+---
 
-👴 *Classificació Sènior (+65)*
-🥇 [Nom] — [Punts] pts
-🥈 [Nom] — [Punts] pts (si aplica)
-🥉 [Nom] — [Punts] pts (si aplica)
-
-[Si hi ha actuacions destacades com birdies, mencionar-les]
-
-👥 ${results.length} participants
-
-[Frase de tancament engrescadora]
-
-🤝 *Sponsors & Ordre de Mèrit*
-${round.sponsor ? `🍷 ${round.sponsor}` : ""}
-Omoda & Jaecoo · Pruna Cargo
-Caves Bohigas · Escampa Hotels
-Santi Pamiès Joiers · Tancat de Codorniu
-Garmin · Bonàrea
-
-#GastronomicGolf #GolfiGastronomia #CircuitGastronomic
-
-DADES:
-CLASSIFICACIÓ HANDICAP BAIX:
+DADES REALS:
+CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
-CLASSIFICACIÓ HANDICAP ALT:
+CLASSIFICACIÓ HANDICAP ALT (15.1–36.0) — ${hcpHigh.length} jugadors:
 ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
-${females.length > 0 ? `CLASSIFICACIÓ FEMENINA:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
-${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65):\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 
-Temporada: ${season?.year || "N/A"}
+Total participants: ${results.length}
 
 INSTRUCCIONS:
-- Utilitza *negretes* de WhatsApp (amb asteriscs)
-- Utilitza emojis de manera similar a l'estructura de referència (mateixa línia que Instagram)
-- Inclou SEMPRE els sponsors i hashtags al final
-- El to ha de ser celebratori i engrescador
-- Modalitat STABLEFORD, NO mencionIs resultats scratch
-- Menciona els guanyadors de cada categoria
+- Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories en paràgraf narratiu, link final
+- Inclou TOTES les categories que tinguin dades: Hcp Baix, Hcp Alt, Femenina i Sènior
+- Utilitza format *negretes* de WhatsApp per al títol i noms de categories
+- To formal i informatiu, sense emojis excessius (només algun puntual si escau)
+- SEMPRE punts Stableford, MAI cops ni scratch
+- Inclou el link a les classificacions al final: ${publishedUrl}
 - Retorna NOMÉS el text del missatge, sense JSON ni markdown`;
 
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -131,7 +107,7 @@ INSTRUCCIONS:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "Ets un community manager de golf. Generes missatges de WhatsApp concisos i clars amb format de negretes (*text*)." },
+          { role: "system", content: "Ets un redactor esportiu de golf. Generes missatges de WhatsApp clars, formals i concisos." },
           { role: "user", content: prompt },
         ],
       }),

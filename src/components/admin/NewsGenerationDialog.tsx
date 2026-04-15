@@ -43,7 +43,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const [specialMention, setSpecialMention] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
-  const [tone, setTone] = useState<'press' | 'social'>('press');
+  const [tone, setTone] = useState<'press' | 'whatsapp' | 'instagram'>('press');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
   const [generatedInstagram, setGeneratedInstagram] = useState<string | null>(null);
   const [generatedWhatsapp, setGeneratedWhatsapp] = useState<string | null>(null);
@@ -109,6 +109,23 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
 
   const generateMutation = useMutation({
     mutationFn: async () => {
+      if (tone === 'instagram') {
+        const { data, error } = await supabase.functions.invoke('generate-instagram', {
+          body: { round_id: round.id, language },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Error generant el post');
+        return { type: 'instagram' as const, post: data.post as string };
+      }
+      if (tone === 'whatsapp') {
+        const { data, error } = await supabase.functions.invoke('generate-whatsapp', {
+          body: { round_id: round.id, language },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Error generant el missatge');
+        return { type: 'whatsapp' as const, message: data.message as string };
+      }
+      // Press
       const { data, error } = await supabase.functions.invoke('generate-news', {
         body: {
           round_id: round.id,
@@ -120,11 +137,23 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
       });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Error generant la notícia');
-      return data.news as GeneratedNews;
+      return { type: 'press' as const, news: data.news as GeneratedNews };
     },
-    onSuccess: (news) => {
-      setGeneratedNews(news);
-      toast({ title: 'Notícia generada!' });
+    onSuccess: (result) => {
+      if (result.type === 'instagram') {
+        setGeneratedInstagram(result.post);
+        setGeneratedNews(null);
+        setGeneratedWhatsapp(null);
+      } else if (result.type === 'whatsapp') {
+        setGeneratedWhatsapp(result.message);
+        setGeneratedNews(null);
+        setGeneratedInstagram(null);
+      } else {
+        setGeneratedNews(result.news);
+        setGeneratedInstagram(null);
+        setGeneratedWhatsapp(null);
+      }
+      toast({ title: 'Contingut generat!' });
     },
     onError: (err: Error) => {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -181,41 +210,8 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
     },
   });
 
-  const instagramMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('generate-instagram', {
-        body: { round_id: round.id, language },
-      });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'Error generant el post');
-      return data.post as string;
-    },
-    onSuccess: (post) => {
-      setGeneratedInstagram(post);
-      toast({ title: 'Post d\'Instagram generat!' });
-    },
-    onError: (err: Error) => {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    },
-  });
 
-  const whatsappMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('generate-whatsapp', {
-        body: { round_id: round.id, language },
-      });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'Error generant el missatge');
-      return data.message as string;
-    },
-    onSuccess: (message) => {
-      setGeneratedWhatsapp(message);
-      toast({ title: 'Missatge de WhatsApp generat!' });
-    },
-    onError: (err: Error) => {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    },
-  });
+
 
   const copyToClipboard = () => {
     if (!generatedNews) return;
@@ -277,9 +273,16 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
 
               <div className="space-y-2">
                 <Label>To</Label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button type="button" variant={tone === 'press' ? 'default' : 'outline'} size="sm" onClick={() => setTone('press')}>Nota de premsa</Button>
-                  <Button type="button" variant={tone === 'social' ? 'default' : 'outline'} size="sm" onClick={() => setTone('social')}>WhatsApp / Instagram</Button>
+                  <Button type="button" variant={tone === 'whatsapp' ? 'default' : 'outline'} size="sm" onClick={() => setTone('whatsapp')}>
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    WhatsApp
+                  </Button>
+                  <Button type="button" variant={tone === 'instagram' ? 'default' : 'outline'} size="sm" onClick={() => setTone('instagram')}>
+                    <Instagram className="h-4 w-4 mr-1" />
+                    Instagram
+                  </Button>
                 </div>
               </div>
 
@@ -341,17 +344,17 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               {generateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Generant notícia...
+                  Generant...
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Generar notícia
+                  {tone === 'press' ? 'Generar nota de premsa' : tone === 'whatsapp' ? 'Generar missatge WhatsApp' : 'Generar post Instagram'}
                 </>
               )}
             </Button>
           </div>
-        ) : (
+        ) : generatedNews ? (
           <div className="space-y-4">
             <Tabs defaultValue="preview">
               <TabsList>
@@ -426,79 +429,27 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                   `Guardar esborrany${imageFiles.length > 0 ? ` (${imageFiles.length} foto${imageFiles.length > 1 ? 's' : ''})` : ''}`
                 )}
               </Button>
-              <Button onClick={() => setGeneratedNews(null)} variant="ghost" size="sm">
+              <Button onClick={() => { setGeneratedNews(null); }} variant="ghost" size="sm">
                 Regenerar
               </Button>
             </div>
-
-            {/* Instagram & WhatsApp generators */}
-            <div className="border-t border-border pt-4 space-y-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Xarxes socials</p>
-              
-              {/* Instagram */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => instagramMutation.mutate()}
-                    disabled={instagramMutation.isPending}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {instagramMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Instagram className="h-4 w-4" />
-                    )}
-                    {generatedInstagram ? 'Regenerar Instagram' : 'Generar post Instagram'}
-                  </Button>
-                  {generatedInstagram && (
-                    <Button onClick={copyInstagram} variant="ghost" size="sm">
-                      <Copy className="h-3.5 w-3.5 mr-1" />
-                      Copiar
-                    </Button>
-                  )}
-                </div>
-                {generatedInstagram && (
-                  <div className="bg-muted/30 rounded-lg p-3 max-h-60 overflow-y-auto">
-                    <pre className="text-sm whitespace-pre-wrap font-sans">{generatedInstagram}</pre>
-                  </div>
-                )}
-              </div>
-
-              {/* WhatsApp */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => whatsappMutation.mutate()}
-                    disabled={whatsappMutation.isPending}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {whatsappMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <MessageCircle className="h-4 w-4" />
-                    )}
-                    {generatedWhatsapp ? 'Regenerar WhatsApp' : 'Generar missatge WhatsApp'}
-                  </Button>
-                  {generatedWhatsapp && (
-                    <Button onClick={copyWhatsapp} variant="ghost" size="sm">
-                      <Copy className="h-3.5 w-3.5 mr-1" />
-                      Copiar
-                    </Button>
-                  )}
-                </div>
-                {generatedWhatsapp && (
-                  <div className="bg-muted/30 rounded-lg p-3 max-h-60 overflow-y-auto">
-                    <pre className="text-sm whitespace-pre-wrap font-sans">{generatedWhatsapp}</pre>
-                  </div>
-                )}
-              </div>
+          </div>
+        ) : (generatedInstagram || generatedWhatsapp) ? (
+          <div className="space-y-4">
+            <div className="bg-muted/30 rounded-lg p-4 max-h-[50vh] overflow-y-auto">
+              <pre className="text-sm whitespace-pre-wrap font-sans">{generatedInstagram || generatedWhatsapp}</pre>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={generatedInstagram ? copyInstagram : copyWhatsapp} variant="outline" size="sm">
+                <Copy className="h-4 w-4 mr-1" />
+                Copiar
+              </Button>
+              <Button onClick={() => { setGeneratedInstagram(null); setGeneratedWhatsapp(null); }} variant="ghost" size="sm">
+                Regenerar
+              </Button>
             </div>
           </div>
-        )}
+        ) : null}
       </DialogContent>
     </Dialog>
   );
