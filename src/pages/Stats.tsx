@@ -380,7 +380,7 @@ const Stats = () => {
                 <Card className={cn('border-border/60 transition-shadow', hasLeaderboard && 'cursor-pointer hover:shadow-md')}>
                   <CollapsibleTrigger asChild disabled={!hasLeaderboard}>
                     <div>
-                      <CardHeader className="pb-2 flex-row items-center gap-3 space-y-0 bg-primary/70 rounded-t-lg">
+                      <CardHeader className="pb-0 pt-4 px-6 flex-row items-center gap-3 space-y-0 bg-primary/70 rounded-t-lg min-h-[48px]">
                         <card.icon className="h-5 w-5 text-primary-foreground" />
                         <CardTitle className="text-sm font-medium text-primary-foreground flex-1">{card.label}</CardTitle>
                         {hasLeaderboard && (
