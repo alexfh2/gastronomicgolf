@@ -29,19 +29,65 @@ const Rounds = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const buildGoogleCalUrl = (round: any) => {
+  const buildIcsContent = (round: any) => {
     const startDate = round.date.replace(/-/g, '');
     const endRaw = round.end_date || round.date;
-    // Google all-day events need end = day after last day
     const endNext = new Date(endRaw);
     endNext.setDate(endNext.getDate() + 1);
     const endDate = endNext.toISOString().split('T')[0].replace(/-/g, '');
-    const title = encodeURIComponent(`${round.name} — Circuit Gastronòmic Golf`);
-    const location = encodeURIComponent([round.club, round.course].filter(Boolean).join(' — '));
-    const details = encodeURIComponent(
-      [round.sponsor ? `Patrocinador: ${round.sponsor}` : '', round.is_master ? 'Jornada MASTER (x1.25)' : ''].filter(Boolean).join('\n')
-    );
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&location=${location}&details=${details}`;
+    const title = `${round.name} — Circuit Gastronòmic Golf`;
+    const location = [round.club, round.course].filter(Boolean).join(' — ');
+    const description = [round.sponsor ? `Patrocinador: ${round.sponsor}` : '', round.is_master ? 'Jornada MASTER (x1.25)' : ''].filter(Boolean).join('\\n');
+    return [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Circuit Gastronomic Golf//CA',
+      'BEGIN:VEVENT',
+      `DTSTART;VALUE=DATE:${startDate}`,
+      `DTEND;VALUE=DATE:${endDate}`,
+      `SUMMARY:${title}`,
+      location ? `LOCATION:${location}` : '',
+      description ? `DESCRIPTION:${description}` : '',
+      `UID:${round.id}@gastronomicgolf`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].filter(Boolean).join('\r\n');
+  };
+
+  const downloadIcs = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAllIcs = () => {
+    if (!rounds?.length) return;
+    const events = rounds.map(r => {
+      const startDate = r.date.replace(/-/g, '');
+      const endRaw = r.end_date || r.date;
+      const endNext = new Date(endRaw);
+      endNext.setDate(endNext.getDate() + 1);
+      const endDate = endNext.toISOString().split('T')[0].replace(/-/g, '');
+      const title = `${r.name} — Circuit Gastronòmic Golf`;
+      const location = [r.club, r.course].filter(Boolean).join(' — ');
+      const description = [r.sponsor ? `Patrocinador: ${r.sponsor}` : '', r.is_master ? 'Jornada MASTER (x1.25)' : ''].filter(Boolean).join('\\n');
+      return [
+        'BEGIN:VEVENT',
+        `DTSTART;VALUE=DATE:${startDate}`,
+        `DTEND;VALUE=DATE:${endDate}`,
+        `SUMMARY:${title}`,
+        location ? `LOCATION:${location}` : '',
+        description ? `DESCRIPTION:${description}` : '',
+        `UID:${r.id}@gastronomicgolf`,
+        'END:VEVENT',
+      ].filter(Boolean).join('\r\n');
+    }).join('\r\n');
+    const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Circuit Gastronomic Golf//CA\r\n${events}\r\nEND:VCALENDAR`;
+    downloadIcs(ics, 'circuit-gastronomic-golf-2026.ics');
   };
 
   const { data: roundResults } = useQuery({
@@ -147,14 +193,10 @@ const Rounds = () => {
               variant="outline"
               size="sm"
               className="gap-2 text-xs"
-              onClick={() => {
-                rounds.forEach((r, i) => {
-                  setTimeout(() => window.open(buildGoogleCalUrl(r), '_blank'), i * 300);
-                });
-              }}
+              onClick={downloadAllIcs}
             >
               <CalendarPlus className="h-4 w-4" />
-              Afegir totes al Google Calendar
+              Afegir totes al calendari
             </Button>
           </div>
         <div className="space-y-3">
@@ -218,16 +260,16 @@ const Rounds = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {!played && (
-                      <a
-                        href={buildGoogleCalUrl(round)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadIcs(buildIcsContent(round), `${round.name.replace(/\s+/g, '-').toLowerCase()}.ics`);
+                        }}
                         className="p-1.5 rounded-md hover:bg-muted/50 transition-colors"
-                        title="Afegir al Google Calendar"
+                        title="Afegir al calendari"
                       >
                         <CalendarPlus className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
-                      </a>
+                      </button>
                     )}
                     {hasResults && (
                       expandedRound === round.id ? (
