@@ -43,7 +43,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const [specialMention, setSpecialMention] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
-  const [tone, setTone] = useState<'journalistic' | 'friendly'>('journalistic');
+  const [tone, setTone] = useState<'press' | 'social'>('press');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
   const [generatedInstagram, setGeneratedInstagram] = useState<string | null>(null);
   const [generatedWhatsapp, setGeneratedWhatsapp] = useState<string | null>(null);
@@ -278,8 +278,8 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               <div className="space-y-2">
                 <Label>To</Label>
                 <div className="flex gap-2">
-                  <Button type="button" variant={tone === 'journalistic' ? 'default' : 'outline'} size="sm" onClick={() => setTone('journalistic')}>Periodístic-esportiu</Button>
-                  <Button type="button" variant={tone === 'friendly' ? 'default' : 'outline'} size="sm" onClick={() => setTone('friendly')}>Proper i amigable</Button>
+                  <Button type="button" variant={tone === 'press' ? 'default' : 'outline'} size="sm" onClick={() => setTone('press')}>Nota de premsa</Button>
+                  <Button type="button" variant={tone === 'social' ? 'default' : 'outline'} size="sm" onClick={() => setTone('social')}>WhatsApp / Instagram</Button>
                 </div>
               </div>
 
