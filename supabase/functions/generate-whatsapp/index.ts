@@ -56,52 +56,60 @@ serve(async (req) => {
 
     const prompt = `Genera un missatge de WhatsApp en ${langLabel} per compartir els RESULTATS d'una jornada de golf del circuit Gastronòmic Golf Experience.
 
-El missatge ha de ser concís, directe i fàcil de llegir al mòbil. Estructura:
-
-⛳ *GASTRONÒMIC GOLF EXPERIENCE*
-*${round.name}* — J${round.round_number}
-📍 ${round.club || ""} ${round.course ? `· ${round.course}` : ""}
+ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, amb format WhatsApp *negretes*):
+🏌️‍♂️✨ *GASTRONÒMIC GOLF EXPERIENCE* ✨🏌️‍♀️
+🍷 *${round.name}* — J${round.round_number}
+📍 ${round.club || ""}${round.course ? ` · ${round.course}` : ""}
 📅 ${round.date}
+${round.is_master ? "\n⭐ *JORNADA MASTER (x1.25)*" : ""}
+
+[1-2 frases resum de com va anar la jornada]
 
 🏆 *RESULTATS*
 
-*Hàndicap Baix (≤15)*
-🥇 [Nom] — [Punts] pts
-🥈 [Nom] — [Punts] pts
-🥉 [Nom] — [Punts] pts
+🥇 *Hàndicap Baix (≤15)*
+[Top 3 amb punts]
 
-*Hàndicap Alt (15.1–36)*
-🥇 [Nom] — [Punts] pts
-🥈 [Nom] — [Punts] pts
-🥉 [Nom] — [Punts] pts
+🥇 *Hàndicap Alt (15.1–36)*
+[Top 3 amb punts]
 
-[Si aplica: Premi Femení i Sènior]
+👩 *1a Classificada*: [Nom] — [Punts] pts (si aplica)
+👴 *1r Sènior*: [Nom] — [Punts] pts (si aplica)
 
-[Si hi ha actuacions destacades, 1 línia]
+[Si hi ha actuacions destacades com birdies, mencionar-les]
 
 👥 ${results.length} participants
 
-[Frase curta de tancament]
+[Frase de tancament engrescadora]
+
+🤝 *Sponsors & Ordre de Mèrit*
+${round.sponsor ? `🍷 ${round.sponsor}` : ""}
+Omoda & Jaecoo · Pruna Cargo
+Caves Bohigas · Escampa Hotels
+Santi Pamiès Joiers · Tancat de Codorniu
+Garmin · Bonàrea
+
+#GastronomicGolf #GolfiGastronomia #CircuitGastronomic
 
 DADES:
 CLASSIFICACIÓ HANDICAP BAIX:
-${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join("\n")}
+${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
 CLASSIFICACIÓ HANDICAP ALT:
-${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join("\n")}
+${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
 ${females.length > 0 ? `PREMI FEMENÍ: ${females[0]?.players?.name} — ${females[0]?.stableford_points} pts` : ""}
 ${seniors.length > 0 ? `PREMI SÈNIOR: ${seniors[0]?.players?.name} — ${seniors[0]?.stableford_points} pts` : ""}
 
-${round.sponsor ? `Patrocinador: ${round.sponsor}` : ""}
-${round.is_master ? "JORNADA MASTER (x1.25)" : ""}
 Temporada: ${season?.year || "N/A"}
 
 INSTRUCCIONS:
 - Utilitza *negretes* de WhatsApp (amb asteriscs)
-- Emojis moderats, menys que Instagram
-- Molt concís i directe
-- Modalitat STABLEFORD, NO mencionar scratch
+- Utilitza emojis de manera similar a l'estructura de referència (mateixa línia que Instagram)
+- Inclou SEMPRE els sponsors i hashtags al final
+- El to ha de ser celebratori i engrescador
+- Modalitat STABLEFORD, NO mencionIs resultats scratch
+- Menciona els guanyadors de cada categoria
 - Retorna NOMÉS el text del missatge, sense JSON ni markdown`;
 
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
