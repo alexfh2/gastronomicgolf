@@ -377,17 +377,17 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
               {generateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Generant notícia...
+                  Generant...
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  Generar notícia
+                  {tone === 'press' ? 'Generar nota de premsa' : tone === 'whatsapp' ? 'Generar missatge WhatsApp' : 'Generar post Instagram'}
                 </>
               )}
             </Button>
           </div>
-        ) : (
+        ) : generatedNews ? (
           <div className="space-y-4">
             <Tabs defaultValue="preview">
               <TabsList>
@@ -462,79 +462,27 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                   `Guardar esborrany${imageFiles.length > 0 ? ` (${imageFiles.length} foto${imageFiles.length > 1 ? 's' : ''})` : ''}`
                 )}
               </Button>
-              <Button onClick={() => setGeneratedNews(null)} variant="ghost" size="sm">
+              <Button onClick={() => { setGeneratedNews(null); }} variant="ghost" size="sm">
                 Regenerar
               </Button>
             </div>
-
-            {/* Instagram & WhatsApp generators */}
-            <div className="border-t border-border pt-4 space-y-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Xarxes socials</p>
-              
-              {/* Instagram */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => instagramMutation.mutate()}
-                    disabled={instagramMutation.isPending}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {instagramMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Instagram className="h-4 w-4" />
-                    )}
-                    {generatedInstagram ? 'Regenerar Instagram' : 'Generar post Instagram'}
-                  </Button>
-                  {generatedInstagram && (
-                    <Button onClick={copyInstagram} variant="ghost" size="sm">
-                      <Copy className="h-3.5 w-3.5 mr-1" />
-                      Copiar
-                    </Button>
-                  )}
-                </div>
-                {generatedInstagram && (
-                  <div className="bg-muted/30 rounded-lg p-3 max-h-60 overflow-y-auto">
-                    <pre className="text-sm whitespace-pre-wrap font-sans">{generatedInstagram}</pre>
-                  </div>
-                )}
-              </div>
-
-              {/* WhatsApp */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => whatsappMutation.mutate()}
-                    disabled={whatsappMutation.isPending}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {whatsappMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <MessageCircle className="h-4 w-4" />
-                    )}
-                    {generatedWhatsapp ? 'Regenerar WhatsApp' : 'Generar missatge WhatsApp'}
-                  </Button>
-                  {generatedWhatsapp && (
-                    <Button onClick={copyWhatsapp} variant="ghost" size="sm">
-                      <Copy className="h-3.5 w-3.5 mr-1" />
-                      Copiar
-                    </Button>
-                  )}
-                </div>
-                {generatedWhatsapp && (
-                  <div className="bg-muted/30 rounded-lg p-3 max-h-60 overflow-y-auto">
-                    <pre className="text-sm whitespace-pre-wrap font-sans">{generatedWhatsapp}</pre>
-                  </div>
-                )}
-              </div>
+          </div>
+        ) : (generatedInstagram || generatedWhatsapp) ? (
+          <div className="space-y-4">
+            <div className="bg-muted/30 rounded-lg p-4 max-h-[50vh] overflow-y-auto">
+              <pre className="text-sm whitespace-pre-wrap font-sans">{generatedInstagram || generatedWhatsapp}</pre>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={generatedInstagram ? copyInstagram : copyWhatsapp} variant="outline" size="sm">
+                <Copy className="h-4 w-4 mr-1" />
+                Copiar
+              </Button>
+              <Button onClick={() => { setGeneratedInstagram(null); setGeneratedWhatsapp(null); }} variant="ghost" size="sm">
+                Regenerar
+              </Button>
             </div>
           </div>
-        )}
+        ) : null}
       </DialogContent>
     </Dialog>
   );
