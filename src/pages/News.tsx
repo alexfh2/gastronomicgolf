@@ -38,8 +38,10 @@ const News = () => {
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
-      <h1 className="font-display text-3xl font-bold mb-2">{t('news.title')}</h1>
-      <p className="text-muted-foreground mb-8">{t('common.season')} 2026</p>
+      <div className="bg-primary rounded-xl px-5 py-5 mb-8 shadow-md">
+        <h1 className="font-display text-3xl font-bold text-primary-foreground">{t('news.title')}</h1>
+        <p className="text-primary-foreground/70 mt-1">{t('common.season')} 2026</p>
+      </div>
 
       {isLoading ? (
         <div className="space-y-4">
