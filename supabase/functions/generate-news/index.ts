@@ -81,25 +81,30 @@ El circuit és el "Gastronòmic Golf Experience" — un circuit de golf amb gast
 
 TEXT DE REFERÈNCIA D'ESTIL (adapta'l al golf i al Gastronòmic Golf Experience):
 ---
-Després de [X] intenses jornades, la classificació s'està consolidant i ja es perfilen els jugadors que lluitaran pel podi aquesta temporada. 🏆
+Després de [X] intenses jornades, la classificació s'està consolidant i ja es perfilen els jugadors que lluitaran pel podi aquesta temporada.
 
-🏌️‍♂️ Hàndicap Baix: la batalla dels millors!
-La competició no pot estar més ajustada. [Descripció engrescadora del líder i perseguidors]
+Hàndicap Baix: la batalla dels millors!
+La competició no pot estar més ajustada. [Descripció del líder i perseguidors]
 
-🥇 [Nom] encapçala amb [X] pts, mostrant una regularitat impressionant.
-🥈 Molt a prop, [Nom] amb [X] pts.
-🥉 La tercera posició és per a [Nom] amb [X] pts.
+1. [Nom] encapçala amb [X] pts, mostrant una regularitat impressionant.
+2. Molt a prop, [Nom] amb [X] pts.
+3. La tercera posició és per a [Nom] amb [X] pts.
 
 TOP 10:
 [Llistat]
 
-👏 Hàndicap Alt: els qui millor dominen el camp!
+Hàndicap Alt: els qui millor dominen el camp!
 [Mateixa estructura]
+
+Classificació Femenina:
+[Mateixa estructura amb top 3]
+
+Classificació Sènior (+65):
+[Mateixa estructura amb top 3]
 
 [Si hi ha actuacions destacades: birdies, hole-in-ones, etc.]
 
 Per a més detalls i classificacions actualitzades, visiteu la nostra web.
-Continuarem informant-vos de totes les novetats d'aquest emocionant circuit! A seguir gaudint del golf! 💪
 ---
 
 DADES DE LA JORNADA:
@@ -125,12 +130,12 @@ ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 Total participants: ${results.length}
 
 INSTRUCCIONS:
-- Segueix l'estructura del text de referència: introducció engrescadora, després cada categoria amb descripció + top 10 + emojis
-- Destaca els guanyadors de cada categoria (Hcp Baix i Hcp Alt) amb comentaris personalitzats
-- Si hi ha classificació femenina o sènior, dedica una secció completa a cada una amb la mateixa estructura (descripció engrescadora + top classificades/ats)
+- ABSOLUTAMENT CAP EMOJI. Ni un sol emoji en tot el text. Això és una nota de premsa professional per enviar a diaris i mitjans de comunicació.
+- To formal, sobri i periodístic. Sense exclamacions excessives.
+- Segueix l'estructura: introducció, després cada categoria amb descripció + top 10
+- Destaca els guanyadors de cada categoria (Hcp Baix, Hcp Alt, Femení i Sènior) amb comentaris personalitzats
+- OBLIGATORI: inclou SEMPRE les 4 categories si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
 - NO mencionIs resultats scratch ni cops totals
-- Si el to és "nota de premsa", NO utilitzis emojis i mantingues un to formal
-- Si el to és "xarxes socials", utilitza emojis com al text de referència
 - Genera un títol atractiu
 - Un subtítol complementari
 - Un cos complet amb la narració per categories
