@@ -71,10 +71,36 @@ serve(async (req) => {
     }
 
     const langLabel = language === 'ca' ? 'català' : 'castellà';
-    const toneLabel = tone === 'journalistic' ? 'periodístic esportiu, professional' : 'proper, amigable, càlid';
+    const toneLabel = tone === 'press' 
+      ? 'nota de premsa esportiva, formal i professional' 
+      : 'engrescador per xarxes socials (WhatsApp/Instagram), amb emojis i to proper';
 
-    const prompt = `Genera una notícia esportiva de golf en ${langLabel} amb to ${toneLabel}.
+    const prompt = `Genera una notícia esportiva de golf en ${langLabel} amb to de ${toneLabel}.
 IMPORTANT: La competició és en modalitat STABLEFORD. NO mencionis resultats scratch ni cops totals. Tots els resultats són en punts Stableford.
+El circuit és el "Gastronòmic Golf Experience" — un circuit de golf amb gastronomia i grans premis.
+
+TEXT DE REFERÈNCIA D'ESTIL (adapta'l al golf i al Gastronòmic Golf Experience):
+---
+Després de [X] intenses jornades, la classificació s'està consolidant i ja es perfilen els jugadors que lluitaran pel podi aquesta temporada. 🏆
+
+🏌️‍♂️ Hàndicap Baix: la batalla dels millors!
+La competició no pot estar més ajustada. [Descripció engrescadora del líder i perseguidors]
+
+🥇 [Nom] encapçala amb [X] pts, mostrant una regularitat impressionant.
+🥈 Molt a prop, [Nom] amb [X] pts.
+🥉 La tercera posició és per a [Nom] amb [X] pts.
+
+TOP 10:
+[Llistat]
+
+👏 Hàndicap Alt: els qui millor dominen el camp!
+[Mateixa estructura]
+
+[Si hi ha actuacions destacades: birdies, hole-in-ones, etc.]
+
+Per a més detalls i classificacions actualitzades, visiteu la nostra web.
+Continuarem informant-vos de totes les novetats d'aquest emocionant circuit! A seguir gaudint del golf! 💪
+---
 
 DADES DE LA JORNADA:
 - Jornada: ${round.name} (J${round.round_number})
@@ -83,13 +109,14 @@ DADES DE LA JORNADA:
 - Camp: ${round.course || 'N/A'}
 - Data: ${round.date}
 - Patrocinador: ${sponsor || 'cap'}
+${round.is_master ? '- JORNADA MASTER (punts x1.25)' : ''}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
 
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
-${hcpLow.slice(0, 5).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
+${hcpLow.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
 CLASSIFICACIÓ HANDICAP ALT (15.1–36.0) — ${hcpHigh.length} jugadors:
-${hcpHigh.slice(0, 5).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
+${hcpHigh.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
 ${females.length > 0 ? `PREMI FEMENÍ:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}` : ''}
 ${seniors.length > 0 ? `PREMI SÈNIOR:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}` : ''}
@@ -98,12 +125,15 @@ ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 Total participants: ${results.length}
 
 INSTRUCCIONS:
-- Destaca els guanyadors de cada categoria (Hcp Baix i Hcp Alt)
-- Si hi ha premis femení o sènior, menciona'ls
+- Segueix l'estructura del text de referència: introducció engrescadora, després cada categoria amb descripció + top 10 + emojis
+- Destaca els guanyadors de cada categoria (Hcp Baix i Hcp Alt) amb comentaris personalitzats
+- Si hi ha premis femení o sènior, menciona'ls amb la mateixa estructura
 - NO mencionIs resultats scratch ni cops totals
+- Si el to és "nota de premsa", NO utilitzis emojis i mantingues un to formal
+- Si el to és "xarxes socials", utilitza emojis com al text de referència
 - Genera un títol atractiu
 - Un subtítol complementari
-- Un cos de 3-5 paràgrafs
+- Un cos complet amb la narració per categories
 - 3-5 highlights (frases curtes de destacats)
 - Un extracte SEO de màxim 160 caràcters
 
