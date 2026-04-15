@@ -181,11 +181,59 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
     },
   });
 
+  const instagramMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('generate-instagram', {
+        body: { round_id: round.id, language },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Error generant el post');
+      return data.post as string;
+    },
+    onSuccess: (post) => {
+      setGeneratedInstagram(post);
+      toast({ title: 'Post d\'Instagram generat!' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const whatsappMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('generate-whatsapp', {
+        body: { round_id: round.id, language },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Error generant el missatge');
+      return data.message as string;
+    },
+    onSuccess: (message) => {
+      setGeneratedWhatsapp(message);
+      toast({ title: 'Missatge de WhatsApp generat!' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
   const copyToClipboard = () => {
     if (!generatedNews) return;
     const text = `${generatedNews.title}\n\n${generatedNews.subtitle}\n\n${generatedNews.body}`;
     navigator.clipboard.writeText(text);
     toast({ title: 'Copiat al portapapers!' });
+  };
+
+  const copyInstagram = () => {
+    if (!generatedInstagram) return;
+    navigator.clipboard.writeText(generatedInstagram);
+    toast({ title: 'Post d\'Instagram copiat!' });
+  };
+
+  const copyWhatsapp = () => {
+    if (!generatedWhatsapp) return;
+    navigator.clipboard.writeText(generatedWhatsapp);
+    toast({ title: 'Missatge de WhatsApp copiat!' });
   };
 
   return (
