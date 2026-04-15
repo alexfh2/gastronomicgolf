@@ -244,7 +244,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
           </DialogDescription>
         </DialogHeader>
 
-        {!generatedNews ? (
+        {(!generatedNews && !generatedInstagram && !generatedWhatsapp) ? (
           <div className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
