@@ -43,7 +43,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const [specialMention, setSpecialMention] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
-  const [tone, setTone] = useState<'press' | 'social'>('press');
+  const [tone, setTone] = useState<'press' | 'whatsapp' | 'instagram'>('press');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
   const [generatedInstagram, setGeneratedInstagram] = useState<string | null>(null);
   const [generatedWhatsapp, setGeneratedWhatsapp] = useState<string | null>(null);
@@ -109,6 +109,23 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
 
   const generateMutation = useMutation({
     mutationFn: async () => {
+      if (tone === 'instagram') {
+        const { data, error } = await supabase.functions.invoke('generate-instagram', {
+          body: { round_id: round.id, language },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Error generant el post');
+        return { type: 'instagram' as const, post: data.post as string };
+      }
+      if (tone === 'whatsapp') {
+        const { data, error } = await supabase.functions.invoke('generate-whatsapp', {
+          body: { round_id: round.id, language },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || 'Error generant el missatge');
+        return { type: 'whatsapp' as const, message: data.message as string };
+      }
+      // Press
       const { data, error } = await supabase.functions.invoke('generate-news', {
         body: {
           round_id: round.id,
@@ -120,11 +137,23 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
       });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Error generant la notícia');
-      return data.news as GeneratedNews;
+      return { type: 'press' as const, news: data.news as GeneratedNews };
     },
-    onSuccess: (news) => {
-      setGeneratedNews(news);
-      toast({ title: 'Notícia generada!' });
+    onSuccess: (result) => {
+      if (result.type === 'instagram') {
+        setGeneratedInstagram(result.post);
+        setGeneratedNews(null);
+        setGeneratedWhatsapp(null);
+      } else if (result.type === 'whatsapp') {
+        setGeneratedWhatsapp(result.message);
+        setGeneratedNews(null);
+        setGeneratedInstagram(null);
+      } else {
+        setGeneratedNews(result.news);
+        setGeneratedInstagram(null);
+        setGeneratedWhatsapp(null);
+      }
+      toast({ title: 'Contingut generat!' });
     },
     onError: (err: Error) => {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -277,9 +306,16 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
 
               <div className="space-y-2">
                 <Label>To</Label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button type="button" variant={tone === 'press' ? 'default' : 'outline'} size="sm" onClick={() => setTone('press')}>Nota de premsa</Button>
-                  <Button type="button" variant={tone === 'social' ? 'default' : 'outline'} size="sm" onClick={() => setTone('social')}>WhatsApp / Instagram</Button>
+                  <Button type="button" variant={tone === 'whatsapp' ? 'default' : 'outline'} size="sm" onClick={() => setTone('whatsapp')}>
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    WhatsApp
+                  </Button>
+                  <Button type="button" variant={tone === 'instagram' ? 'default' : 'outline'} size="sm" onClick={() => setTone('instagram')}>
+                    <Instagram className="h-4 w-4 mr-1" />
+                    Instagram
+                  </Button>
                 </div>
               </div>
 
