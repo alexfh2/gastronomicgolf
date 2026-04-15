@@ -430,6 +430,73 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                 Regenerar
               </Button>
             </div>
+
+            {/* Instagram & WhatsApp generators */}
+            <div className="border-t border-border pt-4 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Xarxes socials</p>
+              
+              {/* Instagram */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => instagramMutation.mutate()}
+                    disabled={instagramMutation.isPending}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {instagramMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Instagram className="h-4 w-4" />
+                    )}
+                    {generatedInstagram ? 'Regenerar Instagram' : 'Generar post Instagram'}
+                  </Button>
+                  {generatedInstagram && (
+                    <Button onClick={copyInstagram} variant="ghost" size="sm">
+                      <Copy className="h-3.5 w-3.5 mr-1" />
+                      Copiar
+                    </Button>
+                  )}
+                </div>
+                {generatedInstagram && (
+                  <div className="bg-muted/30 rounded-lg p-3 max-h-60 overflow-y-auto">
+                    <pre className="text-sm whitespace-pre-wrap font-sans">{generatedInstagram}</pre>
+                  </div>
+                )}
+              </div>
+
+              {/* WhatsApp */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => whatsappMutation.mutate()}
+                    disabled={whatsappMutation.isPending}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {whatsappMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <MessageCircle className="h-4 w-4" />
+                    )}
+                    {generatedWhatsapp ? 'Regenerar WhatsApp' : 'Generar missatge WhatsApp'}
+                  </Button>
+                  {generatedWhatsapp && (
+                    <Button onClick={copyWhatsapp} variant="ghost" size="sm">
+                      <Copy className="h-3.5 w-3.5 mr-1" />
+                      Copiar
+                    </Button>
+                  )}
+                </div>
+                {generatedWhatsapp && (
+                  <div className="bg-muted/30 rounded-lg p-3 max-h-60 overflow-y-auto">
+                    <pre className="text-sm whitespace-pre-wrap font-sans">{generatedWhatsapp}</pre>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </DialogContent>
