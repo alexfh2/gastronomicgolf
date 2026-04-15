@@ -73,8 +73,15 @@ ${round.is_master ? "\n⭐ *JORNADA MASTER (x1.25)*" : ""}
 🥇 *Hàndicap Alt (15.1–36)*
 [Top 3 amb punts]
 
-👩 *1a Classificada*: [Nom] — [Punts] pts (si aplica)
-👴 *1r Sènior*: [Nom] — [Punts] pts (si aplica)
+👩 *Classificació Femenina*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts (si aplica)
+🥉 [Nom] — [Punts] pts (si aplica)
+
+👴 *Classificació Sènior (+65)*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts (si aplica)
+🥉 [Nom] — [Punts] pts (si aplica)
 
 [Si hi ha actuacions destacades com birdies, mencionar-les]
 

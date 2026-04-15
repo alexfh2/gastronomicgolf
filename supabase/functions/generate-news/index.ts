@@ -127,7 +127,7 @@ Total participants: ${results.length}
 INSTRUCCIONS:
 - Segueix l'estructura del text de referència: introducció engrescadora, després cada categoria amb descripció + top 10 + emojis
 - Destaca els guanyadors de cada categoria (Hcp Baix i Hcp Alt) amb comentaris personalitzats
-- Si hi ha premis femení o sènior, menciona'ls amb la mateixa estructura
+- Si hi ha classificació femenina o sènior, dedica una secció completa a cada una amb la mateixa estructura (descripció engrescadora + top classificades/ats)
 - NO mencionIs resultats scratch ni cops totals
 - Si el to és "nota de premsa", NO utilitzis emojis i mantingues un to formal
 - Si el to és "xarxes socials", utilitza emojis com al text de referència

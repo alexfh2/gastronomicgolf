@@ -81,8 +81,16 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 🏆 RESULTATS
 🥇 Hàndicap Baix: [Nom] — [Punts] pts
 🥇 Hàndicap Alt: [Nom] — [Punts] pts
-👩 1a Classificada: [Nom] — [Punts] pts (si aplica)
-👴 1r Sènior: [Nom] — [Punts] pts (si aplica)
+
+👩 *Classificació Femenina*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts (si aplica)
+🥉 [Nom] — [Punts] pts (si aplica)
+
+👴 *Classificació Sènior (+65)*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts (si aplica)
+🥉 [Nom] — [Punts] pts (si aplica)
 
 [Si hi ha actuacions destacades com birdies, mencionar-les amb emojis]
 
