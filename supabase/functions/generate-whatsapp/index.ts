@@ -73,8 +73,15 @@ ${round.is_master ? "\n⭐ *JORNADA MASTER (x1.25)*" : ""}
 🥇 *Hàndicap Alt (15.1–36)*
 [Top 3 amb punts]
 
-👩 *1a Classificada*: [Nom] — [Punts] pts (si aplica)
-👴 *1r Sènior*: [Nom] — [Punts] pts (si aplica)
+👩 *Classificació Femenina*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts (si aplica)
+🥉 [Nom] — [Punts] pts (si aplica)
+
+👴 *Classificació Sènior (+65)*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts (si aplica)
+🥉 [Nom] — [Punts] pts (si aplica)
 
 [Si hi ha actuacions destacades com birdies, mencionar-les]
 
@@ -98,8 +105,8 @@ ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 CLASSIFICACIÓ HANDICAP ALT:
 ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
-${females.length > 0 ? `PREMI FEMENÍ: ${females[0]?.players?.name} — ${females[0]?.stableford_points} pts` : ""}
-${seniors.length > 0 ? `PREMI SÈNIOR: ${seniors[0]?.players?.name} — ${seniors[0]?.stableford_points} pts` : ""}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65):\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 
 Temporada: ${season?.year || "N/A"}
 

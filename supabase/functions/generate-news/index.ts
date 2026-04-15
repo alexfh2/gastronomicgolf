@@ -118,8 +118,8 @@ ${hcpLow.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 CLASSIFICACIÓ HANDICAP ALT (15.1–36.0) — ${hcpHigh.length} jugadors:
 ${hcpHigh.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
-${females.length > 0 ? `PREMI FEMENÍ:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}` : ''}
-${seniors.length > 0 ? `PREMI SÈNIOR:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts`).join('\n')}` : ''}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n${females.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n${seniors.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 
 Total participants: ${results.length}
@@ -127,7 +127,7 @@ Total participants: ${results.length}
 INSTRUCCIONS:
 - Segueix l'estructura del text de referència: introducció engrescadora, després cada categoria amb descripció + top 10 + emojis
 - Destaca els guanyadors de cada categoria (Hcp Baix i Hcp Alt) amb comentaris personalitzats
-- Si hi ha premis femení o sènior, menciona'ls amb la mateixa estructura
+- Si hi ha classificació femenina o sènior, dedica una secció completa a cada una amb la mateixa estructura (descripció engrescadora + top classificades/ats)
 - NO mencionIs resultats scratch ni cops totals
 - Si el to és "nota de premsa", NO utilitzis emojis i mantingues un to formal
 - Si el to és "xarxes socials", utilitza emojis com al text de referència
