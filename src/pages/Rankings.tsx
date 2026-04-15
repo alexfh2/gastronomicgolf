@@ -204,11 +204,11 @@ const Rankings = () => {
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
-      <div className="bg-primary/10 rounded-lg px-5 py-4 mb-8 border border-primary/15">
-        <h1 className="font-display text-3xl font-bold text-primary">{t('rankings.title')}</h1>
-        <p className="text-primary/70 mt-1">
+      <div className="bg-primary rounded-xl px-5 py-5 mb-8 shadow-md">
+        <h1 className="font-display text-3xl font-bold text-primary-foreground">{t('rankings.title')}</h1>
+        <p className="text-primary-foreground/70 mt-1">
           {t('rankings.generalClassification')} — {t('common.season')} 2026
-          <Badge variant="outline" className="ml-2 text-[10px] tracking-wider uppercase">Millors {bestN} jornades</Badge>
+          <Badge variant="outline" className="ml-2 text-[10px] tracking-wider uppercase border-primary-foreground/30 text-primary-foreground/80">Millors {bestN} jornades</Badge>
         </p>
       </div>
 
