@@ -392,7 +392,7 @@ const Stats = () => {
                           />
                         )}
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="pt-5">
                         <p className="text-2xl font-semibold tracking-tight text-foreground">{card.value}</p>
                         <p className="text-sm text-muted-foreground mt-1">{card.detail}</p>
                         {card.subtitle && <p className="text-xs text-muted-foreground/70 mt-2 italic">{card.subtitle}</p>}
