@@ -40,7 +40,7 @@ const Navbar = () => {
                 to={item.path}
                 className={`px-3 py-2 text-[13px] font-medium uppercase tracking-wider rounded-md transition-colors ${
                   isActive
-                    ? 'text-primary bg-secondary'
+                    ? 'text-white bg-primary/80'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
@@ -78,7 +78,7 @@ const Navbar = () => {
                       onClick={() => setOpen(false)}
                       className={`px-4 py-3 text-sm font-medium uppercase tracking-wider rounded-md transition-colors ${
                         isActive
-                          ? 'text-primary bg-secondary'
+                          ? 'text-white bg-primary/80'
                           : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                       }`}
                     >
