@@ -47,8 +47,8 @@ serve(async (req) => {
     // Categorize results
     const hcpLow = results.filter((r: any) => r.category === 'hcp_low' || (r.handicap_at_round !== null && r.handicap_at_round <= 15));
     const hcpHigh = results.filter((r: any) => r.category === 'hcp_high' || (r.handicap_at_round !== null && r.handicap_at_round > 15));
-    const females = results.filter((r: any) => r.is_female_prize);
-    const seniors = results.filter((r: any) => r.is_senior_prize);
+    const females = results.filter((r: any) => r.is_female_prize || r.players?.gender === 'F');
+    const seniors = results.filter((r: any) => r.is_senior_prize || r.players?.is_senior === true);
 
     // Sort each category by stableford
     hcpLow.sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
