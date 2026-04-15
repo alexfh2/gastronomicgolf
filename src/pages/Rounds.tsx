@@ -129,7 +129,7 @@ const Rounds = () => {
             const played = round.date < today || (round.end_date && round.end_date < today);
             const hasResults = round.status === 'published';
             return (
-            <Card key={round.id} className={`overflow-hidden ${played ? 'border-green-500/40 bg-green-50/30 dark:bg-green-950/10' : 'border-border/40 bg-background'}`}>
+            <Card key={round.id} className={`overflow-hidden ${played ? 'border-primary/30 bg-primary/5' : 'border-border/40 bg-background'}`}>
               <button
                 onClick={() => hasResults ? setExpandedRound(expandedRound === round.id ? null : round.id) : null}
                 className={`w-full text-left ${!hasResults ? 'cursor-default' : ''}`}
@@ -137,13 +137,13 @@ const Rounds = () => {
                 <CardContent className="p-4 sm:p-6 flex items-center justify-between">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`font-mono text-xs w-6 ${played ? 'text-green-600/60' : 'text-muted-foreground/40'}`}>J{round.round_number}</span>
+                      <span className={`font-mono text-xs w-6 ${played ? 'text-primary/60' : 'text-muted-foreground/40'}`}>J{round.round_number}</span>
                       <span className={`font-display text-lg font-bold ${played ? 'text-foreground' : 'text-muted-foreground/50'}`}>{round.name}</span>
                       {round.is_master && (
                         <Badge variant="secondary" className="text-xs bg-accent/20 text-accent border-0">MASTER</Badge>
                       )}
                       {played ? (
-                        <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">
+                        <Badge className="text-[10px] bg-primary/15 text-primary border-0">
                           ✓ {t('rounds.played', 'Jugada')}
                         </Badge>
                       ) : (
@@ -173,19 +173,19 @@ const Rounds = () => {
                     {/* Results status line */}
                     <div className="pt-1">
                       {hasResults ? (
-                        <span className="text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5 cursor-pointer hover:underline">
+                        <span className="text-xs text-primary font-medium flex items-center gap-1.5 cursor-pointer hover:underline">
                           <BarChart3 className="h-3.5 w-3.5" />
                           {t('rounds.viewResults', 'Veure resultats')}
                           <ChevronDown className={`h-3 w-3 transition-transform ${expandedRound === round.id ? 'rotate-180' : ''}`} />
                         </span>
                       ) : played ? (
-                        <span className="text-xs text-amber-500/80 italic">{t('rounds.pendingResults', 'Pendent de pujar resultats')}</span>
+                        <span className="text-xs text-accent/80 italic">{t('rounds.pendingResults', 'Pendent de pujar resultats')}</span>
                       ) : null}
                     </div>
                   </div>
                   {hasResults && (
                     expandedRound === round.id ? (
-                      <ChevronUp className="h-5 w-5 text-green-600" />
+                      <ChevronUp className="h-5 w-5 text-primary" />
                     ) : (
                       <ChevronDown className="h-5 w-5 text-muted-foreground/40" />
                     )
