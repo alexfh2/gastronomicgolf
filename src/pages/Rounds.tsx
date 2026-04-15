@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Users, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronDown, ChevronUp, BarChart3, CalendarPlus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
@@ -27,6 +28,21 @@ const Rounds = () => {
   });
 
   const today = new Date().toISOString().split('T')[0];
+
+  const buildGoogleCalUrl = (round: any) => {
+    const startDate = round.date.replace(/-/g, '');
+    const endRaw = round.end_date || round.date;
+    // Google all-day events need end = day after last day
+    const endNext = new Date(endRaw);
+    endNext.setDate(endNext.getDate() + 1);
+    const endDate = endNext.toISOString().split('T')[0].replace(/-/g, '');
+    const title = encodeURIComponent(`${round.name} — Circuit Gastronòmic Golf`);
+    const location = encodeURIComponent([round.club, round.course].filter(Boolean).join(' — '));
+    const details = encodeURIComponent(
+      [round.sponsor ? `Patrocinador: ${round.sponsor}` : '', round.is_master ? 'Jornada MASTER (x1.25)' : ''].filter(Boolean).join('\n')
+    );
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&location=${location}&details=${details}`;
+  };
 
   const { data: roundResults } = useQuery({
     queryKey: ['public-round-results', expandedRound],
@@ -124,6 +140,23 @@ const Rounds = () => {
       ) : !rounds?.length ? (
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
+        <>
+          {/* Add all to Google Calendar */}
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs"
+              onClick={() => {
+                rounds.forEach((r, i) => {
+                  setTimeout(() => window.open(buildGoogleCalUrl(r), '_blank'), i * 300);
+                });
+              }}
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Afegir totes al Google Calendar
+            </Button>
+          </div>
         <div className="space-y-3">
           {rounds.map((round) => {
             const played = round.date < today || (round.end_date && round.end_date < today);
@@ -183,13 +216,27 @@ const Rounds = () => {
                       ) : null}
                     </div>
                   </div>
-                  {hasResults && (
-                    expandedRound === round.id ? (
-                      <ChevronUp className="h-5 w-5 text-primary" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground/40" />
-                    )
-                  )}
+                  <div className="flex items-center gap-2">
+                    {!played && (
+                      <a
+                        href={buildGoogleCalUrl(round)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 rounded-md hover:bg-muted/50 transition-colors"
+                        title="Afegir al Google Calendar"
+                      >
+                        <CalendarPlus className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                      </a>
+                    )}
+                    {hasResults && (
+                      expandedRound === round.id ? (
+                        <ChevronUp className="h-5 w-5 text-primary" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground/40" />
+                      )
+                    )}
+                  </div>
                 </CardContent>
               </button>
 
@@ -223,6 +270,7 @@ const Rounds = () => {
             );
           })}
         </div>
+        </>
       )}
     </div>
   );
