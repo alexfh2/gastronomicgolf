@@ -79,18 +79,22 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 [1-2 frases resum engrescadores sobre com va anar la jornada]
 
 🏆 RESULTATS
-🥇 Hàndicap Baix: [Nom] — [Punts] pts
-🥇 Hàndicap Alt: [Nom] — [Punts] pts
+
+🏌️ *Hàndicap Baix*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts
+🥉 [Nom] — [Punts] pts
+
+🏌️ *Hàndicap Alt*
+🥇 [Nom] — [Punts] pts
+🥈 [Nom] — [Punts] pts
+🥉 [Nom] — [Punts] pts
 
 👩 *Classificació Femenina*
 🥇 [Nom] — [Punts] pts
-🥈 [Nom] — [Punts] pts (si aplica)
-🥉 [Nom] — [Punts] pts (si aplica)
 
 👴 *Classificació Sènior (+65)*
 🥇 [Nom] — [Punts] pts
-🥈 [Nom] — [Punts] pts (si aplica)
-🥉 [Nom] — [Punts] pts (si aplica)
 
 [Si hi ha actuacions destacades com birdies, mencionar-les amb emojis]
 
@@ -121,18 +125,20 @@ ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 CLASSIFICACIÓ HANDICAP ALT (15.1–36.0):
 ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
-${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
-${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — Guanyadora:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ""}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — Guanyador:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ""}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ""}
 
 Total participants: ${results.length}
 
 INSTRUCCIONS:
 - Utilitza emojis de manera similar a l'estructura de referència
+- Per a Hàndicap Baix i Alt: inclou els 3 primers classificats (🥇🥈🥉)
+- Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a (🥇)
+- IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Inclou SEMPRE els sponsors i hashtags al final
 - El to ha de ser celebratori i engrescador
 - Modalitat STABLEFORD, NO mencionIs resultats scratch
-- Menciona els guanyadors de cada categoria
 - Si és jornada MASTER, destaca-ho
 - Si hi ha patrocinador, menciona'l
 - Retorna NOMÉS el text del post, sense JSON ni markdown

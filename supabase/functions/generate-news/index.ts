@@ -118,13 +118,13 @@ ${round.is_master ? '- JORNADA MASTER (punts x1.25)' : ''}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
 
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
-${hcpLow.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
+${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
 CLASSIFICACIÓ HANDICAP ALT (15.1–36.0) — ${hcpHigh.length} jugadors:
-${hcpHigh.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
+${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
-${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n${females.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
-${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n${seniors.slice(0, 10).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ''}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ''}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 
 Total participants: ${results.length}
@@ -132,9 +132,11 @@ Total participants: ${results.length}
 INSTRUCCIONS:
 - ABSOLUTAMENT CAP EMOJI. Ni un sol emoji en tot el text. Això és una nota de premsa professional per enviar a diaris i mitjans de comunicació.
 - To formal, sobri i periodístic. Sense exclamacions excessives.
-- Segueix l'estructura: introducció, després cada categoria amb descripció + top 10
-- Destaca els guanyadors de cada categoria (Hcp Baix, Hcp Alt, Femení i Sènior) amb comentaris personalitzats
+- Segueix l'estructura: introducció, després cada categoria amb descripció + top 3 (Hcp Baix i Alt) o guanyador/a (Femenina i Sènior)
+- Per a Hàndicap Baix i Hàndicap Alt: inclou els 3 primers classificats amb comentaris personalitzats
+- Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
 - OBLIGATORI: inclou SEMPRE les 4 categories si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
+- Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
 - NO mencionIs resultats scratch ni cops totals
 - Genera un títol atractiu
 - Un subtítol complementari
