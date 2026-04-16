@@ -1,55 +1,34 @@
 
 
-## Plan: Extract hole data (par + handicap) from PDF/photo and use hole handicap for Stableford
+# Ajustar jerarquia de categories i salts de linia en la generacio de contingut
 
-### What changes
+## Resum
 
-Currently, the system only extracts **par** per hole (18 values) from a URL. The user wants to:
-1. Also extract the **hole handicap (stroke index)** for each hole — needed to correctly calculate Stableford points based on player handicap
-2. Allow uploading a **PDF or photo** of the course scorecard (not just a URL)
-3. Store both `course_par` and `course_handicap` (stroke index) per round
+Actualitzar les tres edge functions (`generate-news`, `generate-whatsapp`, `generate-instagram`) per:
 
-### Database
+1. **Handicap Baix i Alt**: mostrar els 3 primers (prioritat principal)
+2. **Femeni i Senior**: mostrar nomes el 1r classificat
+3. **Salts de linia**: instruccions explicites al prompt perque l'IA generi text ben estructurat amb separacio clara entre seccions
 
-**Modify `rounds` table** — add a new column:
-```sql
-ALTER TABLE rounds ADD COLUMN course_handicap jsonb DEFAULT NULL;
-```
-This stores an array of 18 integers representing the stroke index for each hole (e.g., `[5, 13, 1, 17, 3, 15, 7, 11, 9, 6, 14, 2, 18, 4, 16, 8, 12, 10]`).
+## Canvis
 
-### Edge Function: `extract-course-par`
+### 1. `generate-news/index.ts`
+- Reduir dades Femenina/Senior de top 10 a nomes 1r classificat al prompt
+- Actualitzar instruccions: "Per a Hcp Baix i Hcp Alt, inclou els 3 primers. Per a Femenina i Senior, nomes el guanyador/a"
+- Afegir instruccio de format: separar cada categoria amb una linia en blanc
 
-Update to:
-- Accept **either** `{ url: "..." }` or `{ image: "data:image/...;base64,..." }` (base64-encoded PDF/photo)
-- For URL: fetch HTML as before
-- For image/PDF: pass the base64 image directly to the AI model using multimodal input
-- Update AI prompt to extract **3 values per hole**: hole number, par, and handicap (stroke index)
-- Update the tool schema to also return `handicap: number[]` (array of 18 stroke index values)
-- Return both `par` and `handicap` arrays
+### 2. `generate-whatsapp/index.ts`
+- Reduir dades Femenina/Senior a nomes 1r classificat
+- Actualitzar el text de referencia per reflectir: top 3 per HCP, nomes guanyador/a per Femeni/Senior
+- Afegir instruccio explicita: "IMPORTANT: Deixa una linia en blanc entre cada secció/categoria per facilitar la lectura"
 
-### Admin UI: `AdminRounds.tsx`
+### 3. `generate-instagram/index.ts`
+- Mateixos canvis: top 3 per HCP, nomes 1r per Femeni/Senior
+- Instruccio de salts de linia clars entre blocs
 
-Update the "Par del camp" section in the create/edit dialog:
-- Add a **file upload input** (accept `.pdf,.jpg,.png,.jpeg,.webp`) alongside the existing URL input
-- Two buttons: "Extreure des d'URL" (existing) and "Extreure des de fitxer" (new)
-- When a file is selected, read it as base64 and send to the edge function
-- Display both **par** and **handicap** fields (comma-separated, editable)
-- Add a new form field `course_handicap` to store stroke index values
-- Save both `course_par` and `course_handicap` to the database
-
-### Scorecard Visual: `ScorecardVisual.tsx`
-
-- Add optional `handicap` prop to show stroke index row on the scorecard
-
-### Stableford Calculation
-
-The hole handicap data will be available in `rounds.course_handicap` for future use in:
-- Verifying/calculating Stableford points per hole based on player handicap
-- Displaying stroke index on scorecards
-
-### Files to modify
-1. **Database migration** — add `course_handicap` column to `rounds`
-2. **`supabase/functions/extract-course-par/index.ts`** — support image/PDF input + extract handicap
-3. **`src/pages/admin/AdminRounds.tsx`** — file upload UI + handicap field
-4. **`src/components/ScorecardVisual.tsx`** — show stroke index row
+### Detall tecnic
+- Canviar `females.slice(0, 3)` / `females.slice(0, 10)` a `females.slice(0, 1)` als 3 fitxers
+- Canviar `seniors.slice(0, 3)` / `seniors.slice(0, 10)` a `seniors.slice(0, 1)` als 3 fitxers
+- Mantenir `hcpLow.slice(0, 3)` i `hcpHigh.slice(0, 3)` (ja correcte a WA/IG, canviar de 10 a 3 a news per coherencia amb el que es demana)
+- Afegir instruccions de format amb salts de linia a cada prompt
 
