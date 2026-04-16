@@ -69,7 +69,11 @@ El ${round.club || "club"} ha acollit la ${round.name} del Gastronòmic Golf Exp
 ${round.sponsor ? `Jornada patrocinada per ${round.sponsor}.` : ""}
 ${round.is_master ? "⭐ JORNADA MASTER — Punts x1.25!" : ""}
 
-En la classificació Hàndicap Baix (≤15), [NOM] s'ha imposat amb [X] punts Stableford, seguit de [NOM] ([X]) i [NOM] ([X]). En la classificació Hàndicap Alt (15.1–36), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X]).${females.length > 0 ? " En la classificació Femenina, [NOM] s'ha imposat amb [X] punts, seguida de [NOM] ([X]) i [NOM] ([X])." : ""}${seniors.length > 0 ? " En la classificació Sènior (+65), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X])." : ""}
+En la classificació Hàndicap Baix (≤15), [NOM] s'ha imposat amb [X] punts Stableford, seguit de [NOM] ([X]) i [NOM] ([X]).
+
+En la classificació Hàndicap Alt (15.1–36), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X]).
+${females.length > 0 ? `\nEn la classificació Femenina, [NOM] s'ha imposat amb [X] punts.` : ""}
+${seniors.length > 0 ? `\nEn la classificació Sènior (+65), [NOM] s'ha imposat amb [X] punts.` : ""}
 
 Les classificacions completes i estadístiques detallades es poden consultar a: ${publishedUrl}
 ---
@@ -81,14 +85,16 @@ ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 CLASSIFICACIÓ HANDICAP ALT (15.1–36.0) — ${hcpHigh.length} jugadors:
 ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
-${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n${females.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
-${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n${seniors.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — Guanyadora:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ""}
+${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — Guanyador:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ""}
 
 Total participants: ${results.length}
 
 INSTRUCCIONS:
-- Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories en paràgraf narratiu, link final
-- Inclou TOTES les categories que tinguin dades: Hcp Baix, Hcp Alt, Femenina i Sènior
+- Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories, link final
+- Per a Hàndicap Baix i Alt: inclou els 3 primers classificats
+- Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
+- IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Utilitza format *negretes* de WhatsApp per al títol i noms de categories
 - To formal i informatiu, sense emojis excessius (només algun puntual si escau)
 - SEMPRE punts Stableford, MAI cops ni scratch
