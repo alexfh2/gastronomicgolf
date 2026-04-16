@@ -146,7 +146,7 @@ const Index = () => {
             <img 
               src={sponsors} 
               alt="Patrocinadors" 
-              className="max-w-4xl w-full mx-auto opacity-70"
+              className="max-w-3xl w-full mx-auto opacity-70 px-4"
             />
           </div>
         </div>
