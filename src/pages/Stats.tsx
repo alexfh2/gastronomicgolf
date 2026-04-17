@@ -535,7 +535,7 @@ const Stats = () => {
                                   <>
                                     <div className="flex items-center gap-2">
                                       <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
-                                      {entry.playerId ? <Link to={`/jugadors/${entry.playerId}`} className="font-semibold text-foreground hover:text-primary transition-colors">{entry.name}</Link> : <span className="font-semibold text-foreground">{entry.name}</span>}
+                                      {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-semibold text-foreground hover:text-primary transition-colors text-left">{entry.name}</button> : <span className="font-semibold text-foreground">{entry.name}</span>}
                                     </div>
                                     {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
                                   </>
