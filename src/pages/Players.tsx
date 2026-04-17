@@ -85,7 +85,7 @@ const Players = () => {
   const [catHigh, setCatHigh] = useState(false);
   const [catFemale, setCatFemale] = useState(false);
   const [catSenior, setCatSenior] = useState(false);
-  const [sortBy, setSortBy] = useState<string>('hcp');
+  const [sortBy, setSortBy] = useState<string>('name');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: players, isLoading } = useQuery({
