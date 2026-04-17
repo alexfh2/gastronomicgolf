@@ -103,16 +103,16 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer }: { catego
                       ) : (
                         <div className="space-y-1.5">
                           {players.map((p, i) => (
-                            <Link
+                            <button
                               key={p.playerId}
-                              to={`/jugadors/${p.playerId}`}
-                              className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-                              onClick={(e) => e.stopPropagation()}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onSelectPlayer(p.playerId); }}
+                              className="w-full flex items-center gap-2 text-sm hover:text-primary transition-colors text-left"
                             >
                               <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
                               <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{p.name}</span>
                               <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
-                            </Link>
+                            </button>
                           ))}
                         </div>
                       )}
