@@ -415,6 +415,52 @@ const Stats = () => {
       ) : !stats ? (
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
+        <>
+          <Card className="border-border/40 mb-6">
+            <CardHeader className="bg-primary rounded-t-lg flex-row items-center gap-3 space-y-0 py-3 px-6">
+              <Crown className="h-5 w-5 text-primary-foreground" />
+              <CardTitle className="text-sm font-medium text-primary-foreground">Líders per categoria</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <Tabs defaultValue="hcpLow">
+                <TabsList className="h-auto gap-1 flex-wrap mb-4">
+                  {leaderCategories.map(cat => (
+                    <TabsTrigger key={cat.key} value={cat.key} className="text-xs">{cat.label}</TabsTrigger>
+                  ))}
+                </TabsList>
+                {leaderCategories.map(cat => {
+                  const players = categoryLeaders[cat.key];
+                  return (
+                    <TabsContent key={cat.key} value={cat.key}>
+                      {!players?.length ? (
+                        <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>
+                      ) : (
+                        <div className="space-y-0">
+                          {players.map((p, i) => (
+                            <Link
+                              key={p.playerId}
+                              to={`/jugadors/${p.playerId}`}
+                              className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors -mx-1 px-1 rounded"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={cn('text-xs font-mono w-5', i < 3 ? 'text-accent font-bold' : 'text-muted-foreground')}>{i + 1}</span>
+                                <span className="text-sm font-medium">{p.name}</span>
+                                {p.handicap != null && (
+                                  <span className="text-[11px] text-muted-foreground font-mono">({p.handicap})</span>
+                                )}
+                              </div>
+                              <span className="font-mono font-bold text-sm text-primary">{p.totalPoints} pts</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            </CardContent>
+          </Card>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {statCards.map((card, idx) => {
             const lb = leaderboards[idx] || [];
