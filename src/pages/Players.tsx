@@ -79,10 +79,19 @@ const formatDate = (s: string) => {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
-const lastNameKey = (name: string) => {
+const nameSortKey = (name: string) => {
+  // Format "APELLIDOS, NOMBRE" → use part before comma (apellidos completos)
   if (name.includes(',')) return name.split(',')[0].trim().toLowerCase();
+  // Fallback: assume "Nombre Apellidos" → last word
   const parts = name.trim().split(/\s+/);
   return (parts[parts.length - 1] || name).toLowerCase();
+};
+
+const RANK_LABELS: Record<CategoryKey, string> = {
+  hcpInf: 'HcpInf',
+  hcpSup: 'HcpSup',
+  female: 'Fem',
+  senior: 'Sr',
 };
 
 const Players = () => {
