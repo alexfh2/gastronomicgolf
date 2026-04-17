@@ -375,7 +375,8 @@ const Players = () => {
                   Act. {formatDate(p.updated_at)}
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
