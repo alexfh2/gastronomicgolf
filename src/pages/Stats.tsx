@@ -591,6 +591,7 @@ const Stats = () => {
           })}
         </div>
       )}
+      <PlayerProfileDialog playerId={selectedPlayerId} open={!!selectedPlayerId} onOpenChange={(o) => !o && setSelectedPlayerId(null)} />
     </div>
   );
 };
