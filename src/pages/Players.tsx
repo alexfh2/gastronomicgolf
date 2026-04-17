@@ -345,6 +345,12 @@ const Players = () => {
           </div>
         </>
       )}
+
+      <PlayerProfileDialog
+        playerId={selectedPlayerId}
+        open={!!selectedPlayerId}
+        onOpenChange={(o) => !o && setSelectedPlayerId(null)}
+      />
     </div>
   );
 };
