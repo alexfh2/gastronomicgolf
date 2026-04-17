@@ -231,10 +231,15 @@ const Players = () => {
 
     list.sort((a, b) => {
       if (sortBy === 'hcp') {
-        return (a.hcpPos ?? 9999) - (b.hcpPos ?? 9999);
+        // Use the best (lowest) ranking position across the player's categories
+        const bestPos = (e: typeof a) => {
+          const positions = Object.values(e.ranks).filter((v): v is number => typeof v === 'number');
+          return positions.length ? Math.min(...positions) : 9999;
+        };
+        return bestPos(a) - bestPos(b);
       }
       if (sortBy === 'name') {
-        return lastNameKey(a.player.name).localeCompare(lastNameKey(b.player.name));
+        return nameSortKey(a.player.name).localeCompare(nameSortKey(b.player.name));
       }
       if (sortBy === 'handicap') {
         const ah = a.player.current_handicap ?? 99;
