@@ -272,7 +272,7 @@ const Players = () => {
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-full md:w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="scratch">Rànquing Scratch</SelectItem>
+              
               <SelectItem value="hcp">Rànquing Hcp</SelectItem>
               <SelectItem value="handicap">Per hàndicap</SelectItem>
               <SelectItem value="name">Per nom</SelectItem>
@@ -287,7 +287,7 @@ const Players = () => {
         <>
           <p className="text-sm text-muted-foreground mb-3">{filtered.length} jugadors</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(({ player: p, stats, scratchPos, hcpPos, prob }) => (
+            {filtered.map(({ player: p, stats, hcpPos }) => (
               <Card key={p.id} className="p-4 border-border/50 hover:border-primary/40 hover:shadow-md transition-all">
                 <div className="flex items-start gap-3 mb-3">
                   <Avatar className="h-12 w-12 border border-border/40">
@@ -305,9 +305,6 @@ const Players = () => {
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
                         Hdcp {formatHcp(p.current_handicap)}
                       </Badge>
-                      {scratchPos && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">#{scratchPos} Scr</Badge>
-                      )}
                       {hcpPos && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">#{hcpPos} Hcp</Badge>
                       )}
@@ -325,30 +322,15 @@ const Players = () => {
                 </div>
 
                 {stats ? (
-                  <>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2 font-mono">
-                      <span className="flex items-center gap-1">
-                        <BarChart3 className="h-3 w-3" /> Ø{stats.avgScratch}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Trophy className="h-3 w-3" /> {stats.bestScratch || '—'}
-                      </span>
-                      <span>{stats.rounds} {stats.rounds === 1 ? 'prova' : 'proves'}</span>
-                    </div>
-
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="text-muted-foreground">Prob. guanyar</span>
-                        <span className="font-mono font-semibold text-primary">{prob}%</span>
-                      </div>
-                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all"
-                          style={{ width: `${Math.min(100, prob * 4)}%` }}
-                        />
-                      </div>
-                    </div>
-                  </>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
+                    <span className="flex items-center gap-1">
+                      <BarChart3 className="h-3 w-3" /> Ø{stats.avgStableford} pts
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3" /> {stats.bestStableford || '—'}
+                    </span>
+                    <span>{stats.rounds} {stats.rounds === 1 ? 'prova' : 'proves'}</span>
+                  </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">Sense proves jugades</p>
                 )}
