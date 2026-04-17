@@ -80,11 +80,9 @@ const formatDate = (s: string) => {
 };
 
 const nameSortKey = (name: string) => {
-  // Format "APELLIDOS, NOMBRE" → use part before comma (apellidos completos)
+  // All names are normalized to "APELLIDOS, NOMBRE" → sort by surnames (text before comma).
   if (name.includes(',')) return name.split(',')[0].trim().toLowerCase();
-  // Fallback: assume "Nombre Apellidos" → last word
-  const parts = name.trim().split(/\s+/);
-  return (parts[parts.length - 1] || name).toLowerCase();
+  return name.trim().toLowerCase();
 };
 
 const RANK_LABELS: Record<CategoryKey, string> = {
