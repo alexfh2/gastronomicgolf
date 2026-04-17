@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Result = Tables<'results'> & {
@@ -15,6 +15,7 @@ type Result = Tables<'results'> & {
 
 const Rankings = () => {
   const { t } = useTranslation();
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: results, isLoading } = useQuery({
     queryKey: ['public-rankings-data'],
@@ -179,9 +180,13 @@ const Rankings = () => {
                   {i + 1}
                 </td>
                 <td className="py-2 font-medium">
-                  <Link to={`/jugadors/${p.id}`} className="hover:text-primary transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlayerId(p.id)}
+                    className="hover:text-primary transition-colors text-left"
+                  >
                     {p.name}
-                  </Link>
+                  </button>
                 </td>
                 <td className="py-2 px-2 text-right font-mono text-xs text-muted-foreground">{p.handicap ?? '—'}</td>
                 {rounds?.map(r => {
@@ -237,6 +242,12 @@ const Rankings = () => {
           ))}
         </Tabs>
       )}
+
+      <PlayerProfileDialog
+        playerId={selectedPlayerId}
+        open={!!selectedPlayerId}
+        onOpenChange={(o) => !o && setSelectedPlayerId(null)}
+      />
     </div>
   );
 };
