@@ -490,7 +490,7 @@ const Stats = () => {
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <LeadersCard categories={leaderCategories} data={categoryLeaders} noDataLabel={t('common.noData')} />
+          <LeadersCard categories={leaderCategories} data={categoryLeaders} noDataLabel={t('common.noData')} onSelectPlayer={setSelectedPlayerId} />
           {statCards.map((card, idx) => {
             const lb = leaderboards[idx] || [];
             const hasLeaderboard = lb.length > 0;
