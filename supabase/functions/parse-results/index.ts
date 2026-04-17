@@ -158,7 +158,12 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
     const view = entry.view || {};
     const dayView = view.day || view.acc || {};
 
-    const name = [player.firstName, player.surname].filter(Boolean).join(" ").trim();
+    // Format: "APELLIDOS, NOMBRE" (federation standard) for consistent alphabetical sorting
+    const surname = (player.surname || "").trim();
+    const firstName = (player.firstName || "").trim();
+    const name = surname && firstName
+      ? `${surname}, ${firstName}`
+      : (surname || firstName);
     if (!name || name.length < 2) continue;
 
     const positionValue = parseNumber(dayView.rankingPosition ?? dayView.realRanking);
