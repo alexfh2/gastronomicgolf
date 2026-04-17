@@ -196,6 +196,7 @@ const Players = () => {
 
 
   const filtered = useMemo(() => {
+    const anyCat = catLow || catHigh || catFemale || catSenior;
     let list = enriched.filter((e) => {
       const p = e.player;
       const q = search.toLowerCase();
@@ -204,9 +205,20 @@ const Players = () => {
         p.license?.toLowerCase().includes(q) ||
         p.club?.toLowerCase().includes(q)
       )) return false;
-      if (genderFilter !== 'all' && p.gender !== genderFilter) return false;
-      if (seniorFilter === 'senior' && !p.is_senior) return false;
-      if (seniorFilter === 'no-senior' && p.is_senior) return false;
+
+      if (anyCat) {
+        const hcp = p.current_handicap;
+        const isLow = hcp !== null && hcp !== undefined && hcp <= 15;
+        const isHigh = hcp !== null && hcp !== undefined && hcp > 15;
+        const isFemale = p.gender === 'F';
+        const isSenior = p.is_senior;
+        const matches =
+          (catLow && isLow) ||
+          (catHigh && isHigh) ||
+          (catFemale && isFemale) ||
+          (catSenior && isSenior);
+        if (!matches) return false;
+      }
       return true;
     });
 
@@ -226,7 +238,7 @@ const Players = () => {
     });
 
     return list;
-  }, [enriched, search, genderFilter, seniorFilter, sortBy]);
+  }, [enriched, search, catLow, catHigh, catFemale, catSenior, sortBy]);
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
