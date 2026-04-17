@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
@@ -77,6 +78,51 @@ const Stats = () => {
       return data || [];
     },
   });
+
+  const { data: categoryData } = useQuery({
+    queryKey: ['public-stats-category-leaders'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('results')
+        .select('stableford_points, player_id, handicap_at_round, players(name, gender, is_senior, current_handicap), rounds!inner(status)')
+        .eq('rounds.status', 'published')
+        .not('stableford_points', 'is', null);
+      return data || [];
+    },
+  });
+
+  const categoryLeaders = useMemo(() => {
+    if (!categoryData?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
+    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
+    for (const r of categoryData) {
+      const p = r.players as any;
+      if (!p) continue;
+      const hcp = r.handicap_at_round ?? p.current_handicap;
+      const pts = r.stableford_points ?? 0;
+      const existing = agg.get(r.player_id);
+      if (existing) {
+        existing.totalPoints += pts;
+        existing.rounds += 1;
+        if (hcp != null) existing.handicap = hcp;
+      } else {
+        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, gender: p.gender, is_senior: p.is_senior, handicap: hcp, playerId: r.player_id });
+      }
+    }
+    const all = Array.from(agg.values());
+    return {
+      hcpLow: all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
+      hcpHigh: all.filter(p => p.handicap != null && p.handicap > 15 && p.handicap <= 36).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
+      female: all.filter(p => p.gender === 'F').sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
+      senior: all.filter(p => p.is_senior).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
+    };
+  }, [categoryData]);
+
+  const leaderCategories = [
+    { key: 'hcpLow' as const, label: 'HCP Baix' },
+    { key: 'hcpHigh' as const, label: 'HCP Alt' },
+    { key: 'female' as const, label: t('categories.female') },
+    { key: 'senior' as const, label: t('categories.senior') },
+  ];
 
   const { stats, leaderboards } = useMemo(() => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
@@ -369,6 +415,52 @@ const Stats = () => {
       ) : !stats ? (
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
+        <>
+          <Card className="border-border/40 mb-6">
+            <CardHeader className="bg-primary rounded-t-lg flex-row items-center gap-3 space-y-0 py-3 px-6">
+              <Crown className="h-5 w-5 text-primary-foreground" />
+              <CardTitle className="text-sm font-medium text-primary-foreground">Líders per categoria</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <Tabs defaultValue="hcpLow">
+                <TabsList className="h-auto gap-1 flex-wrap mb-4">
+                  {leaderCategories.map(cat => (
+                    <TabsTrigger key={cat.key} value={cat.key} className="text-xs">{cat.label}</TabsTrigger>
+                  ))}
+                </TabsList>
+                {leaderCategories.map(cat => {
+                  const players = categoryLeaders[cat.key];
+                  return (
+                    <TabsContent key={cat.key} value={cat.key}>
+                      {!players?.length ? (
+                        <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>
+                      ) : (
+                        <div className="space-y-0">
+                          {players.map((p, i) => (
+                            <Link
+                              key={p.playerId}
+                              to={`/jugadors/${p.playerId}`}
+                              className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors -mx-1 px-1 rounded"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={cn('text-xs font-mono w-5', i < 3 ? 'text-accent font-bold' : 'text-muted-foreground')}>{i + 1}</span>
+                                <span className="text-sm font-medium">{p.name}</span>
+                                {p.handicap != null && (
+                                  <span className="text-[11px] text-muted-foreground font-mono">({p.handicap})</span>
+                                )}
+                              </div>
+                              <span className="font-mono font-bold text-sm text-primary">{p.totalPoints} pts</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            </CardContent>
+          </Card>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {statCards.map((card, idx) => {
             const lb = leaderboards[idx] || [];
@@ -469,6 +561,7 @@ const Stats = () => {
             );
           })}
         </div>
+        </>
       )}
     </div>
   );
