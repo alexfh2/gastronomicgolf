@@ -285,7 +285,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                   <div key={s.label} className="text-center">
                     <s.icon className="h-4 w-4 mx-auto text-muted-foreground/60 mb-1" strokeWidth={1.5} />
                     <div className="font-display font-extrabold text-base text-primary tabular-nums">{s.value}</div>
-                    <div className="text-[10px] text-muted-foreground leading-tight">{s.label}</div>
+                    <div className="text-[10px] text-muted-foreground leading-tight font-bold">{s.label}</div>
                   </div>
                 ))}
               </div>
