@@ -81,8 +81,10 @@ const formatDate = (s: string) => {
 const Players = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const [genderFilter, setGenderFilter] = useState<string>('all');
-  const [seniorFilter, setSeniorFilter] = useState<string>('all');
+  const [catLow, setCatLow] = useState(false);
+  const [catHigh, setCatHigh] = useState(false);
+  const [catFemale, setCatFemale] = useState(false);
+  const [catSenior, setCatSenior] = useState(false);
   const [sortBy, setSortBy] = useState<string>('hcp');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
