@@ -571,7 +571,7 @@ const Stats = () => {
                                     >
                                       {i + 1}
                                     </span>
-                                    {entry.playerId ? <Link to={`/jugadors/${entry.playerId}`} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors">{entry.name}</Link> : <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>}
+                                    {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors text-left">{entry.name}</button> : <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>}
                                     <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
                                       {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
                                     </span>
