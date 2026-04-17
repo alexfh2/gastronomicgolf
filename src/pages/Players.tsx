@@ -16,9 +16,6 @@ import {
 } from '@/components/ui/select';
 import {
   Search,
-  Award,
-  Target,
-  Flame,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -229,23 +226,6 @@ const Players = () => {
     return enrichedList;
   }, [players, statsByPlayer]);
 
-  const highlights = useMemo(() => {
-    const withHcp = enriched.filter((e) => e.player.current_handicap !== null);
-    const bestHcp = withHcp.length
-      ? [...withHcp].sort((a, b) => (a.player.current_handicap! - b.player.current_handicap!))[0]
-      : null;
-
-    const withStats = enriched.filter((e) => e.stats && e.stats.rounds >= 2);
-    const mostRegular = withStats.length
-      ? [...withStats].sort((a, b) => a.stats!.stdev - b.stats!.stdev)[0]
-      : null;
-
-    const favorite = enriched.length
-      ? [...enriched].sort((a, b) => b.prob - a.prob)[0]
-      : null;
-
-    return { bestHcp, mostRegular, favorite };
-  }, [enriched]);
 
   const filtered = useMemo(() => {
     let list = enriched.filter((e) => {
