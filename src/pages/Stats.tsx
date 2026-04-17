@@ -58,7 +58,7 @@ const getMostCommonPar = (parCounts: Record<string, number>) => {
 type LeaderPlayer = { name: string; totalPoints: number; handicap: number | null; playerId: string };
 type LeadersData = Record<string, LeaderPlayer[]>;
 
-const LeadersCard = ({ categories, data, noDataLabel }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string }) => {
+const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string; onSelectPlayer: (id: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(categories[0]?.key);
   const activePlayers = data[activeTab] || [];
