@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,7 +58,7 @@ const getMostCommonPar = (parCounts: Record<string, number>) => {
 type LeaderPlayer = { name: string; totalPoints: number; handicap: number | null; playerId: string };
 type LeadersData = Record<string, LeaderPlayer[]>;
 
-const LeadersCard = ({ categories, data, noDataLabel }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string }) => {
+const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string; onSelectPlayer: (id: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(categories[0]?.key);
   const activePlayers = data[activeTab] || [];
@@ -103,16 +103,16 @@ const LeadersCard = ({ categories, data, noDataLabel }: { categories: { key: str
                       ) : (
                         <div className="space-y-1.5">
                           {players.map((p, i) => (
-                            <Link
+                            <button
                               key={p.playerId}
-                              to={`/jugadors/${p.playerId}`}
-                              className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-                              onClick={(e) => e.stopPropagation()}
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onSelectPlayer(p.playerId); }}
+                              className="w-full flex items-center gap-2 text-sm hover:text-primary transition-colors text-left"
                             >
                               <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
                               <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{p.name}</span>
                               <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
-                            </Link>
+                            </button>
                           ))}
                         </div>
                       )}
@@ -131,6 +131,7 @@ const LeadersCard = ({ categories, data, noDataLabel }: { categories: { key: str
 const Stats = () => {
   const { t } = useTranslation();
   const [openCards, setOpenCards] = useState<Set<number>>(new Set());
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const toggleCard = (idx: number) => {
     setOpenCards(prev => {
@@ -489,7 +490,7 @@ const Stats = () => {
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <LeadersCard categories={leaderCategories} data={categoryLeaders} noDataLabel={t('common.noData')} />
+          <LeadersCard categories={leaderCategories} data={categoryLeaders} noDataLabel={t('common.noData')} onSelectPlayer={setSelectedPlayerId} />
           {statCards.map((card, idx) => {
             const lb = leaderboards[idx] || [];
             const hasLeaderboard = lb.length > 0;
@@ -534,7 +535,7 @@ const Stats = () => {
                                   <>
                                     <div className="flex items-center gap-2">
                                       <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
-                                      {entry.playerId ? <Link to={`/jugadors/${entry.playerId}`} className="font-semibold text-foreground hover:text-primary transition-colors">{entry.name}</Link> : <span className="font-semibold text-foreground">{entry.name}</span>}
+                                      {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-semibold text-foreground hover:text-primary transition-colors text-left">{entry.name}</button> : <span className="font-semibold text-foreground">{entry.name}</span>}
                                     </div>
                                     {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
                                   </>
@@ -570,7 +571,7 @@ const Stats = () => {
                                     >
                                       {i + 1}
                                     </span>
-                                    {entry.playerId ? <Link to={`/jugadors/${entry.playerId}`} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors">{entry.name}</Link> : <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>}
+                                    {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors text-left">{entry.name}</button> : <span className="flex-1 min-w-0 text-foreground leading-tight">{entry.name}</span>}
                                     <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
                                       {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
                                     </span>
@@ -590,6 +591,7 @@ const Stats = () => {
           })}
         </div>
       )}
+      <PlayerProfileDialog playerId={selectedPlayerId} open={!!selectedPlayerId} onOpenChange={(o) => !o && setSelectedPlayerId(null)} />
     </div>
   );
 };
