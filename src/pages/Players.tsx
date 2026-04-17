@@ -292,58 +292,6 @@ const Players = () => {
       </div>
       <p className="text-muted-foreground mb-6">{players?.length || 0} jugadors registrats</p>
 
-      {/* Highlight stat cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="p-4 border-border/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <Award className="h-4 w-4 text-primary" />
-            <span>Millor handicap</span>
-          </div>
-          {highlights.bestHcp ? (
-            <Link to={`/jugadors/${highlights.bestHcp.player.id}`} className="block hover:text-primary transition-colors">
-              <p className="font-semibold truncate">{highlights.bestHcp.player.name}</p>
-              <p className="text-sm text-muted-foreground font-mono mt-1">
-                Hdcp {formatHcp(highlights.bestHcp.player.current_handicap)}
-              </p>
-            </Link>
-          ) : (
-            <p className="text-sm text-muted-foreground">—</p>
-          )}
-        </Card>
-
-        <Card className="p-4 border-border/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <Target className="h-4 w-4 text-primary" />
-            <span>Més regular</span>
-          </div>
-          {highlights.mostRegular ? (
-            <Link to={`/jugadors/${highlights.mostRegular.player.id}`} className="block hover:text-primary transition-colors">
-              <p className="font-semibold truncate">{highlights.mostRegular.player.name}</p>
-              <p className="text-sm text-muted-foreground font-mono mt-1">
-                σ {highlights.mostRegular.stats!.stdev.toFixed(1)}
-              </p>
-            </Link>
-          ) : (
-            <p className="text-sm text-muted-foreground">—</p>
-          )}
-        </Card>
-
-        <Card className="p-4 border-border/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <Flame className="h-4 w-4 text-primary" />
-            <span>Favorit pròxima prova</span>
-          </div>
-          {highlights.favorite && highlights.favorite.stats ? (
-            <Link to={`/jugadors/${highlights.favorite.player.id}`} className="block hover:text-primary transition-colors">
-              <p className="font-semibold truncate">{highlights.favorite.player.name}</p>
-              <p className="text-sm text-primary font-mono font-bold mt-1">{highlights.favorite.prob}%</p>
-            </Link>
-          ) : (
-            <p className="text-sm text-muted-foreground">—</p>
-          )}
-        </Card>
-      </div>
-
       {/* Legend */}
       <div className="text-xs text-muted-foreground mb-4 flex flex-wrap gap-x-3 gap-y-1">
         <span><strong>Hdcp +X</strong> = Hàndicap (+ millor)</span>
