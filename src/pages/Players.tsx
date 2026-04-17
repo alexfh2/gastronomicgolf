@@ -187,28 +187,19 @@ const Players = () => {
     return map;
   }, [results]);
 
+  const categoryRankings = useCategoryRankings();
+  const rankPositions = useMemo(() => buildPlayerRankPositions(categoryRankings), [categoryRankings]);
+
   // Compute hcp ranking
   const enriched = useMemo(() => {
     if (!players) return [];
 
-    const withStats = players.filter((p) => statsByPlayer.has(p.id));
-
-    // Hcp ranking: higher avg stableford = better
-    const hcpRank = new Map<string, number>();
-    [...withStats]
-      .sort((a, b) => {
-        const sa = statsByPlayer.get(a.id)!;
-        const sb = statsByPlayer.get(b.id)!;
-        return sb.avgStableford - sa.avgStableford;
-      })
-      .forEach((p, i) => hcpRank.set(p.id, i + 1));
-
     return players.map((p) => ({
       player: p,
       stats: statsByPlayer.get(p.id),
-      hcpPos: hcpRank.get(p.id),
+      ranks: rankPositions.get(p.id) || {},
     }));
-  }, [players, statsByPlayer]);
+  }, [players, statsByPlayer, rankPositions]);
 
 
   const filtered = useMemo(() => {
