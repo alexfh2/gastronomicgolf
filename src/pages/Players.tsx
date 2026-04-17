@@ -317,7 +317,12 @@ const Players = () => {
         <>
           <p className="text-sm text-muted-foreground mb-3">{filtered.length} jugadors</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(({ player: p, stats, hcpPos }) => (
+            {filtered.map(({ player: p, stats, ranks }) => {
+              const rankBadges = (Object.keys(ranks) as CategoryKey[])
+                .map((k) => ({ key: k, pos: ranks[k]! }))
+                .filter((r) => r.pos)
+                .sort((a, b) => a.pos - b.pos);
+              return (
               <Card key={p.id} className="p-4 border-border/50 hover:border-primary/40 hover:shadow-md transition-all">
                 <div className="flex items-start gap-3 mb-3">
                   <Avatar className="h-12 w-12 border border-border/40">
@@ -336,11 +341,11 @@ const Players = () => {
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
                         Hdcp {formatHcp(p.current_handicap)}
                       </Badge>
-                      {hcpPos && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">#{hcpPos} Hcp</Badge>
-                      )}
-                      {p.gender === 'F' && <Badge variant="outline" className="text-[10px] px-1.5 py-0">F</Badge>}
-                      {p.is_senior && <Badge variant="outline" className="text-[10px] px-1.5 py-0">SR</Badge>}
+                      {rankBadges.map((r) => (
+                        <Badge key={r.key} variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
+                          #{r.pos} {RANK_LABELS[r.key]}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                   <div className="flex items-center text-xs text-muted-foreground shrink-0" title={
