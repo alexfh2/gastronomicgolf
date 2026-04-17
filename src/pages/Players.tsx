@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
+import { useCategoryRankings, buildPlayerRankPositions, type CategoryKey } from '@/hooks/useCategoryRankings';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -78,10 +79,19 @@ const formatDate = (s: string) => {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
-const lastNameKey = (name: string) => {
+const nameSortKey = (name: string) => {
+  // Format "APELLIDOS, NOMBRE" → use part before comma (apellidos completos)
   if (name.includes(',')) return name.split(',')[0].trim().toLowerCase();
+  // Fallback: assume "Nombre Apellidos" → last word
   const parts = name.trim().split(/\s+/);
   return (parts[parts.length - 1] || name).toLowerCase();
+};
+
+const RANK_LABELS: Record<CategoryKey, string> = {
+  hcpInf: 'HcpInf',
+  hcpSup: 'HcpSup',
+  female: 'Fem',
+  senior: 'Sr',
 };
 
 const Players = () => {
@@ -177,28 +187,19 @@ const Players = () => {
     return map;
   }, [results]);
 
+  const categoryRankings = useCategoryRankings();
+  const rankPositions = useMemo(() => buildPlayerRankPositions(categoryRankings), [categoryRankings]);
+
   // Compute hcp ranking
   const enriched = useMemo(() => {
     if (!players) return [];
 
-    const withStats = players.filter((p) => statsByPlayer.has(p.id));
-
-    // Hcp ranking: higher avg stableford = better
-    const hcpRank = new Map<string, number>();
-    [...withStats]
-      .sort((a, b) => {
-        const sa = statsByPlayer.get(a.id)!;
-        const sb = statsByPlayer.get(b.id)!;
-        return sb.avgStableford - sa.avgStableford;
-      })
-      .forEach((p, i) => hcpRank.set(p.id, i + 1));
-
     return players.map((p) => ({
       player: p,
       stats: statsByPlayer.get(p.id),
-      hcpPos: hcpRank.get(p.id),
+      ranks: rankPositions.get(p.id) || {},
     }));
-  }, [players, statsByPlayer]);
+  }, [players, statsByPlayer, rankPositions]);
 
 
   const filtered = useMemo(() => {
@@ -230,10 +231,15 @@ const Players = () => {
 
     list.sort((a, b) => {
       if (sortBy === 'hcp') {
-        return (a.hcpPos ?? 9999) - (b.hcpPos ?? 9999);
+        // Use the best (lowest) ranking position across the player's categories
+        const bestPos = (e: typeof a) => {
+          const positions = Object.values(e.ranks).filter((v): v is number => typeof v === 'number');
+          return positions.length ? Math.min(...positions) : 9999;
+        };
+        return bestPos(a) - bestPos(b);
       }
       if (sortBy === 'name') {
-        return lastNameKey(a.player.name).localeCompare(lastNameKey(b.player.name));
+        return nameSortKey(a.player.name).localeCompare(nameSortKey(b.player.name));
       }
       if (sortBy === 'handicap') {
         const ah = a.player.current_handicap ?? 99;
@@ -311,7 +317,12 @@ const Players = () => {
         <>
           <p className="text-sm text-muted-foreground mb-3">{filtered.length} jugadors</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(({ player: p, stats, hcpPos }) => (
+            {filtered.map(({ player: p, stats, ranks }) => {
+              const rankBadges = (Object.keys(ranks) as CategoryKey[])
+                .map((k) => ({ key: k, pos: ranks[k]! }))
+                .filter((r) => r.pos)
+                .sort((a, b) => a.pos - b.pos);
+              return (
               <Card key={p.id} className="p-4 border-border/50 hover:border-primary/40 hover:shadow-md transition-all">
                 <div className="flex items-start gap-3 mb-3">
                   <Avatar className="h-12 w-12 border border-border/40">
@@ -330,11 +341,11 @@ const Players = () => {
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
                         Hdcp {formatHcp(p.current_handicap)}
                       </Badge>
-                      {hcpPos && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">#{hcpPos} Hcp</Badge>
-                      )}
-                      {p.gender === 'F' && <Badge variant="outline" className="text-[10px] px-1.5 py-0">F</Badge>}
-                      {p.is_senior && <Badge variant="outline" className="text-[10px] px-1.5 py-0">SR</Badge>}
+                      {rankBadges.map((r) => (
+                        <Badge key={r.key} variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
+                          #{r.pos} {RANK_LABELS[r.key]}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                   <div className="flex items-center text-xs text-muted-foreground shrink-0" title={
@@ -364,7 +375,8 @@ const Players = () => {
                   Act. {formatDate(p.updated_at)}
                 </div>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
