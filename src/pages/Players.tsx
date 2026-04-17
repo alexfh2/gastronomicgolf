@@ -78,6 +78,12 @@ const formatDate = (s: string) => {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
+const lastNameKey = (name: string) => {
+  if (name.includes(',')) return name.split(',')[0].trim().toLowerCase();
+  const parts = name.trim().split(/\s+/);
+  return (parts[parts.length - 1] || name).toLowerCase();
+};
+
 const Players = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
