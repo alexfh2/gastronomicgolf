@@ -238,7 +238,7 @@ const Players = () => {
         <span><strong>#N</strong> = Rànquing</span>
         <span>Ø Mitjana</span>
         <span>Millor resultat</span>
-        <span><strong>Prob.</strong> = Predicció</span>
+        
       </div>
 
       {/* Filters */}
