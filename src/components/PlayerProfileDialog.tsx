@@ -253,7 +253,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                 {subCategories.map((sub) => (
                   <div key={sub.label} className="border border-border/50 rounded-lg p-4 bg-card">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-medium">
-                      {sub.label} <span className="text-muted-foreground/60">(subcategoria)</span>
+                      {sub.label}
                     </div>
                     <div className="flex items-end justify-between gap-2">
                       <div className="flex items-center gap-2">
