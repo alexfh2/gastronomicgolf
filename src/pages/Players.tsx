@@ -78,6 +78,12 @@ const formatDate = (s: string) => {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
+const lastNameKey = (name: string) => {
+  if (name.includes(',')) return name.split(',')[0].trim().toLowerCase();
+  const parts = name.trim().split(/\s+/);
+  return (parts[parts.length - 1] || name).toLowerCase();
+};
+
 const Players = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
@@ -85,7 +91,7 @@ const Players = () => {
   const [catHigh, setCatHigh] = useState(false);
   const [catFemale, setCatFemale] = useState(false);
   const [catSenior, setCatSenior] = useState(false);
-  const [sortBy, setSortBy] = useState<string>('hcp');
+  const [sortBy, setSortBy] = useState<string>('name');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: players, isLoading } = useQuery({
@@ -227,7 +233,7 @@ const Players = () => {
         return (a.hcpPos ?? 9999) - (b.hcpPos ?? 9999);
       }
       if (sortBy === 'name') {
-        return a.player.name.localeCompare(b.player.name);
+        return lastNameKey(a.player.name).localeCompare(lastNameKey(b.player.name));
       }
       if (sortBy === 'handicap') {
         const ah = a.player.current_handicap ?? 99;
