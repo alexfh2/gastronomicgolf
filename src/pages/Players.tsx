@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -79,8 +81,10 @@ const formatDate = (s: string) => {
 const Players = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const [genderFilter, setGenderFilter] = useState<string>('all');
-  const [seniorFilter, setSeniorFilter] = useState<string>('all');
+  const [catLow, setCatLow] = useState(false);
+  const [catHigh, setCatHigh] = useState(false);
+  const [catFemale, setCatFemale] = useState(false);
+  const [catSenior, setCatSenior] = useState(false);
   const [sortBy, setSortBy] = useState<string>('hcp');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
@@ -192,6 +196,7 @@ const Players = () => {
 
 
   const filtered = useMemo(() => {
+    const anyCat = catLow || catHigh || catFemale || catSenior;
     let list = enriched.filter((e) => {
       const p = e.player;
       const q = search.toLowerCase();
@@ -200,9 +205,20 @@ const Players = () => {
         p.license?.toLowerCase().includes(q) ||
         p.club?.toLowerCase().includes(q)
       )) return false;
-      if (genderFilter !== 'all' && p.gender !== genderFilter) return false;
-      if (seniorFilter === 'senior' && !p.is_senior) return false;
-      if (seniorFilter === 'no-senior' && p.is_senior) return false;
+
+      if (anyCat) {
+        const hcp = p.current_handicap;
+        const isLow = hcp !== null && hcp !== undefined && hcp <= 15;
+        const isHigh = hcp !== null && hcp !== undefined && hcp > 15;
+        const isFemale = p.gender === 'F';
+        const isSenior = p.is_senior;
+        const matches =
+          (catLow && isLow) ||
+          (catHigh && isHigh) ||
+          (catFemale && isFemale) ||
+          (catSenior && isSenior);
+        if (!matches) return false;
+      }
       return true;
     });
 
@@ -222,14 +238,14 @@ const Players = () => {
     });
 
     return list;
-  }, [enriched, search, genderFilter, seniorFilter, sortBy]);
+  }, [enriched, search, catLow, catHigh, catFemale, catSenior, sortBy]);
 
   return (
     <div className="container py-8 lg:py-12 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <Users className="h-7 w-7 text-primary" />
-        <h1 className="font-display text-3xl lg:text-4xl font-bold">{t('players.title')}</h1>
+      <div className="bg-primary rounded-lg px-4 py-2.5 mb-2 border border-primary/15 inline-flex items-center gap-3">
+        <Users className="h-6 w-6 text-primary-foreground" />
+        <h1 className="font-display text-2xl lg:text-3xl font-bold text-primary-foreground">{t('players.title')}</h1>
       </div>
       <p className="text-muted-foreground mb-6">{players?.length || 0} jugadors registrats</p>
 
@@ -239,12 +255,11 @@ const Players = () => {
         <span><strong>#N</strong> = Rànquing</span>
         <span>Ø Mitjana</span>
         <span>Millor resultat</span>
-        
       </div>
 
       {/* Filters */}
       <Card className="p-3 mb-6 border-border/50">
-        <div className="flex flex-col md:flex-row gap-2">
+        <div className="flex flex-col md:flex-row gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -254,31 +269,33 @@ const Players = () => {
               className="pl-9"
             />
           </div>
-          <Select value={genderFilter} onValueChange={setGenderFilter}>
-            <SelectTrigger className="w-full md:w-[140px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tots</SelectItem>
-              <SelectItem value="M">Masculí</SelectItem>
-              <SelectItem value="F">Femení</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={seniorFilter} onValueChange={setSeniorFilter}>
-            <SelectTrigger className="w-full md:w-[140px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tots</SelectItem>
-              <SelectItem value="senior">Sènior</SelectItem>
-              <SelectItem value="no-senior">No sènior</SelectItem>
-            </SelectContent>
-          </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full md:w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full md:w-[200px]"><SelectValue /></SelectTrigger>
             <SelectContent>
-              
-              <SelectItem value="hcp">Rànquing Hcp</SelectItem>
-              <SelectItem value="handicap">Per hàndicap</SelectItem>
+              <SelectItem value="hcp">Per rànquing</SelectItem>
               <SelectItem value="name">Per nom</SelectItem>
+              <SelectItem value="handicap">Per hàndicap</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
+          <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Categoria:</span>
+          <div className="flex items-center gap-2">
+            <Checkbox id="cat-low" checked={catLow} onCheckedChange={(v) => setCatLow(!!v)} />
+            <Label htmlFor="cat-low" className="text-sm cursor-pointer">HCP Baix (≤15)</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="cat-high" checked={catHigh} onCheckedChange={(v) => setCatHigh(!!v)} />
+            <Label htmlFor="cat-high" className="text-sm cursor-pointer">HCP Alt (&gt;15)</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="cat-female" checked={catFemale} onCheckedChange={(v) => setCatFemale(!!v)} />
+            <Label htmlFor="cat-female" className="text-sm cursor-pointer">Femení</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="cat-senior" checked={catSenior} onCheckedChange={(v) => setCatSenior(!!v)} />
+            <Label htmlFor="cat-senior" className="text-sm cursor-pointer">Sènior</Label>
+          </div>
         </div>
       </Card>
 
