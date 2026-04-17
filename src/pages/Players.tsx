@@ -81,7 +81,7 @@ const Players = () => {
   const [search, setSearch] = useState('');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [seniorFilter, setSeniorFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('scratch');
+  const [sortBy, setSortBy] = useState<string>('hcp');
 
   const { data: players, isLoading } = useQuery({
     queryKey: ['public-players-cards'],
@@ -166,20 +166,11 @@ const Players = () => {
     return map;
   }, [results]);
 
-  // Compute rankings + probability
+  // Compute hcp ranking
   const enriched = useMemo(() => {
     if (!players) return [];
 
-    // Scratch ranking: lower avg = better (only players with rounds)
     const withStats = players.filter((p) => statsByPlayer.has(p.id));
-    const scratchRank = new Map<string, number>();
-    [...withStats]
-      .sort((a, b) => {
-        const sa = statsByPlayer.get(a.id)!;
-        const sb = statsByPlayer.get(b.id)!;
-        return sa.avgScratch - sb.avgScratch;
-      })
-      .forEach((p, i) => scratchRank.set(p.id, i + 1));
 
     // Hcp ranking: higher avg stableford = better
     const hcpRank = new Map<string, number>();
@@ -191,39 +182,11 @@ const Players = () => {
       })
       .forEach((p, i) => hcpRank.set(p.id, i + 1));
 
-    // Probability: weighted score normalized 0-25%
-    // hcp 40%, recent results 30%, regularity 20%, trend 10%
-    const hcps = players.map((p) => p.current_handicap).filter((h): h is number => h !== null);
-    const minH = Math.min(...hcps, 0);
-    const maxH = Math.max(...hcps, 36);
-    const hRange = maxH - minH || 1;
-
-    const stdevs = withStats.map((p) => statsByPlayer.get(p.id)!.stdev);
-    const maxStdev = Math.max(...stdevs, 1);
-
-    const enrichedList = players.map((p) => {
-      const stats = statsByPlayer.get(p.id);
-      let prob = 0;
-      if (stats) {
-        const hcpScore = p.current_handicap !== null ? 1 - (p.current_handicap - minH) / hRange : 0.5;
-        const recentScore = stats.scratchScores.length
-          ? Math.max(0, 1 - (stats.scratchScores.slice(-2).reduce((a, b) => a + b, 0) / stats.scratchScores.slice(-2).length - 50) / 30)
-          : 0.5;
-        const regScore = 1 - stats.stdev / maxStdev;
-        const trendScore = stats.trend === 'up' ? 1 : stats.trend === 'down' ? 0 : 0.5;
-        const raw = hcpScore * 0.4 + recentScore * 0.3 + regScore * 0.2 + trendScore * 0.1;
-        prob = Math.round(raw * 25);
-      }
-      return {
-        player: p,
-        stats,
-        scratchPos: scratchRank.get(p.id),
-        hcpPos: hcpRank.get(p.id),
-        prob,
-      };
-    });
-
-    return enrichedList;
+    return players.map((p) => ({
+      player: p,
+      stats: statsByPlayer.get(p.id),
+      hcpPos: hcpRank.get(p.id),
+    }));
   }, [players, statsByPlayer]);
 
 
@@ -243,9 +206,6 @@ const Players = () => {
     });
 
     list.sort((a, b) => {
-      if (sortBy === 'scratch') {
-        return (a.scratchPos ?? 9999) - (b.scratchPos ?? 9999);
-      }
       if (sortBy === 'hcp') {
         return (a.hcpPos ?? 9999) - (b.hcpPos ?? 9999);
       }
@@ -278,7 +238,7 @@ const Players = () => {
         <span><strong>#N</strong> = Rànquing</span>
         <span>Ø Mitjana</span>
         <span>Millor resultat</span>
-        <span><strong>Prob.</strong> = Predicció</span>
+        
       </div>
 
       {/* Filters */}
@@ -312,7 +272,7 @@ const Players = () => {
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-full md:w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="scratch">Rànquing Scratch</SelectItem>
+              
               <SelectItem value="hcp">Rànquing Hcp</SelectItem>
               <SelectItem value="handicap">Per hàndicap</SelectItem>
               <SelectItem value="name">Per nom</SelectItem>
@@ -327,7 +287,7 @@ const Players = () => {
         <>
           <p className="text-sm text-muted-foreground mb-3">{filtered.length} jugadors</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(({ player: p, stats, scratchPos, hcpPos, prob }) => (
+            {filtered.map(({ player: p, stats, hcpPos }) => (
               <Card key={p.id} className="p-4 border-border/50 hover:border-primary/40 hover:shadow-md transition-all">
                 <div className="flex items-start gap-3 mb-3">
                   <Avatar className="h-12 w-12 border border-border/40">
@@ -345,9 +305,6 @@ const Players = () => {
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
                         Hdcp {formatHcp(p.current_handicap)}
                       </Badge>
-                      {scratchPos && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">#{scratchPos} Scr</Badge>
-                      )}
                       {hcpPos && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">#{hcpPos} Hcp</Badge>
                       )}
@@ -365,30 +322,15 @@ const Players = () => {
                 </div>
 
                 {stats ? (
-                  <>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2 font-mono">
-                      <span className="flex items-center gap-1">
-                        <BarChart3 className="h-3 w-3" /> Ø{stats.avgScratch}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Trophy className="h-3 w-3" /> {stats.bestScratch || '—'}
-                      </span>
-                      <span>{stats.rounds} {stats.rounds === 1 ? 'prova' : 'proves'}</span>
-                    </div>
-
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="text-muted-foreground">Prob. guanyar</span>
-                        <span className="font-mono font-semibold text-primary">{prob}%</span>
-                      </div>
-                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all"
-                          style={{ width: `${Math.min(100, prob * 4)}%` }}
-                        />
-                      </div>
-                    </div>
-                  </>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
+                    <span className="flex items-center gap-1">
+                      <BarChart3 className="h-3 w-3" /> Ø{stats.avgStableford} pts
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3" /> {stats.bestStableford || '—'}
+                    </span>
+                    <span>{stats.rounds} {stats.rounds === 1 ? 'prova' : 'proves'}</span>
+                  </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic">Sense proves jugades</p>
                 )}
