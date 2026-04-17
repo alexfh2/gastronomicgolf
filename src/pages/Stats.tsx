@@ -55,6 +55,79 @@ const getMostCommonPar = (parCounts: Record<string, number>) => {
   return Number(topPar || 0);
 };
 
+type LeaderPlayer = { name: string; totalPoints: number; handicap: number | null; playerId: string };
+type LeadersData = Record<string, LeaderPlayer[]>;
+
+const LeadersCard = ({ categories, data, noDataLabel }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string }) => {
+  const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(categories[0]?.key);
+  const activePlayers = data[activeTab] || [];
+  const leader = activePlayers[0];
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <Card className="border-border/60 transition-shadow cursor-pointer hover:shadow-md">
+        <CollapsibleTrigger asChild>
+          <div>
+            <CardHeader className="pb-0 pt-4 px-6 flex-row items-center gap-3 space-y-0 bg-primary/70 rounded-t-lg min-h-[48px]">
+              <Crown className="h-5 w-5 text-primary-foreground" />
+              <CardTitle className="text-sm font-medium text-primary-foreground flex-1">Líders per categoria</CardTitle>
+              <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
+            </CardHeader>
+            <CardContent className="pt-5">
+              <p className="text-2xl font-semibold tracking-tight text-foreground">
+                {leader ? `${leader.totalPoints} pts` : '—'}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {leader ? `${leader.name} · ${categories.find(c => c.key === activeTab)?.label}` : noDataLabel}
+              </p>
+            </CardContent>
+          </div>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent>
+          <CardContent className="pt-0 pb-4">
+            <div className="border-t border-border/60 pt-3">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="h-auto gap-1 flex-wrap mb-3 w-full">
+                  {categories.map(cat => (
+                    <TabsTrigger key={cat.key} value={cat.key} className="text-[11px] px-2 py-1">{cat.label}</TabsTrigger>
+                  ))}
+                </TabsList>
+                {categories.map(cat => {
+                  const players = data[cat.key] || [];
+                  return (
+                    <TabsContent key={cat.key} value={cat.key} className="mt-0">
+                      {!players.length ? (
+                        <p className="text-muted-foreground text-sm py-2">{noDataLabel}</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {players.map((p, i) => (
+                            <Link
+                              key={p.playerId}
+                              to={`/jugadors/${p.playerId}`}
+                              className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
+                              <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{p.name}</span>
+                              <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+};
+
 const Stats = () => {
   const { t } = useTranslation();
   const [openCards, setOpenCards] = useState<Set<number>>(new Set());
@@ -415,53 +488,8 @@ const Stats = () => {
       ) : !stats ? (
         <p className="text-muted-foreground">{t('common.noData')}</p>
       ) : (
-        <>
-          <Card className="border-border/40 mb-6">
-            <CardHeader className="bg-primary rounded-t-lg flex-row items-center gap-3 space-y-0 py-3 px-6">
-              <Crown className="h-5 w-5 text-primary-foreground" />
-              <CardTitle className="text-sm font-medium text-primary-foreground">Líders per categoria</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-5">
-              <Tabs defaultValue="hcpLow">
-                <TabsList className="h-auto gap-1 flex-wrap mb-4">
-                  {leaderCategories.map(cat => (
-                    <TabsTrigger key={cat.key} value={cat.key} className="text-xs">{cat.label}</TabsTrigger>
-                  ))}
-                </TabsList>
-                {leaderCategories.map(cat => {
-                  const players = categoryLeaders[cat.key];
-                  return (
-                    <TabsContent key={cat.key} value={cat.key}>
-                      {!players?.length ? (
-                        <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>
-                      ) : (
-                        <div className="space-y-0">
-                          {players.map((p, i) => (
-                            <Link
-                              key={p.playerId}
-                              to={`/jugadors/${p.playerId}`}
-                              className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors -mx-1 px-1 rounded"
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className={cn('text-xs font-mono w-5', i < 3 ? 'text-accent font-bold' : 'text-muted-foreground')}>{i + 1}</span>
-                                <span className="text-sm font-medium">{p.name}</span>
-                                {p.handicap != null && (
-                                  <span className="text-[11px] text-muted-foreground font-mono">({p.handicap})</span>
-                                )}
-                              </div>
-                              <span className="font-mono font-bold text-sm text-primary">{p.totalPoints} pts</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
-            </CardContent>
-          </Card>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <LeadersCard categories={leaderCategories} data={categoryLeaders} noDataLabel={t('common.noData')} />
           {statCards.map((card, idx) => {
             const lb = leaderboards[idx] || [];
             const hasLeaderboard = lb.length > 0;
@@ -561,7 +589,6 @@ const Stats = () => {
             );
           })}
         </div>
-        </>
       )}
     </div>
   );
