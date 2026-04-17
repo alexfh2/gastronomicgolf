@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -82,6 +82,7 @@ const Players = () => {
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [seniorFilter, setSeniorFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('hcp');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: players, isLoading } = useQuery({
     queryKey: ['public-players-cards'],
@@ -295,12 +296,13 @@ const Players = () => {
                     <AvatarFallback className="bg-muted text-xs font-semibold">{initials(p.name)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <Link
-                      to={`/jugadors/${p.id}`}
-                      className="font-semibold text-sm leading-tight hover:text-primary transition-colors block truncate"
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPlayerId(p.id)}
+                      className="font-semibold text-sm leading-tight hover:text-primary transition-colors block truncate text-left w-full"
                     >
                       {p.name}
-                    </Link>
+                    </button>
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-mono">
                         Hdcp {formatHcp(p.current_handicap)}
