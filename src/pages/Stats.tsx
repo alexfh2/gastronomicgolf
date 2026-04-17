@@ -131,6 +131,7 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer }: { catego
 const Stats = () => {
   const { t } = useTranslation();
   const [openCards, setOpenCards] = useState<Set<number>>(new Set());
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const toggleCard = (idx: number) => {
     setOpenCards(prev => {
