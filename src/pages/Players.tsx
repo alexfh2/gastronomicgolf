@@ -81,7 +81,7 @@ const Players = () => {
   const [search, setSearch] = useState('');
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [seniorFilter, setSeniorFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('scratch');
+  const [sortBy, setSortBy] = useState<string>('hcp');
 
   const { data: players, isLoading } = useQuery({
     queryKey: ['public-players-cards'],
@@ -166,20 +166,11 @@ const Players = () => {
     return map;
   }, [results]);
 
-  // Compute rankings + probability
+  // Compute hcp ranking
   const enriched = useMemo(() => {
     if (!players) return [];
 
-    // Scratch ranking: lower avg = better (only players with rounds)
     const withStats = players.filter((p) => statsByPlayer.has(p.id));
-    const scratchRank = new Map<string, number>();
-    [...withStats]
-      .sort((a, b) => {
-        const sa = statsByPlayer.get(a.id)!;
-        const sb = statsByPlayer.get(b.id)!;
-        return sa.avgScratch - sb.avgScratch;
-      })
-      .forEach((p, i) => scratchRank.set(p.id, i + 1));
 
     // Hcp ranking: higher avg stableford = better
     const hcpRank = new Map<string, number>();
@@ -191,39 +182,11 @@ const Players = () => {
       })
       .forEach((p, i) => hcpRank.set(p.id, i + 1));
 
-    // Probability: weighted score normalized 0-25%
-    // hcp 40%, recent results 30%, regularity 20%, trend 10%
-    const hcps = players.map((p) => p.current_handicap).filter((h): h is number => h !== null);
-    const minH = Math.min(...hcps, 0);
-    const maxH = Math.max(...hcps, 36);
-    const hRange = maxH - minH || 1;
-
-    const stdevs = withStats.map((p) => statsByPlayer.get(p.id)!.stdev);
-    const maxStdev = Math.max(...stdevs, 1);
-
-    const enrichedList = players.map((p) => {
-      const stats = statsByPlayer.get(p.id);
-      let prob = 0;
-      if (stats) {
-        const hcpScore = p.current_handicap !== null ? 1 - (p.current_handicap - minH) / hRange : 0.5;
-        const recentScore = stats.scratchScores.length
-          ? Math.max(0, 1 - (stats.scratchScores.slice(-2).reduce((a, b) => a + b, 0) / stats.scratchScores.slice(-2).length - 50) / 30)
-          : 0.5;
-        const regScore = 1 - stats.stdev / maxStdev;
-        const trendScore = stats.trend === 'up' ? 1 : stats.trend === 'down' ? 0 : 0.5;
-        const raw = hcpScore * 0.4 + recentScore * 0.3 + regScore * 0.2 + trendScore * 0.1;
-        prob = Math.round(raw * 25);
-      }
-      return {
-        player: p,
-        stats,
-        scratchPos: scratchRank.get(p.id),
-        hcpPos: hcpRank.get(p.id),
-        prob,
-      };
-    });
-
-    return enrichedList;
+    return players.map((p) => ({
+      player: p,
+      stats: statsByPlayer.get(p.id),
+      hcpPos: hcpRank.get(p.id),
+    }));
   }, [players, statsByPlayer]);
 
 
@@ -243,9 +206,6 @@ const Players = () => {
     });
 
     list.sort((a, b) => {
-      if (sortBy === 'scratch') {
-        return (a.scratchPos ?? 9999) - (b.scratchPos ?? 9999);
-      }
       if (sortBy === 'hcp') {
         return (a.hcpPos ?? 9999) - (b.hcpPos ?? 9999);
       }
