@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
+import { useCategoryRankings, buildPlayerRankPositions, type CategoryKey } from '@/hooks/useCategoryRankings';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
