@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
