@@ -233,7 +233,7 @@ const Players = () => {
         return (a.hcpPos ?? 9999) - (b.hcpPos ?? 9999);
       }
       if (sortBy === 'name') {
-        return a.player.name.localeCompare(b.player.name);
+        return lastNameKey(a.player.name).localeCompare(lastNameKey(b.player.name));
       }
       if (sortBy === 'handicap') {
         const ah = a.player.current_handicap ?? 99;
