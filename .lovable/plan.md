@@ -1,74 +1,78 @@
+# Sistema de inscripciones a torneos por WhatsApp (Twilio)
 
-El usuario quiere usar WhatsApp para el sistema de inscripciones. Twilio está disponible como connector en Lovable. Plan: conectar Twilio + MVP del sistema.
+Estado: PENDIENTE — pausado a la espera de conectar Twilio.
 
-# Sistema de inscripciones por WhatsApp (Twilio)
+## Stack elegido
+- Gateway: Twilio WhatsApp via connector de Lovable Cloud (`https://connector-gateway.lovable.dev/twilio/Messages.json`)
+- Para pruebas: Sandbox de Twilio WhatsApp (gratis)
+- Producción: número WhatsApp Business + plantillas pre-aprobadas por Meta
 
-## Paso 1 — Conectar Twilio
-Lanzo el conector oficial de Twilio. Necesitarás:
-- Cuenta Twilio activa con número WhatsApp Business aprobado (o sandbox para pruebas)
-- API Key creada en consola Twilio
+## Roadmap acordado (ejecutar cuando se retome)
 
-Una vez conectado, las credenciales quedan disponibles automáticamente en las edge functions vía gateway. No tienes que pegar tokens manualmente.
+### Paso 1 — Conectar Twilio
+- Lanzar `standard_connectors--connect` con `connector_id: twilio`
+- Requisitos previos del usuario: cuenta Twilio + API Key + número WhatsApp (sandbox o productivo)
 
-## Paso 2 — Estructura de datos (migración)
-
+### Paso 2 — Migración de BBDD
 Tablas nuevas:
-- **player_contacts**: `player_id`, `phone_e164`, `whatsapp_opt_in`, `verified_at`
-- **registrations**: `round_id`, `player_id`, `status` (invited/confirmed/declined/waitlist/cancelled), `invited_at`, `responded_at`, `notes`
-- **whatsapp_messages**: log de entrada/salida (auditoría)
+- **player_contacts**: `player_id` (FK players), `phone_e164`, `whatsapp_opt_in` (bool), `verified_at` (timestamp)
+- **registrations**: `round_id`, `player_id`, `status` enum (`invited`/`confirmed`/`declined`/`waitlist`/`cancelled`), `invited_at`, `responded_at`, `notes`
+- **whatsapp_messages**: log entrada/salida (auditoría) — `direction`, `from`, `to`, `body`, `twilio_sid`, `created_at`
 
-Campos nuevos en **rounds**: `max_players`, `registration_deadline`
+Campos nuevos en **rounds**:
+- `max_players` (int, nullable)
+- `registration_deadline` (timestamp, nullable)
 
-Todo con RLS (admin gestiona, jugador solo lee lo suyo).
+RLS:
+- Admin gestiona todo (has_role admin)
+- Lectura pública: registrations puede ser pública para mostrar inscritos en /jornades, o restringida (a decidir)
+- player_contacts: solo admin
 
-## Paso 3 — Edge functions
+### Paso 3 — UI Admin
+Nueva pestaña **"Inscripcions"** dentro de cada jornada en `/admin/rounds`:
+- Lista jugadores con estado (pendiente/confirmado/rechazado/lista espera)
+- Capacidad visible (X/Y inscritos)
+- Botón "Enviar invitaciones" (Paso 4)
+- Botón "Enviar recordatorio" (futuro)
+- Inscripción/cambio de estado manual por admin
+- Gestión de teléfonos y opt-in en ficha jugador (`/admin/players`)
 
-1. **send-tournament-invitations** — envía template WhatsApp a jugadores activos para una jornada (lanzable manual desde admin o por cron)
-2. **whatsapp-webhook** — recibe respuestas entrantes de Twilio, identifica jugador por teléfono, parsea SI/NO/ESPERA, actualiza `registrations` y responde confirmación
-3. **send-reminders** — recordatorio a quien no ha respondido (manual o cron)
+### Paso 4 — Edge function `send-tournament-invitations`
+- Input: `round_id`
+- Selecciona jugadores con `whatsapp_opt_in=true` y sin registro previo para esa jornada
+- Crea fila en `registrations` con status `invited`
+- Envía template WhatsApp via Twilio gateway
+- Logs en `whatsapp_messages`
+- Lanzable manualmente desde admin (cron en futura iteración)
 
-Todas usan el gateway de Twilio (`https://connector-gateway.lovable.dev/twilio/Messages.json`).
+### Paso 5 — Edge function `whatsapp-webhook`
+- Endpoint público (verify_jwt=false), valida firma Twilio
+- Recibe respuestas entrantes
+- Identifica jugador por `From` (E.164) → `player_contacts`
+- Parser básico de intención:
+  - SI / SÍ / OK / CONFIRMO / VOY → `confirmed`
+  - NO / NO PUC / CANCELO → `declined`
+  - ESPERA / WAITLIST → `waitlist`
+  - AJUDA / HELP → menú con comandos
+  - Fallback → mensaje con sugerencias + alerta admin
+- Actualiza última `registration` con status `invited` del jugador
+- Responde confirmación al jugador
 
-## Paso 4 — UI Admin
+URL a pegar en consola Twilio (Messaging → Sandbox / número productivo → "When a message comes in"):
+`https://ehyjwpoexafoxjepoyob.supabase.co/functions/v1/whatsapp-webhook`
 
-Nueva pestaña **"Inscripcions"** dentro de cada jornada en el admin:
-- Lista de jugadores con estado (pendiente/confirmado/rechazado/lista espera)
-- Botón "Enviar invitaciones" → llama a edge function
-- Botón "Enviar recordatorio"
-- Capacidad visible (X/Y) y gestión de cierre
-- Inscripción manual / cambio de estado por admin
-- Gestión de teléfonos y opt-in en ficha jugador
+## Roadmap futuro (siguientes iteraciones)
+- `send-reminders` cron (7 días y 2 días antes de deadline)
+- Lista de espera con auto-promoción cuando alguien cancela
+- Dashboard de tasas de respuesta / no-shows
+- Plantillas pre-aprobadas Meta para producción
+- Comando STOP global (GDPR)
 
-## Paso 5 — Flujo conversacional
+## Bloqueante actual
+Usuario rechazó la primera invocación de `standard_connectors--connect` para Twilio (le dio skip sin querer en una iteración, y en la siguiente cancelaron el flow). Al retomar, primero relanzar la conexión.
 
-```text
-Bot → "Hola Marta, t'invitem a la J5 - Empordà (15 nov).
-       Confirmes? Respon SI / NO / ESPERA"
-Marta → "SI"
-Bot → "Inscripció confirmada! Rebràs detalls 3 dies abans."
-```
-
-Comandos reconocidos: SI/SÍ/OK/CONFIRMO, NO/CANCELO, ESPERA, AJUDA. Fallback con menú.
-
-## Webhook URL para Twilio
-
-Tras desplegar `whatsapp-webhook`, te daré la URL pública para pegarla en la consola Twilio (Messaging → Sandbox o número productivo → "When a message comes in").
-
-## Roadmap propuesto (este turno)
-
-Para no abarcar demasiado de golpe, propongo ejecutar **ahora**:
-1. Conectar Twilio
-2. Crear migración de tablas
-3. UI Admin de inscripciones (manual, sin enviar aún)
-4. Edge function `send-tournament-invitations` + botón en admin
-5. Edge function `whatsapp-webhook` + parser básico
-
-**Después** (siguiente iteración): recordatorios automáticos, lista de espera con auto-promoción, dashboard de tasas de respuesta.
-
-## Consideraciones importantes
-
-- Meta exige **plantillas pre-aprobadas** para mensajes salientes fuera de ventana de 24h. Para empezar puedes usar el **Sandbox de Twilio WhatsApp** (gratis, jugadores deben unirse con código)
-- **GDPR**: opt-in explícito antes de enviar; comando STOP para baja
-- Coste real Twilio: ~0.005-0.05€/mensaje según país y tipo
-
-¿Apruebas para empezar con la conexión Twilio y el MVP de los pasos 1-5?
+## Consideraciones
+- Meta exige plantillas pre-aprobadas para mensajes salientes fuera de ventana 24h → empezar con Sandbox Twilio
+- GDPR: opt-in explícito antes de enviar; comando STOP para baja
+- Coste Twilio: ~0.005-0.05€/mensaje según país y tipo
+- Activar SMS Pumping Protection y Geo Permissions en consola Twilio antes de producción
