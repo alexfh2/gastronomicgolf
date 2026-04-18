@@ -1,34 +1,78 @@
+# Sistema de inscripciones a torneos por WhatsApp (Twilio)
 
+Estado: PENDIENTE — pausado a la espera de conectar Twilio.
 
-# Ajustar jerarquia de categories i salts de linia en la generacio de contingut
+## Stack elegido
+- Gateway: Twilio WhatsApp via connector de Lovable Cloud (`https://connector-gateway.lovable.dev/twilio/Messages.json`)
+- Para pruebas: Sandbox de Twilio WhatsApp (gratis)
+- Producción: número WhatsApp Business + plantillas pre-aprobadas por Meta
 
-## Resum
+## Roadmap acordado (ejecutar cuando se retome)
 
-Actualitzar les tres edge functions (`generate-news`, `generate-whatsapp`, `generate-instagram`) per:
+### Paso 1 — Conectar Twilio
+- Lanzar `standard_connectors--connect` con `connector_id: twilio`
+- Requisitos previos del usuario: cuenta Twilio + API Key + número WhatsApp (sandbox o productivo)
 
-1. **Handicap Baix i Alt**: mostrar els 3 primers (prioritat principal)
-2. **Femeni i Senior**: mostrar nomes el 1r classificat
-3. **Salts de linia**: instruccions explicites al prompt perque l'IA generi text ben estructurat amb separacio clara entre seccions
+### Paso 2 — Migración de BBDD
+Tablas nuevas:
+- **player_contacts**: `player_id` (FK players), `phone_e164`, `whatsapp_opt_in` (bool), `verified_at` (timestamp)
+- **registrations**: `round_id`, `player_id`, `status` enum (`invited`/`confirmed`/`declined`/`waitlist`/`cancelled`), `invited_at`, `responded_at`, `notes`
+- **whatsapp_messages**: log entrada/salida (auditoría) — `direction`, `from`, `to`, `body`, `twilio_sid`, `created_at`
 
-## Canvis
+Campos nuevos en **rounds**:
+- `max_players` (int, nullable)
+- `registration_deadline` (timestamp, nullable)
 
-### 1. `generate-news/index.ts`
-- Reduir dades Femenina/Senior de top 10 a nomes 1r classificat al prompt
-- Actualitzar instruccions: "Per a Hcp Baix i Hcp Alt, inclou els 3 primers. Per a Femenina i Senior, nomes el guanyador/a"
-- Afegir instruccio de format: separar cada categoria amb una linia en blanc
+RLS:
+- Admin gestiona todo (has_role admin)
+- Lectura pública: registrations puede ser pública para mostrar inscritos en /jornades, o restringida (a decidir)
+- player_contacts: solo admin
 
-### 2. `generate-whatsapp/index.ts`
-- Reduir dades Femenina/Senior a nomes 1r classificat
-- Actualitzar el text de referencia per reflectir: top 3 per HCP, nomes guanyador/a per Femeni/Senior
-- Afegir instruccio explicita: "IMPORTANT: Deixa una linia en blanc entre cada secció/categoria per facilitar la lectura"
+### Paso 3 — UI Admin
+Nueva pestaña **"Inscripcions"** dentro de cada jornada en `/admin/rounds`:
+- Lista jugadores con estado (pendiente/confirmado/rechazado/lista espera)
+- Capacidad visible (X/Y inscritos)
+- Botón "Enviar invitaciones" (Paso 4)
+- Botón "Enviar recordatorio" (futuro)
+- Inscripción/cambio de estado manual por admin
+- Gestión de teléfonos y opt-in en ficha jugador (`/admin/players`)
 
-### 3. `generate-instagram/index.ts`
-- Mateixos canvis: top 3 per HCP, nomes 1r per Femeni/Senior
-- Instruccio de salts de linia clars entre blocs
+### Paso 4 — Edge function `send-tournament-invitations`
+- Input: `round_id`
+- Selecciona jugadores con `whatsapp_opt_in=true` y sin registro previo para esa jornada
+- Crea fila en `registrations` con status `invited`
+- Envía template WhatsApp via Twilio gateway
+- Logs en `whatsapp_messages`
+- Lanzable manualmente desde admin (cron en futura iteración)
 
-### Detall tecnic
-- Canviar `females.slice(0, 3)` / `females.slice(0, 10)` a `females.slice(0, 1)` als 3 fitxers
-- Canviar `seniors.slice(0, 3)` / `seniors.slice(0, 10)` a `seniors.slice(0, 1)` als 3 fitxers
-- Mantenir `hcpLow.slice(0, 3)` i `hcpHigh.slice(0, 3)` (ja correcte a WA/IG, canviar de 10 a 3 a news per coherencia amb el que es demana)
-- Afegir instruccions de format amb salts de linia a cada prompt
+### Paso 5 — Edge function `whatsapp-webhook`
+- Endpoint público (verify_jwt=false), valida firma Twilio
+- Recibe respuestas entrantes
+- Identifica jugador por `From` (E.164) → `player_contacts`
+- Parser básico de intención:
+  - SI / SÍ / OK / CONFIRMO / VOY → `confirmed`
+  - NO / NO PUC / CANCELO → `declined`
+  - ESPERA / WAITLIST → `waitlist`
+  - AJUDA / HELP → menú con comandos
+  - Fallback → mensaje con sugerencias + alerta admin
+- Actualiza última `registration` con status `invited` del jugador
+- Responde confirmación al jugador
 
+URL a pegar en consola Twilio (Messaging → Sandbox / número productivo → "When a message comes in"):
+`https://ehyjwpoexafoxjepoyob.supabase.co/functions/v1/whatsapp-webhook`
+
+## Roadmap futuro (siguientes iteraciones)
+- `send-reminders` cron (7 días y 2 días antes de deadline)
+- Lista de espera con auto-promoción cuando alguien cancela
+- Dashboard de tasas de respuesta / no-shows
+- Plantillas pre-aprobadas Meta para producción
+- Comando STOP global (GDPR)
+
+## Bloqueante actual
+Usuario rechazó la primera invocación de `standard_connectors--connect` para Twilio (le dio skip sin querer en una iteración, y en la siguiente cancelaron el flow). Al retomar, primero relanzar la conexión.
+
+## Consideraciones
+- Meta exige plantillas pre-aprobadas para mensajes salientes fuera de ventana 24h → empezar con Sandbox Twilio
+- GDPR: opt-in explícito antes de enviar; comando STOP para baja
+- Coste Twilio: ~0.005-0.05€/mensaje según país y tipo
+- Activar SMS Pumping Protection y Geo Permissions en consola Twilio antes de producción
