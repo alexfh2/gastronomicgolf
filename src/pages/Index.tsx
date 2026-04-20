@@ -33,7 +33,7 @@ const Index = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('stableford_points, player_id, round_id, handicap_at_round, players(name, gender, is_senior, current_handicap), rounds!inner(status)')
+        .select('stableford_points, player_id, round_id, handicap_at_round, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null)
         .order('stableford_points', { ascending: false });
@@ -53,7 +53,7 @@ const Index = () => {
     // Accumulate total points per player across all rounds
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
     for (const r of topResults) {
-      const p = r.players as any;
+      const p = (r as any).players_public;
       if (!p) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;

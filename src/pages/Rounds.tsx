@@ -96,7 +96,7 @@ const Rounds = () => {
       if (!expandedRound) return [];
       const { data } = await supabase
         .from('results')
-        .select('*, players(id, name, license, club, gender, is_senior, current_handicap)')
+        .select('*, players_public!results_player_id_fkey(id, name, license, club, gender, is_senior, current_handicap)')
         .eq('round_id', expandedRound)
         .order('stableford_points', { ascending: false });
       return data || [];
@@ -109,22 +109,22 @@ const Rounds = () => {
 
     // HCP Bajo: handicap ≤ 15.0, stableford desc
     const hcpLow = results.filter(r => {
-      const hcp = r.handicap_at_round ?? (r.players as any)?.current_handicap;
+      const hcp = r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
       return hcp != null && hcp <= 15.0;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     // HCP Alto: handicap 15.1 - 36
     const hcpHigh = results.filter(r => {
-      const hcp = r.handicap_at_round ?? (r.players as any)?.current_handicap;
+      const hcp = r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
       return hcp != null && hcp > 15.0 && hcp <= 36;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     // Female
-    const female = results.filter(r => (r.players as any)?.gender === 'F')
+    const female = results.filter(r => ((r as any).players_public)?.gender === 'F')
       .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     // Senior
-    const senior = results.filter(r => (r.players as any)?.is_senior)
+    const senior = results.filter(r => ((r as any).players_public)?.is_senior)
       .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
     return { hcpLow, hcpHigh, female, senior };
@@ -150,7 +150,7 @@ const Rounds = () => {
                 <td className="py-1.5 pr-2 font-mono text-muted-foreground">{i + 1}</td>
                 <td className="py-1.5 font-medium">
                   <Link to={`/jugadors/${r.player_id}`} className="hover:text-primary transition-colors">
-                    {(r.players as any)?.name}
+                    {((r as any).players_public)?.name}
                   </Link>
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
