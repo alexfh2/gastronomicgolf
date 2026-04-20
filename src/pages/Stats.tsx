@@ -425,8 +425,8 @@ const Stats = () => {
       .slice(0, 10)
       .map(hole => ({
         name: hole.name,
-        value: `${hole.avgStrokes} (x${(hole.avgStrokes / hole.par).toFixed(2)} par)` as any,
-        detail: `Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
+        value: hole.avgStrokes,
+        detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
       }));
 
     const easiestHoles: LeaderboardEntry[] = [...holeList]
@@ -434,8 +434,8 @@ const Stats = () => {
       .slice(0, 10)
       .map(hole => ({
         name: hole.name,
-        value: `${hole.avgStrokes} (x${(hole.avgStrokes / hole.par).toFixed(2)} par)` as any,
-        detail: `Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
+        value: hole.avgStrokes,
+        detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
       }));
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
