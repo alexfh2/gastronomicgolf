@@ -9,7 +9,7 @@ import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Result = Tables<'results'> & {
-  players: { name: string; license: string; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
+  players_public: { name: string; license: string; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
   rounds: { is_master: boolean; master_coefficient: number; name: string; round_number: number } | null;
 };
 

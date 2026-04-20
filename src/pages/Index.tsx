@@ -53,7 +53,7 @@ const Index = () => {
     // Accumulate total points per player across all rounds
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
     for (const r of topResults) {
-      const p = r.players as any;
+      const p = (r as any).players_public;
       if (!p) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
