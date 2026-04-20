@@ -85,13 +85,13 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     }>();
 
     for (const r of allResults as any[]) {
-      if (!r.players || r.stableford_points == null) continue;
+      if (!r.players_public || r.stableford_points == null) continue;
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
         byPlayer.set(pid, {
-          gender: r.players.gender,
-          is_senior: r.players.is_senior,
-          handicap: r.handicap_at_round ?? r.players.current_handicap,
+          gender: r.players_public.gender,
+          is_senior: r.players_public.is_senior,
+          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
           scores: [],
         });
       }
