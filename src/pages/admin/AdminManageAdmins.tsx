@@ -37,19 +37,11 @@ const AdminManageAdmins = () => {
 
   const createAdmin = useMutation({
     mutationFn: async () => {
-      // Create user via edge function would be ideal, but for now
-      // we sign them up and add the role
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
+      const { data, error } = await supabase.functions.invoke('create-admin', {
+        body: { email, password },
       });
-      if (signUpError) throw signUpError;
-      if (!signUpData.user) throw new Error('No s\'ha pogut crear l\'usuari');
-
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({ user_id: signUpData.user.id, role: 'admin' as const });
-      if (roleError) throw roleError;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
