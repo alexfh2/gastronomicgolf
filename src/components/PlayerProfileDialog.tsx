@@ -28,7 +28,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   const { data: player } = useQuery({
     queryKey: ['player-profile-dialog', playerId],
     queryFn: async () => {
-      const { data } = await supabase.from('players').select('*').eq('id', playerId!).single();
+      const { data } = await supabase.from('players_public' as any).select('*').eq('id', playerId!).single();
       return data;
     },
     enabled: !!playerId && open,
