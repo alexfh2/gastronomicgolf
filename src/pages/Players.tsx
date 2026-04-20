@@ -106,10 +106,10 @@ const Players = () => {
     queryKey: ['public-players-cards'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('players')
+        .from('players_public' as any)
         .select('id, name, license, club, current_handicap, gender, is_senior, photo_url, updated_at')
         .order('name');
-      return (data || []) as Player[];
+      return ((data as any) || []) as Player[];
     },
   });
 

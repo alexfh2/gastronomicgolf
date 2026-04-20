@@ -57,10 +57,10 @@ const PlayerCompareDialog: React.FC<PlayerCompareProps> = ({ currentPlayerId, cu
     queryKey: ['compare-players-list'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('players')
+        .from('players_public' as any)
         .select('id, name, current_handicap')
         .order('name');
-      return data || [];
+      return ((data as any) || []) as Array<{ id: string; name: string; current_handicap: number | null }>;
     },
     enabled: open,
   });

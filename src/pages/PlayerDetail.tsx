@@ -30,11 +30,11 @@ const PlayerDetail = () => {
     queryKey: ['player-detail', id],
     queryFn: async () => {
       const { data } = await supabase
-        .from('players')
+        .from('players_public' as any)
         .select('*')
         .eq('id', id!)
         .single();
-      return data;
+      return data as any;
     },
     enabled: !!id,
   });
