@@ -29,7 +29,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     queryKey: ['player-profile-dialog', playerId],
     queryFn: async () => {
       const { data } = await supabase.from('players_public' as any).select('*').eq('id', playerId!).single();
-      return data;
+      return data as any;
     },
     enabled: !!playerId && open,
   });
