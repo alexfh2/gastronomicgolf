@@ -147,7 +147,7 @@ const Stats = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, scorecard, rounds!inner(status, name, round_number, club, course, course_par, course_handicap), players(name)')
+        .select('player_id, stableford_points, scorecard, rounds!inner(status, name, round_number, club, course, course_par, course_handicap), players_public!results_player_id_fkey(name)')
         .eq('rounds.status', 'published');
       return data || [];
     },
@@ -158,7 +158,7 @@ const Stats = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('stableford_points, player_id, handicap_at_round, players(name, gender, is_senior, current_handicap), rounds!inner(status)')
+        .select('stableford_points, player_id, handicap_at_round, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null);
       return data || [];

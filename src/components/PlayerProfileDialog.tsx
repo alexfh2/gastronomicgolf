@@ -54,7 +54,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, handicap_at_round, players!inner(gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
+        .select('player_id, stableford_points, handicap_at_round, players_public!results_player_id_fkey!inner(gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null);
       return data || [];
