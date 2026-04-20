@@ -96,7 +96,7 @@ const Rounds = () => {
       if (!expandedRound) return [];
       const { data } = await supabase
         .from('results')
-        .select('*, players(id, name, license, club, gender, is_senior, current_handicap)')
+        .select('*, players_public!results_player_id_fkey(id, name, license, club, gender, is_senior, current_handicap)')
         .eq('round_id', expandedRound)
         .order('stableford_points', { ascending: false });
       return data || [];

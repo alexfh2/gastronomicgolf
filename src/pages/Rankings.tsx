@@ -22,7 +22,7 @@ const Rankings = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('*, players(name, license, gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, name, round_number, status)')
+        .select('*, players_public!results_player_id_fkey(name, license, gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, name, round_number, status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null);
       return (data || []) as Result[];

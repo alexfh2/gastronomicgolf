@@ -33,7 +33,7 @@ const Index = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('stableford_points, player_id, round_id, handicap_at_round, players(name, gender, is_senior, current_handicap), rounds!inner(status)')
+        .select('stableford_points, player_id, round_id, handicap_at_round, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null)
         .order('stableford_points', { ascending: false });
