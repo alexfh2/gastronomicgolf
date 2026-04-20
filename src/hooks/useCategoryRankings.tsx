@@ -21,7 +21,7 @@ type Result = {
   stableford_points: number | null;
   handicap_at_round: number | null;
   round_id: string;
-  players: { name: string; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
+  players_public: { name: string; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
   rounds: { is_master: boolean; master_coefficient: number; status: string } | null;
 };
 
