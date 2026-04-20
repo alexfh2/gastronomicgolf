@@ -161,7 +161,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   });
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (publish: boolean = false) => {
       if (!generatedNews) throw new Error('No hi ha notícia generada');
 
       // Upload images first
@@ -180,7 +180,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
         if (photoError) throw photoError;
       }
 
-      const payload = {
+      const payload: any = {
         round_id: round.id,
         language,
         tone,
@@ -190,7 +190,8 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
         highlights: generatedNews.highlights as any,
         seo_excerpt: generatedNews.seo_excerpt,
         special_mention: specialMention || null,
-        status: 'draft',
+        status: publish ? 'published' : 'draft',
+        published_at: publish ? new Date().toISOString() : null,
       };
 
       if (existingDraft) {
@@ -200,10 +201,14 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
         const { error } = await supabase.from('news_drafts').insert(payload);
         if (error) throw error;
       }
+      return publish;
     },
-    onSuccess: () => {
+    onSuccess: (published) => {
       queryClient.invalidateQueries({ queryKey: ['news-draft'] });
-      toast({ title: 'Notícia guardada com a esborrany' });
+      queryClient.invalidateQueries({ queryKey: ['admin-news'] });
+      queryClient.invalidateQueries({ queryKey: ['public-news'] });
+      toast({ title: published ? 'Notícia publicada' : 'Notícia guardada com a esborrany' });
+      if (published) onClose();
     },
     onError: (err: Error) => {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -416,8 +421,9 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                 Copiar
               </Button>
               <Button
-                onClick={() => saveMutation.mutate()}
+                onClick={() => saveMutation.mutate(false)}
                 disabled={saveMutation.isPending || uploadingImages}
+                variant="outline"
                 size="sm"
               >
                 {saveMutation.isPending || uploadingImages ? (
@@ -427,6 +433,20 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                   </>
                 ) : (
                   `Guardar esborrany${imageFiles.length > 0 ? ` (${imageFiles.length} foto${imageFiles.length > 1 ? 's' : ''})` : ''}`
+                )}
+              </Button>
+              <Button
+                onClick={() => saveMutation.mutate(true)}
+                disabled={saveMutation.isPending || uploadingImages}
+                size="sm"
+              >
+                {saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    Publicant...
+                  </>
+                ) : (
+                  'Publicar ara'
                 )}
               </Button>
               <Button onClick={() => { setGeneratedNews(null); }} variant="ghost" size="sm">
