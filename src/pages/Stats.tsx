@@ -425,7 +425,7 @@ const Stats = () => {
       .slice(0, 10)
       .map(hole => ({
         name: hole.name,
-        value: hole.avgStrokes,
+        value: `${hole.avgStrokes} (x${(hole.avgStrokes / hole.par).toFixed(2)} par)` as any,
         detail: `Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
       }));
 
@@ -434,7 +434,7 @@ const Stats = () => {
       .slice(0, 10)
       .map(hole => ({
         name: hole.name,
-        value: hole.avgStrokes,
+        value: `${hole.avgStrokes} (x${(hole.avgStrokes / hole.par).toFixed(2)} par)` as any,
         detail: `Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
       }));
 
