@@ -21,7 +21,7 @@ type Result = {
   stableford_points: number | null;
   handicap_at_round: number | null;
   round_id: string;
-  players: { name: string; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
+  players_public: { name: string; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
   rounds: { is_master: boolean; master_coefficient: number; status: string } | null;
 };
 
@@ -31,7 +31,7 @@ export function useCategoryRankings() {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, handicap_at_round, round_id, players(name, gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
+        .select('player_id, stableford_points, handicap_at_round, round_id, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null);
       return (data || []) as unknown as Result[];
@@ -61,14 +61,14 @@ export function useCategoryRankings() {
     }>();
 
     for (const r of results) {
-      if (!r.players || r.stableford_points == null) continue;
+      if (!r.players_public || r.stableford_points == null) continue;
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
         byPlayer.set(pid, {
-          name: r.players.name,
-          gender: r.players.gender,
-          is_senior: r.players.is_senior,
-          handicap: r.handicap_at_round ?? r.players.current_handicap,
+          name: r.players_public.name,
+          gender: r.players_public.gender,
+          is_senior: r.players_public.is_senior,
+          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
           scores: [],
         });
       }

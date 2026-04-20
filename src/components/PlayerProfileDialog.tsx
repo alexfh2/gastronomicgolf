@@ -54,7 +54,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('player_id, stableford_points, handicap_at_round, players!inner(gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
+        .select('player_id, stableford_points, handicap_at_round, players_public!results_player_id_fkey!inner(gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
         .eq('rounds.status', 'published')
         .not('stableford_points', 'is', null);
       return data || [];
@@ -85,13 +85,13 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     }>();
 
     for (const r of allResults as any[]) {
-      if (!r.players || r.stableford_points == null) continue;
+      if (!r.players_public || r.stableford_points == null) continue;
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
         byPlayer.set(pid, {
-          gender: r.players.gender,
-          is_senior: r.players.is_senior,
-          handicap: r.handicap_at_round ?? r.players.current_handicap,
+          gender: r.players_public.gender,
+          is_senior: r.players_public.is_senior,
+          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
           scores: [],
         });
       }
@@ -275,6 +275,65 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
               </div>
             </div>
           )}
+
+          {/* HCP Evolution */}
+          {(() => {
+            const hcpData = (results || [])
+              .filter(r => r.handicap_at_round != null)
+              .map(r => ({
+                label: `J${(r.rounds as any)?.round_number}`,
+                hcp: Number(r.handicap_at_round),
+              }));
+            if (hcpData.length < 2) return null;
+
+            const values = hcpData.map(d => d.hcp);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min || 1;
+            const chartH = 60;
+            const chartW = Math.max(200, hcpData.length * 60);
+            const padX = 30;
+            const padY = 22;
+            const usableW = chartW - padX * 2;
+            const usableH = chartH - padY * 2;
+
+            const points = hcpData.map((d, i) => ({
+              x: padX + (i / (hcpData.length - 1)) * usableW,
+              y: padY + (1 - (d.hcp - min) / range) * usableH,
+              hcp: d.hcp,
+              label: d.label,
+            }));
+
+            const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+
+            return (
+              <div>
+                <h4 className="font-display font-semibold text-sm mb-3">Evolució HCP</h4>
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/40 overflow-x-auto">
+                  <svg width={chartW} height={chartH + 20} className="text-primary">
+                    <polyline
+                      points={polyline}
+                      fill="none"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    />
+                    {points.map((p, i) => (
+                      <g key={i}>
+                        <circle cx={p.x} cy={p.y} r="4" fill="hsl(var(--primary))" />
+                        <text x={p.x} y={p.y - 8} textAnchor="middle" className="fill-foreground text-[10px] font-mono font-semibold">
+                          {p.hcp}
+                        </text>
+                        <text x={p.x} y={chartH + 14} textAnchor="middle" className="fill-muted-foreground text-[9px]">
+                          {p.label}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Statistics */}
           {n > 0 && (
