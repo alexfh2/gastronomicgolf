@@ -169,7 +169,7 @@ const Stats = () => {
     if (!categoryData?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
     for (const r of categoryData) {
-      const p = r.players as any;
+      const p = r.players_public as any;
       if (!p) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
@@ -205,7 +205,7 @@ const Stats = () => {
     const specialShots: LeaderboardEntry[] = []; // hole-in-ones, albatrosses, eagles
 
     for (const r of results) {
-      const name = (r.players as any)?.name || 'Desconegut';
+      const name = (r.players_public as any)?.name || 'Desconegut';
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
         byPlayer.set(pid, { name, stableford: [], birdies: 0, rounds: [] });
@@ -248,7 +248,7 @@ const Stats = () => {
     for (const r of results) {
       if (r.stableford_points != null) {
         allRounds.push({
-          name: (r.players as any)?.name || '',
+          name: (r.players_public as any)?.name || '',
           value: r.stableford_points,
           detail: (r.rounds as any)?.name || '',
           playerId: r.player_id,
