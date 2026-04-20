@@ -175,6 +175,7 @@ export type Database = {
           is_senior: boolean
           license: string
           name: string
+          phone: string | null
           photo_url: string | null
           updated_at: string
         }
@@ -188,6 +189,7 @@ export type Database = {
           is_senior?: boolean
           license: string
           name: string
+          phone?: string | null
           photo_url?: string | null
           updated_at?: string
         }
@@ -201,6 +203,7 @@ export type Database = {
           is_senior?: boolean
           license?: string
           name?: string
+          phone?: string | null
           photo_url?: string | null
           updated_at?: string
         }
