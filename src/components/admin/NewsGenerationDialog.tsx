@@ -421,8 +421,9 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                 Copiar
               </Button>
               <Button
-                onClick={() => saveMutation.mutate()}
+                onClick={() => saveMutation.mutate(false)}
                 disabled={saveMutation.isPending || uploadingImages}
+                variant="outline"
                 size="sm"
               >
                 {saveMutation.isPending || uploadingImages ? (
@@ -432,6 +433,20 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                   </>
                 ) : (
                   `Guardar esborrany${imageFiles.length > 0 ? ` (${imageFiles.length} foto${imageFiles.length > 1 ? 's' : ''})` : ''}`
+                )}
+              </Button>
+              <Button
+                onClick={() => saveMutation.mutate(true)}
+                disabled={saveMutation.isPending || uploadingImages}
+                size="sm"
+              >
+                {saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    Publicant...
+                  </>
+                ) : (
+                  'Publicar ara'
                 )}
               </Button>
               <Button onClick={() => { setGeneratedNews(null); }} variant="ghost" size="sm">
