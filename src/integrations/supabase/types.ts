@@ -267,6 +267,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "results_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "results_round_id_fkey"
             columns: ["round_id"]
             isOneToOne: false
@@ -396,7 +403,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      players_public: {
+        Row: {
+          club: string | null
+          created_at: string | null
+          current_handicap: number | null
+          gender: string | null
+          id: string | null
+          initial_handicap: number | null
+          is_senior: boolean | null
+          license: string | null
+          name: string | null
+          photo_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          club?: string | null
+          created_at?: string | null
+          current_handicap?: number | null
+          gender?: string | null
+          id?: string | null
+          initial_handicap?: number | null
+          is_senior?: boolean | null
+          license?: string | null
+          name?: string | null
+          photo_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          club?: string | null
+          created_at?: string | null
+          current_handicap?: number | null
+          gender?: string | null
+          id?: string | null
+          initial_handicap?: number | null
+          is_senior?: boolean | null
+          license?: string | null
+          name?: string | null
+          photo_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
