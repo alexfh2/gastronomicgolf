@@ -69,14 +69,14 @@ const Rankings = () => {
     }>();
 
     for (const r of results) {
-      if (!r.players || r.stableford_points == null) continue;
+      if (!r.players_public || r.stableford_points == null) continue;
       const pid = r.player_id;
       if (!byPlayer.has(pid)) {
         byPlayer.set(pid, {
-          name: r.players.name,
-          gender: r.players.gender,
-          is_senior: r.players.is_senior,
-          handicap: r.handicap_at_round ?? r.players.current_handicap,
+          name: r.players_public.name,
+          gender: r.players_public.gender,
+          is_senior: r.players_public.is_senior,
+          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
           scores: [],
         });
       }
