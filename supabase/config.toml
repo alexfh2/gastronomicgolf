@@ -1,1 +1,4 @@
 project_id = "ehyjwpoexafoxjepoyob"
+
+[functions.public-rankings-data]
+verify_jwt = false
