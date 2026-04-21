@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import {
   Select,
   SelectContent,
@@ -103,14 +104,9 @@ const Players = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: players, isLoading } = useQuery({
-    queryKey: ['public-players-cards'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('players_public' as any)
-        .select('id, name, license, club, current_handicap, gender, is_senior, photo_url, updated_at')
-        .order('name');
-      return ((data as any) || []) as Player[];
-    },
+    queryKey: publicCircuitDataQueryKey,
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.players as Player[],
   });
 
   const { data: results } = useQuery({
