@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 const Rounds = () => {
   const { t, i18n } = useTranslation();
@@ -91,15 +92,13 @@ const Rounds = () => {
   };
 
   const { data: roundResults } = useQuery({
-    queryKey: ['public-round-results', expandedRound],
+    queryKey: [...publicCircuitDataQueryKey, 'round-results', expandedRound],
     queryFn: async () => {
       if (!expandedRound) return [];
-      const { data } = await supabase
-        .from('results')
-        .select('*, players_public!results_player_id_fkey(id, name, license, club, gender, is_senior, current_handicap)')
-        .eq('round_id', expandedRound)
-        .order('stableford_points', { ascending: false });
-      return data || [];
+      const data = await fetchPublicCircuitData();
+      return data.results
+        .filter((result) => result.round_id === expandedRound)
+        .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
     },
     enabled: !!expandedRound,
   });
