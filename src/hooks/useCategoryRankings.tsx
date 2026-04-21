@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 export type CategoryKey = 'hcpInf' | 'hcpSup' | 'female' | 'senior';
 
@@ -27,14 +27,10 @@ type Result = {
 
 export function useCategoryRankings() {
   const { data: results } = useQuery({
-    queryKey: ['public-rankings-data'],
+    queryKey: publicCircuitDataQueryKey,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('results')
-        .select('player_id, stableford_points, handicap_at_round, round_id, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
-        .eq('rounds.status', 'published')
-        .not('stableford_points', 'is', null);
-      return (data || []) as unknown as Result[];
+      const data = await fetchPublicCircuitData();
+      return data.results as unknown as Result[];
     },
   });
 
