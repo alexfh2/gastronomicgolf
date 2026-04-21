@@ -10,6 +10,7 @@ import { User, TrendingUp, Trophy, Bird, Target, Square, AlertTriangle } from 'l
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 interface PlayerProfileDialogProps {
   playerId: string | null;
@@ -26,11 +27,9 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   const [openCards, setOpenCards] = useState<string[]>([]);
 
   const { data: player } = useQuery({
-    queryKey: ['player-profile-dialog', playerId],
-    queryFn: async () => {
-      const { data } = await supabase.from('players_public' as any).select('*').eq('id', playerId!).single();
-      return data as any;
-    },
+    queryKey: [...publicCircuitDataQueryKey, 'dialog-player', playerId],
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.players.find((player) => player.id === playerId) ?? null,
     enabled: !!playerId && open,
   });
 
@@ -50,15 +49,9 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
   // Load all season data to compute category rankings
   const { data: allResults } = useQuery({
-    queryKey: ['player-profile-dialog-all-results'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('results')
-        .select('player_id, stableford_points, handicap_at_round, players_public!results_player_id_fkey!inner(gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, status)')
-        .eq('rounds.status', 'published')
-        .not('stableford_points', 'is', null);
-      return data || [];
-    },
+    queryKey: [...publicCircuitDataQueryKey, 'dialog-results'],
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.results.filter((result) => result.stableford_points != null),
     enabled: open,
   });
 

@@ -6,27 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
-import type { Tables } from '@/integrations/supabase/types';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
 
-type Result = Tables<'results'> & {
-  players_public: { name: string; license: string | null; gender: string | null; is_senior: boolean; current_handicap: number | null } | null;
-  rounds: { is_master: boolean; master_coefficient: number; name: string; round_number: number } | null;
-};
+type Result = PublicResult;
 
 const Rankings = () => {
   const { t } = useTranslation();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ['public-rankings-data'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('public-rankings-data', {
-        body: {},
-      });
-
-      if (error) throw error;
-      return ((data as { results?: Result[] } | null)?.results || []) as Result[];
-    },
+    queryKey: publicCircuitDataQueryKey,
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.results as Result[],
   });
 
   const { data: rounds } = useQuery({

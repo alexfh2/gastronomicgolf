@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
@@ -143,26 +144,15 @@ const Stats = () => {
   };
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ['public-stats-data'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('results')
-        .select('player_id, stableford_points, scorecard, rounds!inner(status, name, round_number, club, course, course_par, course_handicap), players_public!results_player_id_fkey(name)')
-        .eq('rounds.status', 'published');
-      return data || [];
-    },
+    queryKey: publicCircuitDataQueryKey,
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.results,
   });
 
   const { data: categoryData } = useQuery({
-    queryKey: ['public-stats-category-leaders'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('results')
-        .select('stableford_points, player_id, handicap_at_round, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(status)')
-        .eq('rounds.status', 'published')
-        .not('stableford_points', 'is', null);
-      return data || [];
-    },
+    queryKey: [...publicCircuitDataQueryKey, 'category-leaders'],
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.results.filter((result) => result.stableford_points != null),
   });
 
   const categoryLeaders = useMemo(() => {

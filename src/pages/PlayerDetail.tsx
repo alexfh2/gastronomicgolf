@@ -12,6 +12,7 @@ import ScorecardVisual from '@/components/ScorecardVisual';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import SectionHeader from '@/components/SectionHeader';
 import PlayerCompareDialog from '@/components/PlayerCompareDialog';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 const PlayerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,15 +28,9 @@ const PlayerDetail = () => {
   }, []);
 
   const { data: player } = useQuery({
-    queryKey: ['player-detail', id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('players_public' as any)
-        .select('*')
-        .eq('id', id!)
-        .single();
-      return data as any;
-    },
+    queryKey: [...publicCircuitDataQueryKey, 'player', id],
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.players.find((player) => player.id === id) ?? null,
     enabled: !!id,
   });
 

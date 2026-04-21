@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { GitCompare, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 interface PlayerCompareProps {
   currentPlayerId: string;
@@ -54,14 +55,13 @@ const PlayerCompareDialog: React.FC<PlayerCompareProps> = ({ currentPlayerId, cu
   const [comparePlayerId, setComparePlayerId] = useState<string | null>(null);
 
   const { data: allPlayers } = useQuery({
-    queryKey: ['compare-players-list'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('players_public' as any)
-        .select('id, name, current_handicap')
-        .order('name');
-      return ((data as any) || []) as Array<{ id: string; name: string; current_handicap: number | null }>;
-    },
+    queryKey: publicCircuitDataQueryKey,
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.players.map((player) => ({
+        id: player.id,
+        name: player.name,
+        current_handicap: player.current_handicap,
+      })),
     enabled: open,
   });
 

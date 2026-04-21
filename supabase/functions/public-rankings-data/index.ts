@@ -21,18 +21,44 @@ type RankingResultRow = {
   created_at: string;
   updated_at: string;
   players_public: {
+    id: string;
     name: string;
     license: string | null;
+    club: string | null;
     gender: string | null;
     is_senior: boolean;
+    initial_handicap: number | null;
     current_handicap: number | null;
+    photo_url: string | null;
+    created_at: string;
+    updated_at: string;
   } | null;
   rounds: {
+    status: string;
     is_master: boolean;
     master_coefficient: number;
     name: string;
     round_number: number;
+    date: string | null;
+    club: string | null;
+    course: string | null;
+    course_par: unknown;
+    course_handicap: unknown;
   } | null;
+};
+
+type PublicPlayerRow = {
+  id: string;
+  license: string | null;
+  name: string;
+  club: string | null;
+  current_handicap: number | null;
+  initial_handicap: number | null;
+  gender: string | null;
+  is_senior: boolean;
+  photo_url: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 Deno.serve(async (req) => {
@@ -45,7 +71,8 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data, error } = await adminClient
+    const [{ data: resultsData, error: resultsError }, { data: playersData, error: playersError }] = await Promise.all([
+      adminClient
       .from("results")
       .select(`
         id,
@@ -62,15 +89,21 @@ Deno.serve(async (req) => {
         source_url,
         created_at,
         updated_at,
-        rounds!inner(is_master, master_coefficient, name, round_number, status),
-        players!inner(name, license, gender, is_senior, current_handicap)
+        rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap),
+        players!inner(id, name, license, club, gender, is_senior, initial_handicap, current_handicap, photo_url, created_at, updated_at)
       `)
       .eq("rounds.status", "published")
-      .not("stableford_points", "is", null);
+      .not("stableford_points", "is", null),
+      adminClient
+        .from("players")
+        .select("id, license, name, club, current_handicap, initial_handicap, gender, is_senior, photo_url, created_at, updated_at")
+        .order("name"),
+    ]);
 
-    if (error) throw error;
+    if (resultsError) throw resultsError;
+    if (playersError) throw playersError;
 
-    const results: RankingResultRow[] = (data || []).map((row: any) => ({
+    const results: RankingResultRow[] = (resultsData || []).map((row: any) => ({
       id: row.id,
       round_id: row.round_id,
       player_id: row.player_id,
@@ -87,24 +120,50 @@ Deno.serve(async (req) => {
       updated_at: row.updated_at,
       rounds: row.rounds
         ? {
+            status: row.rounds.status,
             is_master: row.rounds.is_master,
             master_coefficient: Number(row.rounds.master_coefficient ?? 1),
             name: row.rounds.name,
             round_number: row.rounds.round_number,
+            date: row.rounds.date,
+            club: row.rounds.club,
+            course: row.rounds.course,
+            course_par: row.rounds.course_par,
+            course_handicap: row.rounds.course_handicap,
           }
         : null,
       players_public: row.players
         ? {
+            id: row.players.id,
             name: row.players.name,
             license: row.players.license,
+            club: row.players.club,
             gender: row.players.gender,
             is_senior: row.players.is_senior,
+            initial_handicap: row.players.initial_handicap,
             current_handicap: row.players.current_handicap,
+            photo_url: row.players.photo_url,
+            created_at: row.players.created_at,
+            updated_at: row.players.updated_at,
           }
         : null,
     }));
 
-    return new Response(JSON.stringify({ results }), {
+    const players: PublicPlayerRow[] = (playersData || []).map((player: any) => ({
+      id: player.id,
+      license: player.license,
+      name: player.name,
+      club: player.club,
+      current_handicap: player.current_handicap,
+      initial_handicap: player.initial_handicap,
+      gender: player.gender,
+      is_senior: player.is_senior,
+      photo_url: player.photo_url,
+      created_at: player.created_at,
+      updated_at: player.updated_at,
+    }));
+
+    return new Response(JSON.stringify({ players, results }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
