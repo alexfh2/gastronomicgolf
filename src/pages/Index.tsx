@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
+import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 const Index = () => {
   const { t, i18n } = useTranslation();
@@ -29,16 +30,12 @@ const Index = () => {
   });
 
   const { data: topResults } = useQuery({
-    queryKey: ['public-top-results-by-category'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('results')
-        .select('stableford_points, player_id, round_id, handicap_at_round, players_public!results_player_id_fkey(name, gender, is_senior, current_handicap), rounds!inner(status)')
-        .eq('rounds.status', 'published')
-        .not('stableford_points', 'is', null)
-        .order('stableford_points', { ascending: false });
-      return data || [];
-    },
+    queryKey: [...publicCircuitDataQueryKey, 'home-top-results'],
+    queryFn: fetchPublicCircuitData,
+    select: (data) =>
+      [...data.results]
+        .filter((result) => result.stableford_points != null)
+        .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0)),
   });
 
   const now = new Date().toISOString().split('T')[0];
