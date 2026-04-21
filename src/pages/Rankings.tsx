@@ -20,12 +20,12 @@ const Rankings = () => {
   const { data: results, isLoading } = useQuery({
     queryKey: ['public-rankings-data'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('results')
-        .select('*, players_public!results_player_id_fkey(name, license, gender, is_senior, current_handicap), rounds!inner(is_master, master_coefficient, name, round_number, status)')
-        .eq('rounds.status', 'published')
-        .not('stableford_points', 'is', null);
-      return (data || []) as Result[];
+      const { data, error } = await supabase.functions.invoke('public-rankings-data', {
+        body: {},
+      });
+
+      if (error) throw error;
+      return ((data as { results?: Result[] } | null)?.results || []) as Result[];
     },
   });
 
