@@ -56,14 +56,12 @@ const PlayerCompareDialog: React.FC<PlayerCompareProps> = ({ currentPlayerId, cu
 
   const { data: allPlayers } = useQuery({
     queryKey: publicCircuitDataQueryKey,
-    queryFn: async () => {
-      const data = await fetchPublicCircuitData();
-      return data.players.map((player) => ({
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.players.map((player) => ({
         id: player.id,
         name: player.name,
         current_handicap: player.current_handicap,
-      }));
-    },
+      })),
     enabled: open,
   });
 

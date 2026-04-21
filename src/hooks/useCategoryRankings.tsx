@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 export type CategoryKey = 'hcpInf' | 'hcpSup' | 'female' | 'senior';
@@ -28,10 +29,8 @@ type Result = {
 export function useCategoryRankings() {
   const { data: results } = useQuery({
     queryKey: publicCircuitDataQueryKey,
-    queryFn: async () => {
-      const data = await fetchPublicCircuitData();
-      return data.results as unknown as Result[];
-    },
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.results as unknown as Result[],
   });
 
   const { data: season } = useQuery({

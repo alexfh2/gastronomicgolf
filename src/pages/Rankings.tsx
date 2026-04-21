@@ -16,10 +16,8 @@ const Rankings = () => {
 
   const { data: results, isLoading } = useQuery({
     queryKey: publicCircuitDataQueryKey,
-    queryFn: async () => {
-      const data = await fetchPublicCircuitData();
-      return data.results as Result[];
-    },
+    queryFn: fetchPublicCircuitData,
+    select: (data) => data.results as Result[],
   });
 
   const { data: rounds } = useQuery({
