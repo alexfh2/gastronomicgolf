@@ -126,7 +126,12 @@ function findHeaderRow(ws: XLSX.WorkSheet, range: XLSX.Range): number {
   return 0; // default to first row
 }
 
-export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
+export interface ExcelParseOutput {
+  results: ExcelParsedResult[];
+  hasSeniorInfo: boolean; // true if age or niv columns were detected
+}
+
+export function parseExcelResults(buffer: ArrayBuffer): ExcelParseOutput {
   const wb = XLSX.read(buffer, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   if (!ws) throw new Error('No s\'ha trobat cap fulla al fitxer Excel');
@@ -222,5 +227,6 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
     });
   }
 
-  return results;
+  const hasSeniorInfo = cols.age !== null || cols.niv !== null;
+  return { results, hasSeniorInfo };
 }

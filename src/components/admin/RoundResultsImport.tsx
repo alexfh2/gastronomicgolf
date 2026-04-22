@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Check, X, AlertTriangle, Search, Plus, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
 import { DialogDescription } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { parseExcelResults, type ExcelParsedResult } from '@/lib/parseExcelResults';
+import { parseExcelResults, type ExcelParsedResult, type ExcelParseOutput } from '@/lib/parseExcelResults';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Round = Tables<'rounds'>;
@@ -57,6 +57,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [importTab, setImportTab] = useState('url');
   const [deleteExisting, setDeleteExisting] = useState(false);
   const [existingCount, setExistingCount] = useState<number | null>(null);
+  const [needsSeniorFile, setNeedsSeniorFile] = useState(false);
+  const seniorFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     supabase.from('results').select('id', { count: 'exact', head: true })
@@ -87,6 +89,43 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     return matched;
   };
 
+  // --- Senior Excel cross-reference ---
+  const handleSeniorExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const { results: seniorRows } = parseExcelResults(buffer);
+
+      // Build a set of senior names/licenses
+      const seniorLicenses = new Set<string>();
+      const seniorNames = new Set<string>();
+      for (const sr of seniorRows) {
+        if (sr.license) seniorLicenses.add(sr.license.trim().toUpperCase());
+        if (sr.name) seniorNames.add(sr.name.trim().toUpperCase());
+      }
+
+      // Cross-reference with main results
+      setResults(prev => prev.map(r => {
+        const matchByLic = r.license && seniorLicenses.has(r.license.trim().toUpperCase());
+        const matchByName = seniorNames.has(r.name.trim().toUpperCase());
+        return { ...r, _is_senior: matchByLic || matchByName };
+      }));
+
+      setNeedsSeniorFile(false);
+      toast({
+        title: `${seniorRows.length} jugadors sènior identificats`,
+        description: `S'han creuat amb els resultats generals.`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: "Error llegint Excel sènior", description: message, variant: 'destructive' });
+    } finally {
+      if (seniorFileRef.current) seniorFileRef.current.value = '';
+    }
+  };
+
   // --- Excel import ---
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,10 +134,11 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     setLoading(true);
     setWarnings([]);
     setResults([]);
+    setNeedsSeniorFile(false);
 
     try {
       const buffer = await file.arrayBuffer();
-      const excelResults = parseExcelResults(buffer);
+      const { results: excelResults, hasSeniorInfo } = parseExcelResults(buffer);
 
       const parsed: ParsedResult[] = excelResults
         .filter(r => !r.is_np)
@@ -122,9 +162,13 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       setSource(`Excel: ${file.name}`);
       const matched = await matchPlayers(parsed);
 
+      if (!hasSeniorInfo) {
+        setNeedsSeniorFile(true);
+      }
+
       toast({
         title: `${matched.length} resultats importats des d'Excel`,
-        description: `${excelResults.filter(r => r.is_np).length} N.P exclosos. Revisa abans de guardar.`,
+        description: `${excelResults.filter(r => r.is_np).length} N.P exclosos.${!hasSeniorInfo ? ' Cal pujar classificació sènior.' : ''} Revisa abans de guardar.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
@@ -318,13 +362,12 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Excel tab */}
         <TabsContent value="excel" className="space-y-3 mt-3">
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Fitxer Excel amb resultats (.xlsx)</Label>
             <p className="text-xs text-muted-foreground">
-              Puja l'Excel amb les columnes: Pos, Licencia, Nombre, Hex, NVH, Edad, Sex, Cat, Hpu, Total, H1-H18, Totalx.
-              Els jugadors N.P s'exclouran automàticament. Sènior = edat ≥ 65.
+              Puja l'Excel amb les columnes: Pos, Licencia, Nombre, Hex, NVH, Niv, Edad, Sex, Cat, Hpu, Total, H1-H18, Totalx.
+              Els jugadors N.P s'exclouran automàticament. Sènior = edat ≥ 65 o Niv = S.
             </p>
             <div className="flex gap-2">
               <input
@@ -345,6 +388,43 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
               </Button>
             </div>
           </div>
+
+          {/* Senior classification upload fallback */}
+          {needsSeniorFile && results.length > 0 && (
+            <Card className="border-amber-300 bg-amber-50/50">
+              <CardContent className="py-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800">
+                      No s'ha detectat informació de sènior (ni Edat ni Niv)
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Puja la classificació sènior per identificar automàticament els jugadors sènior.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    ref={seniorFileRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleSeniorExcelUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => seniorFileRef.current?.click()}
+                    className="w-full"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Pujar classificació sènior
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* URL tab */}
