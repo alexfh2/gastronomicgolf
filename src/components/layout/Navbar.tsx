@@ -12,7 +12,6 @@ const navItems = [
   { key: 'rankings', path: '/ranquings' },
   { key: 'rounds', path: '/jornades' },
   { key: 'players', path: '/jugadors' },
-  
   { key: 'stats', path: '/estadistiques' },
   { key: 'news', path: '/noticies' },
 ] as const;
@@ -21,13 +20,26 @@ const Navbar = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const isHome = location.pathname === '/';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="container flex h-16 items-center justify-between">
+    <header
+      className={`${
+        isHome ? 'absolute' : 'sticky'
+      } top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        isHome
+          ? 'bg-transparent'
+          : 'bg-background/95 backdrop-blur border-b border-border/40'
+      }`}
+    >
+      <div className="container flex h-18 items-center justify-between py-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="Gastronòmic Golf" className="h-10 w-auto" />
+          <img
+            src={logo}
+            alt="Gastronòmic Golf"
+            className={`h-10 w-auto ${isHome ? 'brightness-0 invert opacity-90' : ''}`}
+          />
         </Link>
 
         {/* Desktop Nav */}
@@ -38,10 +50,12 @@ const Navbar = () => {
               <Link
                 key={item.key}
                 to={item.path}
-                className={`px-3 py-2 text-[13px] font-medium uppercase tracking-wider rounded-md transition-colors ${
+                className={`px-4 py-2 text-[11px] font-body font-medium uppercase tracking-[0.2em] transition-colors ${
                   isActive
-                    ? 'text-white bg-primary/80'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    ? 'text-accent border border-accent/40 rounded-sm'
+                    : isHome
+                    ? 'text-foreground/60 hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {t(`nav.${item.key}`)}
@@ -51,8 +65,10 @@ const Navbar = () => {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
-          <span className="hidden sm:inline-flex text-[11px] text-muted-foreground font-medium tracking-[0.15em] uppercase">
+        <div className="flex items-center gap-3">
+          <span className={`hidden sm:inline-flex text-[10px] font-body font-medium tracking-[0.2em] uppercase ${
+            isHome ? 'text-foreground/40' : 'text-muted-foreground'
+          }`}>
             Temporada 2026
           </span>
           <LanguageSwitcher />
@@ -60,11 +76,11 @@ const Navbar = () => {
           {/* Mobile menu */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className={isHome ? 'text-foreground/70 hover:text-foreground' : ''}>
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            <SheetContent side="right" className="w-72 bg-background border-border">
               <SheetTitle className="flex items-center gap-2">
                 <img src={logo} alt="Gastronòmic Golf" className="h-8 w-auto" />
               </SheetTitle>
@@ -76,10 +92,10 @@ const Navbar = () => {
                       key={item.key}
                       to={item.path}
                       onClick={() => setOpen(false)}
-                      className={`px-4 py-3 text-sm font-medium uppercase tracking-wider rounded-md transition-colors ${
+                      className={`px-4 py-3 text-xs font-body font-medium uppercase tracking-[0.15em] transition-colors ${
                         isActive
-                          ? 'text-white bg-primary/80'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                          ? 'text-accent border-l-2 border-accent'
+                          : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       {t(`nav.${item.key}`)}
