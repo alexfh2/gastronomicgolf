@@ -205,6 +205,7 @@ const Stats = () => {
       // Count birdies and special shots from scorecard vs course_par
       const pars = getHoleScores((r.rounds as any)?.course_par);
       const scores = getHoleScores(r.scorecard);
+      const hcps = getHoleScores((r.rounds as any)?.course_handicap);
       const roundClub = (r.rounds as any)?.club || (r.rounds as any)?.name || '';
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) {
@@ -212,12 +213,13 @@ const Stats = () => {
         }
         if (pars[h] > 0 && scores[h] > 0) {
           const diff = scores[h] - pars[h];
+          const hcpLabel = hcps[h] > 0 ? ` · HCP ${hcps[h]}` : '';
           if (scores[h] === 1) {
-            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} · ${roundClub}`, playerId: pid });
+            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
           } else if (diff <= -3) {
-            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}`, playerId: pid });
+            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
           } else if (diff === -2) {
-            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}) · ${roundClub}`, playerId: pid });
+            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
           }
         }
       }
