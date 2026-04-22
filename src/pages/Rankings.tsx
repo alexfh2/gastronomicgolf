@@ -227,12 +227,12 @@ const Rankings = () => {
             {players.map((p: any, i: number) => (
               <tr
                 key={p.id}
-                className={`border-b border-border/20 last:border-0 hover:bg-muted/30 transition-colors ${i < 3 ? 'bg-accent/5' : ''}`}
+                className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${i % 2 === 0 ? 'bg-muted/20' : 'bg-background'} ${i < 3 ? 'border-l-2 border-l-accent' : ''}`}
               >
-                <td className={`py-2 pr-2 font-mono font-bold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
+                <td className={`py-3 pr-2 font-mono font-bold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
                   {i + 1}
                 </td>
-                <td className="py-2 font-medium">
+                <td className="py-3 font-medium">
                   <button
                     type="button"
                     onClick={() => setSelectedPlayerId(p.id)}
@@ -246,12 +246,12 @@ const Rankings = () => {
                   const score = p.roundScores.get(r.id);
                   const val = score?.weighted ?? score?.points;
                   return (
-                    <td key={r.id} className="py-2 px-1.5 text-right font-mono text-xs">
+                    <td key={r.id} className="py-3 px-1.5 text-right font-mono text-xs">
                       {val != null ? val : <span className="text-muted-foreground/40">—</span>}
                     </td>
                   );
                 })}
-                <td className="py-2 text-right font-mono font-bold text-lg text-primary">{p.total}</td>
+                <td className="py-3 text-right font-mono font-bold text-lg text-primary">{p.total}</td>
               </tr>
             ))}
           </tbody>
