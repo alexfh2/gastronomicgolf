@@ -69,7 +69,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="animate-fade-in pb-14">
+    <div className="animate-fade-in">
       {/* ——— HERO with sponsors overlay ——— */}
       <section className="relative h-[22vh] overflow-hidden">
         <div className="absolute inset-0">
