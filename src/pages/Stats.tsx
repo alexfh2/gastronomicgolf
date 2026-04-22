@@ -551,20 +551,23 @@ const Stats = () => {
                                   </>
                                 ) : (
                                   <>
-                                    <span
-                                      className={cn(
-                                        'w-6 text-center font-bold text-xs rounded-full py-0.5',
-                                        i === 0 && 'bg-primary/15 text-primary',
-                                        i <= 2 && i > 0 && 'bg-muted text-muted-foreground',
-                                        i > 2 && 'text-muted-foreground',
-                                      )}
-                                    >
-                                      {i + 1}
-                                    </span>
-                                    {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{entry.name}</span>}
-                                    <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
-                                      {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className={cn(
+                                          'w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0',
+                                          i === 0 && 'bg-primary/15 text-primary',
+                                          i <= 2 && i > 0 && 'bg-muted text-muted-foreground',
+                                          i > 2 && 'text-muted-foreground',
+                                        )}
+                                      >
+                                        {i + 1}
+                                      </span>
+                                      {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{entry.name}</span>}
+                                      <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
+                                        {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
+                                      </span>
+                                    </div>
+                                    {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
                                   </>
                                 )}
                               </div>
