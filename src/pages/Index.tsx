@@ -99,7 +99,7 @@ const Index = () => {
 
       {/* ——— SPONSORS ——— */}
       <section className="border-y border-border/40 bg-card/50">
-        <div className="container py-8">
+        <div className="container py-5">
           <img
             src={sponsors}
             alt="Patrocinadors"
@@ -109,8 +109,8 @@ const Index = () => {
       </section>
 
       {/* ——— QUICK ACCESS ——— */}
-      <section className="container py-20">
-        <div className="flex items-center gap-4 mb-12">
+      <section className="container py-10">
+        <div className="flex items-center gap-4 mb-6">
           <div className="h-px flex-1 bg-border/60" />
           <h2 className="font-body text-[11px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
             {t('home.quickAccess')}
@@ -118,20 +118,20 @@ const Index = () => {
           <div className="h-px flex-1 bg-border/60" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
           {quickLinks.map((link) => (
             <Link key={link.path} to={link.path} className="group">
-              <div className="border border-border/50 bg-card/30 p-8 hover:border-accent/30 hover:bg-card/60 transition-all duration-300">
-                <link.icon className="h-6 w-6 text-accent/70 mb-5" strokeWidth={1.5} />
-                <h3 className="font-body text-sm font-semibold text-foreground mb-2 tracking-wide">
-                  {link.label}
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                  {link.desc}
-                </p>
-                <div className="flex items-center gap-1 text-accent/70 text-[11px] font-body font-medium tracking-wider uppercase group-hover:gap-2 transition-all">
-                  <ChevronRight className="h-3.5 w-3.5" />
+              <div className="border border-border/50 bg-card/30 p-5 hover:border-accent/30 hover:bg-card/60 transition-all duration-300 flex items-start gap-4">
+                <link.icon className="h-5 w-5 text-accent/70 mt-0.5 shrink-0" strokeWidth={1.5} />
+                <div>
+                  <h3 className="font-body text-sm font-semibold text-foreground mb-1 tracking-wide">
+                    {link.label}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {link.desc}
+                  </p>
                 </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto mt-0.5 shrink-0 group-hover:text-accent/60 transition-colors" />
               </div>
             </Link>
           ))}
