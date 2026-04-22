@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import heroBg from '@/assets/hero-bg.png';
-import sponsors from '@/assets/sponsors-row.png';
 import logo from '@/assets/logo.png';
+import sponsorEscampa from '@/assets/sponsor-escampa.png';
+import sponsorBonarea from '@/assets/sponsor-bonarea.png';
+import sponsorSantipamies from '@/assets/sponsor-santipamies.png';
+import sponsorOptimotor from '@/assets/sponsor-optimotor.png';
+import sponsorPrunacar from '@/assets/sponsor-prunacar.png';
+import sponsorTancat from '@/assets/sponsor-tancat.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin, ChevronRight } from 'lucide-react';
