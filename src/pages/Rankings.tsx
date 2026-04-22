@@ -212,48 +212,57 @@ const Rankings = () => {
 
     return (
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm border-separate border-spacing-0">
           <thead>
             <tr className="border-b border-border/40 text-muted-foreground">
               <th className="text-left py-2.5 pr-2 w-12">{t('common.position')}</th>
               <th className="text-left py-2.5">{t('common.name')} <span className="font-normal text-xs text-muted-foreground/70">(últim hcp jugat)</span></th>
-              {rounds?.map(r => (
-                <th key={r.id} className="text-right py-2.5 px-1.5 text-xs whitespace-nowrap">J{r.round_number}</th>
+              {rounds?.map((r, ri) => (
+                <th key={r.id} className={`text-right py-2.5 px-1.5 text-xs whitespace-nowrap ${ri % 2 === 0 ? 'bg-muted/10' : ''}`}>J{r.round_number}</th>
               ))}
-              <th className="text-right py-2.5 font-bold">{t('common.total')}</th>
+              <th className="text-right py-2.5 font-bold bg-primary/5 border-l border-border/30">{t('common.total')}</th>
             </tr>
           </thead>
           <tbody>
-            {players.map((p: any, i: number) => (
-              <tr
-                key={p.id}
-                className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${i % 2 === 0 ? 'bg-muted/20' : 'bg-background'} ${i < 3 ? 'border-l-2 border-l-accent' : ''}`}
-              >
-                <td className={`py-3 pr-2 font-mono font-bold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
-                  {i + 1}
-                </td>
-                <td className="py-3 font-medium">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlayerId(p.id)}
-                    className="hover:text-primary transition-colors text-left"
-                  >
-                    {p.name}
-                    {p.handicap != null && <span className="text-muted-foreground font-normal text-xs ml-1">({p.handicap})</span>}
-                  </button>
-                </td>
-                {rounds?.map(r => {
-                  const score = p.roundScores.get(r.id);
-                  const val = score?.weighted ?? score?.points;
-                  return (
-                    <td key={r.id} className="py-3 px-1.5 text-right font-mono text-xs">
-                      {val != null ? val : <span className="text-muted-foreground/40">—</span>}
-                    </td>
-                  );
-                })}
-                <td className="py-3 text-right font-mono font-bold text-lg text-primary">{p.total}</td>
-              </tr>
-            ))}
+            {players.map((p: any, i: number) => {
+              const isTop3 = i < 3;
+              const rowBg = isTop3
+                ? 'bg-accent/15'
+                : i % 2 === 0
+                  ? 'bg-muted/20'
+                  : 'bg-background';
+
+              return (
+                <tr
+                  key={p.id}
+                  className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${rowBg}`}
+                >
+                  <td className={`py-3 pr-2 font-mono font-bold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>
+                    {i + 1}
+                  </td>
+                  <td className={`py-3 font-medium ${isTop3 ? 'text-accent-foreground' : ''}`}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPlayerId(p.id)}
+                      className="hover:text-primary transition-colors text-left"
+                    >
+                      {p.name}
+                      {p.handicap != null && <span className={`font-normal text-xs ml-1 ${isTop3 ? 'text-accent/70' : 'text-muted-foreground'}`}>({p.handicap})</span>}
+                    </button>
+                  </td>
+                  {rounds?.map((r, ri) => {
+                    const score = p.roundScores.get(r.id);
+                    const val = score?.weighted ?? score?.points;
+                    return (
+                      <td key={r.id} className={`py-3 px-1.5 text-right font-mono text-xs ${ri % 2 === 0 ? 'bg-muted/10' : ''}`}>
+                        {val != null ? val : <span className="text-muted-foreground/40">—</span>}
+                      </td>
+                    );
+                  })}
+                  <td className="py-3 text-right font-mono font-bold text-lg text-primary bg-primary/5 border-l border-border/30">{p.total}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

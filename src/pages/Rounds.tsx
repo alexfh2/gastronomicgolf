@@ -145,10 +145,17 @@ const Rounds = () => {
             </tr>
           </thead>
           <tbody>
-            {results.map((r: any, i: number) => (
-              <tr key={r.id} className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${i % 2 === 0 ? 'bg-muted/20' : 'bg-background'} ${i < 3 ? 'border-l-2 border-l-accent' : ''}`}>
-                <td className={`py-2.5 pr-2 font-mono font-bold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>{i + 1}</td>
-                <td className="py-2.5 font-medium">
+            {results.map((r: any, i: number) => {
+              const isTop3 = i < 3;
+              const rowBg = isTop3
+                ? 'bg-accent/15'
+                : i % 2 === 0
+                  ? 'bg-muted/20'
+                  : 'bg-background';
+              return (
+              <tr key={r.id} className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${rowBg}`}>
+                <td className={`py-2.5 pr-2 font-mono font-bold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>{i + 1}</td>
+                <td className={`py-2.5 font-medium ${isTop3 ? 'text-accent-foreground' : ''}`}>
                   <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="hover:text-primary transition-colors text-left">
                     {((r as any).players_public)?.name}
                   </button>
@@ -158,7 +165,8 @@ const Rounds = () => {
                   {r.stableford_points ?? '—'}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
