@@ -289,6 +289,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       for (const r of selected) {
         if (r._matched_player_id) continue;
 
+        const birthYear = r.age != null ? new Date().getFullYear() - Math.floor(r.age) : null;
         const isSenior = r._is_senior ?? (r.age != null ? r.age >= SENIOR_AGE : false);
 
         const { data: newPlayer, error } = await supabase
@@ -300,7 +301,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             initial_handicap: r.handicap,
             gender: r.gender === 'F' ? 'F' : r.gender === 'M' ? 'M' : null,
             is_senior: isSenior,
-          })
+            birth_year: birthYear,
+          } as any)
           .select('id')
           .single();
 
