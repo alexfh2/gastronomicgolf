@@ -7,15 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Users, ChevronDown, ChevronUp, BarChart3, CalendarPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Rounds = () => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'ca' ? ca : es;
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: rounds, isLoading } = useQuery({
     queryKey: ['public-rounds-all'],
@@ -148,9 +149,9 @@ const Rounds = () => {
               <tr key={r.id} className="border-b border-border/20 last:border-0">
                 <td className="py-1.5 pr-2 font-mono text-muted-foreground">{i + 1}</td>
                 <td className="py-1.5 font-medium">
-                  <Link to={`/jugadors/${r.player_id}`} className="hover:text-primary transition-colors">
+                  <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="hover:text-primary transition-colors text-left">
                     {((r as any).players_public)?.name}
-                  </Link>
+                  </button>
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
                 <td className="py-1.5 px-2 text-right font-mono font-bold text-primary">
@@ -313,6 +314,7 @@ const Rounds = () => {
         </div>
         </>
       )}
+      <PlayerProfileDialog playerId={selectedPlayerId} open={!!selectedPlayerId} onOpenChange={(o) => !o && setSelectedPlayerId(null)} />
     </div>
   );
 };
