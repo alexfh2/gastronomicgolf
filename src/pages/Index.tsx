@@ -80,7 +80,7 @@ const Index = () => {
 
         {/* Sponsors overlay inside hero */}
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-2">
-          <img src={sponsors} alt="Patrocinadors" className="max-w-2xl w-full opacity-40 brightness-200 invert" />
+          <img src={sponsors} alt="Patrocinadors" className="max-w-2xl w-full opacity-25 brightness-150" />
         </div>
       </section>
 
