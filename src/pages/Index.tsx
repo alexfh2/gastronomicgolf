@@ -72,7 +72,7 @@ const Index = () => {
   return (
     <div className="animate-fade-in">
       {/* ——— HERO ——— */}
-      <section className="relative min-h-[52vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[38vh] flex items-end overflow-hidden">
         {/* BG Image */}
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" />
@@ -81,14 +81,14 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
 
-        <div className="container relative pb-10 pt-24">
-          <p className="text-accent text-[11px] font-body font-medium tracking-[0.3em] uppercase mb-3">
+        <div className="container relative pb-8 pt-16">
+          <p className="text-accent text-[11px] font-body font-medium tracking-[0.3em] uppercase mb-2">
             {t('common.season')} 2026
           </p>
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground leading-[0.95] mb-2">
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-[0.95] mb-1">
             Gastronòmic Golf
           </h1>
-          <p className="font-display text-xl md:text-2xl text-foreground/50 italic mb-3">
+          <p className="font-display text-lg md:text-xl text-foreground/50 italic mb-2">
             circuit de golf
           </p>
           <p className="font-body text-sm text-muted-foreground max-w-md leading-relaxed">
@@ -99,20 +99,20 @@ const Index = () => {
 
       {/* ——— SPONSORS ——— */}
       <section className="border-y border-border/40 bg-card/50">
-        <div className="container py-5">
+        <div className="container py-3">
           <img
             src={sponsors}
             alt="Patrocinadors"
-            className="max-w-4xl w-full mx-auto opacity-50 brightness-150"
+            className="max-w-2xl w-full mx-auto opacity-40 brightness-150"
           />
         </div>
       </section>
 
       {/* ——— QUICK ACCESS ——— */}
-      <section className="container py-10">
-        <div className="flex items-center gap-4 mb-6">
+      <section className="container py-6">
+        <div className="flex items-center gap-4 mb-4">
           <div className="h-px flex-1 bg-border/60" />
-          <h2 className="font-body text-[11px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+          <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
             {t('home.quickAccess')}
           </h2>
           <div className="h-px flex-1 bg-border/60" />
@@ -121,17 +121,17 @@ const Index = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
           {quickLinks.map((link) => (
             <Link key={link.path} to={link.path} className="group">
-              <div className="border border-border/50 bg-card/30 p-5 hover:border-accent/30 hover:bg-card/60 transition-all duration-300 flex items-start gap-4">
-                <link.icon className="h-5 w-5 text-accent/70 mt-0.5 shrink-0" strokeWidth={1.5} />
-                <div>
-                  <h3 className="font-body text-sm font-semibold text-foreground mb-1 tracking-wide">
+              <div className="border border-border/50 bg-card/30 px-4 py-3 hover:border-accent/30 hover:bg-card/60 transition-all duration-300 flex items-center gap-3">
+                <link.icon className="h-4 w-4 text-accent/70 shrink-0" strokeWidth={1.5} />
+                <div className="min-w-0">
+                  <h3 className="font-body text-xs font-semibold text-foreground tracking-wide">
                     {link.label}
                   </h3>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  <p className="text-[10px] text-muted-foreground leading-snug truncate">
                     {link.desc}
                   </p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30 ml-auto mt-0.5 shrink-0 group-hover:text-accent/60 transition-colors" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/60 transition-colors" />
               </div>
             </Link>
           ))}
