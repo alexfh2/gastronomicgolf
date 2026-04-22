@@ -166,6 +166,7 @@ export type Database = {
       }
       players: {
         Row: {
+          birth_year: number | null
           club: string | null
           created_at: string
           current_handicap: number | null
@@ -180,6 +181,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          birth_year?: number | null
           club?: string | null
           created_at?: string
           current_handicap?: number | null
@@ -194,6 +196,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          birth_year?: number | null
           club?: string | null
           created_at?: string
           current_handicap?: number | null
