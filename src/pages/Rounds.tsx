@@ -16,6 +16,7 @@ const Rounds = () => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'ca' ? ca : es;
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: rounds, isLoading } = useQuery({
     queryKey: ['public-rounds-all'],
