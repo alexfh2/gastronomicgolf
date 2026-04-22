@@ -144,13 +144,23 @@ const Index = () => {
           <p className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
             {t('home.subtitle')}
           </p>
-          <div className="mt-12 pt-6 border-t border-white/10 flex justify-center px-4">
-            <div className="bg-white/85 rounded-md px-8 py-4 inline-block">
-              <img 
-                src={sponsors} 
-                alt="Patrocinadors" 
-                className="h-28 w-auto object-contain"
-              />
+          <div className="mt-12 pt-6 border-t border-white/10 px-4">
+            <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap max-w-4xl mx-auto">
+              {[
+                { src: sponsorEscampa, alt: 'Escampa Hotels' },
+                { src: sponsorBonarea, alt: 'bonÀrea' },
+                { src: sponsorSantipamies, alt: 'Santi Pàmies Joiers' },
+                { src: sponsorOptimotor, alt: 'Grup Optimotor' },
+                { src: sponsorPrunacar, alt: 'Pruna Car Go' },
+                { src: sponsorTancat, alt: 'Tancat de Codorniu' },
+              ].map((s) => (
+                <img
+                  key={s.alt}
+                  src={s.src}
+                  alt={s.alt}
+                  className="h-10 md:h-12 w-auto object-contain brightness-0 invert opacity-70"
+                />
+              ))}
             </div>
           </div>
         </div>
