@@ -154,7 +154,7 @@ const Index = () => {
                 { src: sponsorPrunacar, alt: 'Pruna Car Go' },
                 { src: sponsorTancat, alt: 'Tancat de Codorniu' },
               ].map((s) => (
-                <div key={s.alt} className="bg-white/90 rounded px-3 py-2 flex items-center justify-center shrink-0">
+                <div key={s.alt} className="bg-white/90 rounded px-3 py-2 flex items-center justify-center shrink-0 overflow-visible">
                   <img
                     src={s.src}
                     alt={s.alt}
