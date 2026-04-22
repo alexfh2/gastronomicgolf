@@ -250,7 +250,7 @@ const Stats = () => {
 
     const avgList: LeaderboardEntry[] = [];
     for (const [pid, player] of players) {
-      if (player.stableford.length >= 2) {
+      if (player.stableford.length >= 3) {
         const avg = player.stableford.reduce((a, b) => a + b, 0) / player.stableford.length;
         avgList.push({
           name: player.name,
