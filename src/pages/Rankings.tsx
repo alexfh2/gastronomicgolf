@@ -216,7 +216,7 @@ const Rankings = () => {
           <thead>
             <tr className="border-b border-border/40 text-muted-foreground">
               <th className="text-left py-2.5 pr-2 w-12">{t('common.position')}</th>
-              <th className="text-left py-2.5 font-light">{t('common.name')}</th>
+              <th className="text-left py-2.5">{t('common.name')} <span className="font-normal text-xs text-muted-foreground/70">(últim hcp jugat)</span></th>
               {rounds?.map(r => (
                 <th key={r.id} className="text-right py-2.5 px-1.5 text-xs whitespace-nowrap">J{r.round_number}</th>
               ))}
