@@ -79,8 +79,8 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
 
         {/* Sponsors overlay inside hero */}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-3">
-          <img src={sponsors} alt="Patrocinadors" className="max-w-2xl w-full opacity-30" />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-2">
+          <img src={sponsors} alt="Patrocinadors" className="max-w-2xl w-full opacity-40 brightness-200 invert" />
         </div>
       </section>
 
