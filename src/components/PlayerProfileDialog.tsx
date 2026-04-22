@@ -186,7 +186,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 gap-0">
         <DialogHeader className="px-6 pt-5 pb-3">
           <DialogTitle className="flex items-center gap-2 font-display">
             <User className="h-5 w-5 text-primary" />
