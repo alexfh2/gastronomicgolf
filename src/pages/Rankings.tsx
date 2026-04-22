@@ -2,11 +2,10 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
+import { Trophy, ChevronRight, Users } from 'lucide-react';
 
 type Result = PublicResult;
 
@@ -18,7 +17,7 @@ function computeScratchStableford(scorecard: any, coursePar: any): number | null
   let total = 0;
   for (let i = 0; i < scores.length; i++) {
     const s = scores[i];
-    if (s == null || s === 0) continue; // picked up = 0 scratch pts
+    if (s == null || s === 0) continue;
     total += Math.max(0, 2 - (s - pars[i]));
   }
   return total;
@@ -27,6 +26,7 @@ function computeScratchStableford(scorecard: any, coursePar: any): number | null
 const Rankings = () => {
   const { t } = useTranslation();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('hcpLow');
 
   const { data: results, isLoading } = useQuery({
     queryKey: publicCircuitDataQueryKey,
@@ -65,7 +65,6 @@ const Rankings = () => {
 
     const roundMap = new Map(rounds.map(r => [r.id, r]));
 
-    // --- Stableford rankings ---
     const byPlayer = new Map<string, {
       name: string;
       gender: string | null;
@@ -145,7 +144,6 @@ const Rankings = () => {
     const senior = buildRanking(p => p.is_senior);
     senior.sort((a, b) => b.total - a.total);
 
-    // --- Scratch ranking ---
     const scratchByPlayer = new Map<string, {
       name: string;
       handicap: number | null;
@@ -155,17 +153,11 @@ const Rankings = () => {
     for (const r of results) {
       if (!r.players_public) continue;
       const pid = r.player_id;
-
-      // Compute scratch stableford from scorecard + course_par
       let scratchPts = computeScratchStableford(r.scorecard, r.rounds?.course_par);
-
-      // Fallback: use scratch_score if it looks like scratch stableford (≤50)
       if (scratchPts == null && r.scratch_score != null && r.scratch_score <= 50) {
         scratchPts = r.scratch_score;
       }
-
       if (scratchPts == null) continue;
-
       if (!scratchByPlayer.has(pid)) {
         scratchByPlayer.set(pid, {
           name: r.players_public.name,
@@ -208,58 +200,56 @@ const Rankings = () => {
   ];
 
   const renderTable = (players: any[] | undefined) => {
-    if (!players?.length) return <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>;
+    if (!players?.length) return <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>;
 
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-separate border-spacing-0">
           <thead>
-            <tr className="border-b border-border/40 text-muted-foreground">
-              <th className="text-left py-2.5 pr-2 w-12">{t('common.position')}</th>
-              <th className="text-left py-2.5">{t('common.name')} <span className="font-normal text-xs text-muted-foreground/70">(últim hcp jugat)</span></th>
+            <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+              <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
+              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span></th>
               {rounds?.map((r, ri) => (
-                <th key={r.id} className={`text-right py-2.5 px-1.5 text-xs whitespace-nowrap ${ri % 2 === 0 ? 'bg-muted/10' : ''}`}>J{r.round_number}</th>
+                <th key={r.id} className={`text-right py-3 px-1.5 whitespace-nowrap border-b border-border/30 ${ri % 2 === 0 ? 'bg-muted/5' : ''}`}>J{r.round_number}</th>
               ))}
-              <th className="text-right py-2.5 font-bold bg-primary/5 border-l border-border/30">{t('common.total')}</th>
+              <th className="text-right py-3 border-b border-border/30 border-l border-border/20">{t('common.total')}</th>
             </tr>
           </thead>
           <tbody>
             {players.map((p: any, i: number) => {
               const isTop3 = i < 3;
-              const rowBg = isTop3
-                ? 'bg-accent/15'
-                : i % 2 === 0
-                  ? 'bg-muted/20'
-                  : 'bg-background';
 
               return (
                 <tr
                   key={p.id}
-                  className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${rowBg}`}
+                  className={`border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors ${isTop3 ? 'bg-accent/[0.04]' : ''}`}
                 >
-                  <td className={`py-3 pr-2 font-mono font-bold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>
+                  <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>
                     {i + 1}
                   </td>
-                  <td className={`py-3 font-medium ${isTop3 ? 'text-accent-foreground' : ''}`}>
+                  <td className="py-3.5">
                     <button
                       type="button"
                       onClick={() => setSelectedPlayerId(p.id)}
-                      className="hover:text-primary transition-colors text-left"
+                      className="flex items-center gap-2 hover:text-accent transition-colors text-left"
                     >
-                      {p.name}
-                      {p.handicap != null && <span className={`font-normal text-xs ml-1 ${isTop3 ? 'text-accent/70' : 'text-muted-foreground'}`}>({p.handicap})</span>}
+                      <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+                        <Users className="h-3 w-3 text-muted-foreground/60" />
+                      </div>
+                      <span className="text-sm font-body font-medium text-foreground">{p.name}</span>
+                      {p.handicap != null && <span className="text-[10px] text-muted-foreground/60 font-mono">({p.handicap})</span>}
                     </button>
                   </td>
                   {rounds?.map((r, ri) => {
                     const score = p.roundScores.get(r.id);
                     const val = score?.weighted ?? score?.points;
                     return (
-                      <td key={r.id} className={`py-3 px-1.5 text-right font-mono text-xs ${ri % 2 === 0 ? 'bg-muted/10' : ''}`}>
-                        {val != null ? val : <span className="text-muted-foreground/40">—</span>}
+                      <td key={r.id} className={`py-3.5 px-1.5 text-right font-mono text-xs ${ri % 2 === 0 ? 'bg-muted/5' : ''}`}>
+                        {val != null ? val : <span className="text-muted-foreground/30">—</span>}
                       </td>
                     );
                   })}
-                  <td className="py-3 text-right font-mono font-bold text-lg text-primary bg-primary/5 border-l border-border/30">{p.total}</td>
+                  <td className={`py-3.5 text-right font-mono font-bold text-sm border-l border-border/20 ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{p.total}</td>
                 </tr>
               );
             })}
@@ -270,40 +260,65 @@ const Rankings = () => {
   };
 
   return (
-    <div className="container py-8 lg:py-12 animate-fade-in">
-      <div className="bg-primary rounded-xl px-5 py-5 mb-8 shadow-md">
-        <h1 className="font-display text-3xl font-bold text-primary-foreground">{t('rankings.title')}</h1>
-        <p className="text-primary-foreground/70 mt-1">
-          {t('rankings.generalClassification')} — {t('common.season')} 2026
-          <Badge variant="outline" className="ml-2 text-[10px] tracking-wider uppercase border-primary-foreground/30 text-primary-foreground/80">Millors {bestN} jornades</Badge>
-        </p>
-      </div>
+    <div className="animate-fade-in">
+      {/* Header section matching Index style */}
+      <section className="container pt-6 pb-4">
+        <div className="flex items-center gap-3 mb-1">
+          <Trophy className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
+          <h1 className="font-display text-2xl font-semibold text-foreground">{t('rankings.title')}</h1>
+        </div>
+        <div className="flex items-center gap-2 mb-6">
+          <p className="text-[11px] font-body text-muted-foreground tracking-wide">
+            {t('rankings.generalClassification')} — {t('common.season')} 2026
+          </p>
+          <span className="inline-block text-[9px] px-2 py-0.5 border border-accent/30 text-accent/80 font-body font-medium tracking-[0.15em] uppercase">
+            Millors {bestN} jornades
+          </span>
+        </div>
 
-      {isLoading ? (
-        <p className="text-muted-foreground">{t('common.loading')}</p>
-      ) : (
-        <Tabs defaultValue="hcpLow">
-          <TabsList className="flex-wrap h-auto gap-1">
-            {categories.map((cat) => (
-              <TabsTrigger key={cat.key} value={cat.key} className="text-xs sm:text-sm">
-                {cat.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        {/* Category tabs matching Index editorial style */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className="h-px flex-1 bg-border/60" />
+          <span className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+            Categories
+          </span>
+          <div className="h-px flex-1 bg-border/60" />
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-6">
           {categories.map((cat) => (
-            <TabsContent key={cat.key} value={cat.key}>
-              <Card className="border-border/60">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{cat.label}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {renderTable((rankings as any)[cat.key])}
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <button
+              key={cat.key}
+              onClick={() => setActiveTab(cat.key)}
+              className={`px-4 py-2 text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+                activeTab === cat.key
+                  ? 'border-accent/40 bg-accent/10 text-accent'
+                  : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+              }`}
+            >
+              {cat.label}
+            </button>
           ))}
-        </Tabs>
-      )}
+        </div>
+      </section>
+
+      {/* Table section */}
+      <section className="container pb-14">
+        {isLoading ? (
+          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+        ) : (
+          <div className="border border-border/50 bg-card/30">
+            <div className="flex items-center justify-between px-7 py-5 border-b border-border/40">
+              <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
+                {categories.find(c => c.key === activeTab)?.label}
+              </h3>
+            </div>
+            <div className="px-7 py-2">
+              {renderTable((rankings as any)[activeTab])}
+            </div>
+          </div>
+        )}
+      </section>
 
       <PlayerProfileDialog
         playerId={selectedPlayerId}

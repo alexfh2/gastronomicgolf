@@ -38,7 +38,7 @@ const Navbar = () => {
           <img
             src={logo}
             alt="Gastronòmic Golf"
-            className={`h-10 w-auto ${isHome ? 'brightness-0 invert opacity-90' : ''}`}
+            className="h-10 w-auto brightness-0 invert opacity-90"
           />
         </Link>
 
