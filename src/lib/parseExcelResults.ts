@@ -61,7 +61,7 @@ interface ColumnMap {
 
 function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range): ColumnMap {
   const map: ColumnMap = {
-    pos: null, name: null, license: null, hex: null, nvh: null,
+    pos: null, name: null, license: null, hex: null, nvh: null, niv: null,
     age: null, gender: null, category: null, hpu: null, total: null,
     scratch: null, holeColumns: [],
   };
@@ -183,6 +183,7 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
         scratch_score: null,
         scores: [],
         is_np: true,
+        is_senior: String(getVal(cols.niv) || '').toUpperCase() === 'S',
       });
       continue;
     }
@@ -217,6 +218,7 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
       scratch_score: hasLiftedBall ? null : (scratchScore ?? null),
       scores,
       is_np: false,
+      is_senior: String(getVal(cols.niv) || '').toUpperCase() === 'S',
     });
   }
 
