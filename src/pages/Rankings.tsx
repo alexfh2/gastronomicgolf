@@ -239,9 +239,9 @@ const Rankings = () => {
                     className="hover:text-primary transition-colors text-left"
                   >
                     {p.name}
+                    {p.handicap != null && <span className="text-muted-foreground font-normal text-xs ml-1">({p.handicap})</span>}
                   </button>
                 </td>
-                <td className="py-2 px-2 text-right font-mono text-xs text-muted-foreground">{p.handicap ?? '—'}</td>
                 {rounds?.map(r => {
                   const score = p.roundScores.get(r.id);
                   const val = score?.weighted ?? score?.points;
