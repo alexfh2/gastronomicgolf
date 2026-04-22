@@ -72,26 +72,26 @@ const Index = () => {
   return (
     <div className="animate-fade-in">
       {/* ——— HERO ——— */}
-      <section className="relative min-h-[85vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[52vh] flex items-end overflow-hidden">
         {/* BG Image */}
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" />
         </div>
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
 
-        <div className="container relative pb-20 pt-40">
-          <p className="text-accent text-[11px] font-body font-medium tracking-[0.3em] uppercase mb-6">
+        <div className="container relative pb-10 pt-24">
+          <p className="text-accent text-[11px] font-body font-medium tracking-[0.3em] uppercase mb-3">
             {t('common.season')} 2026
           </p>
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-semibold text-foreground leading-[0.95] mb-3">
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground leading-[0.95] mb-2">
             Gastronòmic Golf
           </h1>
-          <p className="font-display text-2xl md:text-3xl text-foreground/50 italic mb-6">
+          <p className="font-display text-xl md:text-2xl text-foreground/50 italic mb-3">
             circuit de golf
           </p>
-          <p className="font-body text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
+          <p className="font-body text-sm text-muted-foreground max-w-md leading-relaxed">
             {t('home.subtitle')}
           </p>
         </div>
