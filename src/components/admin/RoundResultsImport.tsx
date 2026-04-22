@@ -362,13 +362,12 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Excel tab */}
         <TabsContent value="excel" className="space-y-3 mt-3">
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Fitxer Excel amb resultats (.xlsx)</Label>
             <p className="text-xs text-muted-foreground">
-              Puja l'Excel amb les columnes: Pos, Licencia, Nombre, Hex, NVH, Edad, Sex, Cat, Hpu, Total, H1-H18, Totalx.
-              Els jugadors N.P s'exclouran automàticament. Sènior = edat ≥ 65.
+              Puja l'Excel amb les columnes: Pos, Licencia, Nombre, Hex, NVH, Niv, Edad, Sex, Cat, Hpu, Total, H1-H18, Totalx.
+              Els jugadors N.P s'exclouran automàticament. Sènior = edat ≥ 65 o Niv = S.
             </p>
             <div className="flex gap-2">
               <input
@@ -389,6 +388,43 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
               </Button>
             </div>
           </div>
+
+          {/* Senior classification upload fallback */}
+          {needsSeniorFile && results.length > 0 && (
+            <Card className="border-amber-300 bg-amber-50/50">
+              <CardContent className="py-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800">
+                      No s'ha detectat informació de sènior (ni Edat ni Niv)
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Puja la classificació sènior per identificar automàticament els jugadors sènior.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    ref={seniorFileRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleSeniorExcelUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => seniorFileRef.current?.click()}
+                    className="w-full"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Pujar classificació sènior
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* URL tab */}
