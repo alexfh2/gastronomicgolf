@@ -520,7 +520,7 @@ const Stats = () => {
                             const isHoleStat = card.unit === 'cops';
                             const isSpecial = card.unit === 'special';
                             return (
-                              <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-b-0' : 'flex items-start gap-2')}>
+                              <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-b-0' : 'flex flex-col gap-0.5')}>
                                 {isSpecial ? (
                                   <>
                                     <div className="flex items-center gap-2">
