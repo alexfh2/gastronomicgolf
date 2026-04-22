@@ -149,9 +149,9 @@ const Rounds = () => {
               <tr key={r.id} className="border-b border-border/20 last:border-0">
                 <td className="py-1.5 pr-2 font-mono text-muted-foreground">{i + 1}</td>
                 <td className="py-1.5 font-medium">
-                  <Link to={`/jugadors/${r.player_id}`} className="hover:text-primary transition-colors">
+                  <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="hover:text-primary transition-colors text-left">
                     {((r as any).players_public)?.name}
-                  </Link>
+                  </button>
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
                 <td className="py-1.5 px-2 text-right font-mono font-bold text-primary">
