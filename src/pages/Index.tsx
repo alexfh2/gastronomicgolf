@@ -71,40 +71,23 @@ const Index = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* ——— HERO ——— */}
-      <section className="relative min-h-[38vh] flex items-end overflow-hidden">
-        {/* BG Image */}
+      {/* ——— HERO (just the background image, no text) ——— */}
+      <section className="relative h-[28vh] overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" />
         </div>
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
 
-        <div className="container relative pb-8 pt-16">
-          <p className="text-accent text-[11px] font-body font-medium tracking-[0.3em] uppercase mb-2">
-            {t('common.season')} 2026
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-[0.95] mb-1">
-            Gastronòmic Golf
-          </h1>
-          <p className="font-display text-lg md:text-xl text-foreground/50 italic mb-2">
-            circuit de golf
-          </p>
-          <p className="font-body text-sm text-muted-foreground max-w-md leading-relaxed">
-            {t('home.subtitle')}
-          </p>
-        </div>
-      </section>
-
-      {/* ——— SPONSORS ——— */}
-      <section className="border-y border-border/40 bg-card/50">
-        <div className="container py-3">
-          <img
-            src={sponsors}
-            alt="Patrocinadors"
-            className="max-w-2xl w-full mx-auto opacity-40 brightness-150"
-          />
+        {/* Sponsors strip at the bottom of the hero, semi-transparent */}
+        <div className="absolute bottom-0 left-0 right-0 bg-background/60 backdrop-blur-sm border-t border-border/20">
+          <div className="container py-3">
+            <img
+              src={sponsors}
+              alt="Patrocinadors"
+              className="max-w-3xl w-full mx-auto opacity-60"
+            />
+          </div>
         </div>
       </section>
 
