@@ -86,7 +86,7 @@ function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range)
     for (const [field, aliases] of Object.entries(HEADER_ALIASES)) {
       if (field === 'team') continue; // skip, we don't need it
       if (aliases.includes(h.normalized)) {
-        (map as Record<string, number | null | number[]>)[field] = h.col;
+        (map as unknown as Record<string, number | null | number[]>)[field] = h.col;
         break;
       }
     }
