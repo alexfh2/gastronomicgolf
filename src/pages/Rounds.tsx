@@ -146,15 +146,15 @@ const Rounds = () => {
           </thead>
           <tbody>
             {results.map((r: any, i: number) => (
-              <tr key={r.id} className="border-b border-border/20 last:border-0">
-                <td className="py-1.5 pr-2 font-mono text-muted-foreground">{i + 1}</td>
-                <td className="py-1.5 font-medium">
+              <tr key={r.id} className={`border-b border-border/30 last:border-0 hover:bg-primary/8 transition-colors ${i % 2 === 0 ? 'bg-muted/20' : 'bg-background'} ${i < 3 ? 'border-l-2 border-l-accent' : ''}`}>
+                <td className={`py-2.5 pr-2 font-mono font-bold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>{i + 1}</td>
+                <td className="py-2.5 font-medium">
                   <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="hover:text-primary transition-colors text-left">
                     {((r as any).players_public)?.name}
                   </button>
                 </td>
-                <td className="py-1.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
-                <td className="py-1.5 px-2 text-right font-mono font-bold text-primary">
+                <td className="py-2.5 px-2 text-right font-mono text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
+                <td className="py-2.5 px-2 text-right font-mono font-bold text-primary">
                   {r.stableford_points ?? '—'}
                 </td>
               </tr>
