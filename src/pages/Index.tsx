@@ -139,12 +139,14 @@ const Index = () => {
           <p className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
             {t('home.subtitle')}
           </p>
-          <div className="mt-12 pt-6 border-t border-white/10 px-4">
-            <img 
-              src={sponsors} 
-              alt="Patrocinadors" 
-              className="max-w-5xl w-full mx-auto opacity-70 object-contain"
-            />
+          <div className="mt-12 pt-6 border-t border-white/10 flex justify-center px-4">
+            <div className="bg-white/85 rounded-md px-8 py-4 inline-block">
+              <img 
+                src={sponsors} 
+                alt="Patrocinadors" 
+                className="h-28 w-auto object-contain"
+              />
+            </div>
           </div>
         </div>
       </section>
