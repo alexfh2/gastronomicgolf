@@ -314,6 +314,7 @@ const Rounds = () => {
         </div>
         </>
       )}
+      <PlayerProfileDialog playerId={selectedPlayerId} open={!!selectedPlayerId} onOpenChange={(o) => !o && setSelectedPlayerId(null)} />
     </div>
   );
 };
