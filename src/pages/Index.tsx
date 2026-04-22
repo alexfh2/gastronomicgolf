@@ -1,6 +1,4 @@
 import heroBg from '@/assets/hero-editorial.png';
-import sponsors from '@/assets/sponsors-row.png';
-import logo from '@/assets/logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
@@ -70,25 +68,14 @@ const Index = () => {
   ];
 
   return (
-    <div className="animate-fade-in">
-      {/* ——— HERO (just the background image, no text) ——— */}
+    <div className="animate-fade-in pb-14">
+      {/* ——— HERO (just the background image) ——— */}
       <section className="relative h-[28vh] overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-
-        {/* Sponsors strip at the bottom of the hero, semi-transparent */}
-        <div className="absolute bottom-0 left-0 right-0 bg-background/60 backdrop-blur-sm border-t border-border/20">
-          <div className="container py-3">
-            <img
-              src={sponsors}
-              alt="Patrocinadors"
-              className="max-w-3xl w-full mx-auto opacity-60"
-            />
-          </div>
-        </div>
       </section>
 
       {/* ——— QUICK ACCESS ——— */}
