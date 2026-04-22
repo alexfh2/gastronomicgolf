@@ -101,7 +101,11 @@ function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range)
   map.holeColumns.sort((a, b) => {
     const aCell = ws[XLSX.utils.encode_cell({ r: headerRow, c: a })];
     const bCell = ws[XLSX.utils.encode_cell({ r: headerRow, c: b })];
-    return parseInt(String(aCell?.v || '0')) - parseInt(String(bCell?.v || '0'));
+    const extractNum = (v: string) => {
+      const m = v.match(/(\d{1,2})/);
+      return m ? parseInt(m[1]) : 0;
+    };
+    return extractNum(String(aCell?.v || '0')) - extractNum(String(bCell?.v || '0'));
   });
 
   return map;
@@ -120,7 +124,9 @@ function findHeaderRow(ws: XLSX.WorkSheet, range: XLSX.Range): number {
         if (aliases.includes(n)) { matchCount++; break; }
       }
       // Also count hole numbers
-      const num = parseInt(String(cell.v), 10);
+      const raw = String(cell.v);
+      const holeMatch = raw.match(/^(?:h(?:oyo|ole)?\s*)?(\d{1,2})$/i);
+      const num = holeMatch ? parseInt(holeMatch[1], 10) : NaN;
       if (!isNaN(num) && num >= 1 && num <= 18) matchCount++;
     }
     if (matchCount >= 3) return r;
