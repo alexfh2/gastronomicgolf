@@ -227,5 +227,6 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParseOutput {
     });
   }
 
-  return results;
+  const hasSeniorInfo = cols.age !== null || cols.niv !== null;
+  return { results, hasSeniorInfo };
 }
