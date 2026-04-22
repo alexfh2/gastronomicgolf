@@ -1,12 +1,9 @@
-import { useState } from 'react';
-import heroBg from '@/assets/hero-bg.png';
+import heroBg from '@/assets/hero-editorial.png';
 import sponsors from '@/assets/sponsors-row.png';
 import logo from '@/assets/logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Users, ArrowRight, Calendar, MapPin, ChevronRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -38,210 +35,219 @@ const Index = () => {
         .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0)),
   });
 
-  const now = new Date().toISOString().split('T')[0];
-  const nextRound = rounds?.find(r => r.date >= now);
-  const lastRound = rounds ? [...rounds].reverse().find(r => r.date < now) : null;
-  const featuredRound = nextRound || lastRound;
-
-  // Build per-category top 5
-  const categoryResults = (() => {
-    if (!topResults?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
-
-    // Accumulate total points per player across all rounds
-    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
+  // Aggregate rankings
+  const generalRanking = (() => {
+    if (!topResults?.length) return [];
+    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; lastRound: string | null }>();
     for (const r of topResults) {
       const p = (r as any).players_public;
       if (!p) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
+      const roundName = (r as any).rounds?.name ?? null;
       const existing = agg.get(r.player_id);
       if (existing) {
         existing.totalPoints += pts;
         existing.rounds += 1;
-        // Keep most recent handicap
         if (hcp != null) existing.handicap = hcp;
+        existing.lastRound = roundName;
       } else {
-        agg.set(r.player_id, {
-          name: p.name,
-          totalPoints: pts,
-          rounds: 1,
-          gender: p.gender,
-          is_senior: p.is_senior,
-          handicap: hcp,
-          playerId: r.player_id,
-        });
+        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, lastRound: roundName });
       }
     }
-
-    const all = Array.from(agg.values());
-    const hcpLow = all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
-    const hcpHigh = all.filter(p => p.handicap != null && p.handicap > 15 && p.handicap <= 36).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
-    const female = all.filter(p => p.gender === 'F').sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
-    const senior = all.filter(p => p.is_senior).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
-
-    return { hcpLow, hcpHigh, female, senior };
+    return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
   })();
 
+  // Stats
+  const totalRounds = rounds?.length ?? 0;
+  const uniquePlayers = topResults ? new Set(topResults.map(r => r.player_id)).size : 0;
+  const totalPoints = topResults ? topResults.reduce((s, r) => s + (r.stableford_points ?? 0), 0) : 0;
+
   const quickLinks = [
-    { icon: Trophy, label: t('home.viewRankings'), path: '/ranquings' },
-    { icon: BarChart3, label: t('home.viewStats'), path: '/estadistiques' },
-    { icon: Calendar, label: t('home.calendar', 'Calendari'), path: '/jornades' },
+    { icon: Trophy, label: t('home.viewRankings'), desc: 'Consulta la classificació general i per categories', path: '/ranquings' },
+    { icon: BarChart3, label: t('home.viewStats'), desc: 'Descobreix dades, gràfics i comparatives del circuit', path: '/estadistiques' },
+    { icon: Calendar, label: t('home.calendar', 'Calendari'), desc: 'Consulta les properes jornades i esdeveniments', path: '/jornades' },
   ];
-
-  const categories = [
-    { key: 'hcpLow', label: 'HCP Baix' },
-    { key: 'hcpHigh', label: 'HCP Alt' },
-    { key: 'female', label: t('categories.female') },
-    { key: 'senior', label: t('categories.senior') },
-  ];
-
-  const renderCategoryList = (players: typeof categoryResults.hcpLow) => {
-    if (!players?.length) return <p className="text-muted-foreground text-sm py-4">{t('common.noData')}</p>;
-    return (
-      <div className="space-y-0">
-        {players.map((p, i) => (
-          <Link
-            key={p.playerId}
-            to={`/jugadors/${p.playerId}`}
-            className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors -mx-1 px-1 rounded"
-          >
-            <div className="flex items-center gap-3">
-              <span className={`text-xs font-mono w-5 ${i < 3 ? 'text-accent font-bold' : 'text-muted-foreground'}`}>{i + 1}</span>
-              <span className="text-sm font-medium">{p.name}</span>
-              {p.handicap != null && (
-                <span className="text-[11px] text-muted-foreground font-mono">({p.handicap})</span>
-              )}
-            </div>
-            <span className="font-mono font-bold text-sm text-primary">{p.totalPoints} pts</span>
-          </Link>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="animate-fade-in">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-primary py-24 lg:py-32">
+      {/* ——— HERO ——— */}
+      <section className="relative min-h-[85vh] flex items-end overflow-hidden">
+        {/* BG Image */}
         <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-40" />
+          <img src={heroBg} alt="" className="w-full h-full object-cover" />
         </div>
-        <div className="absolute inset-0 bg-primary/60" />
-        <div className="container relative text-center">
-          <p className="text-primary-foreground/50 text-xs font-medium tracking-[0.25em] uppercase mb-6">
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+
+        <div className="container relative pb-20 pt-40">
+          <p className="text-accent text-[11px] font-body font-medium tracking-[0.3em] uppercase mb-6">
             {t('common.season')} 2026
           </p>
-          <img 
-            src={logo} 
-            alt="Circuit Gastronòmic Golf" 
-            className="h-16 md:h-20 lg:h-24 w-auto mx-auto mb-5 brightness-0 invert"
-          />
-          <p className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
+          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-semibold text-foreground leading-[0.95] mb-3">
+            Gastronòmic Golf
+          </h1>
+          <p className="font-display text-2xl md:text-3xl text-foreground/50 italic mb-6">
+            circuit de golf
+          </p>
+          <p className="font-body text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
             {t('home.subtitle')}
           </p>
-          <div className="mt-12 pt-6 border-t border-white/10">
-            <img 
-              src={sponsors} 
-              alt="Patrocinadors" 
-              className="max-w-4xl w-full mx-auto opacity-70"
-            />
-          </div>
         </div>
       </section>
 
-      {/* Quick Access */}
-      <section className="container py-14 lg:py-20">
-        <h2 className="font-display text-2xl font-semibold mb-10 text-center tracking-tight">
-          {t('home.quickAccess')}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto">
+      {/* ——— SPONSORS ——— */}
+      <section className="border-y border-border/40 bg-card/50">
+        <div className="container py-8">
+          <img
+            src={sponsors}
+            alt="Patrocinadors"
+            className="max-w-4xl w-full mx-auto opacity-50 brightness-150"
+          />
+        </div>
+      </section>
+
+      {/* ——— QUICK ACCESS ——— */}
+      <section className="container py-20">
+        <div className="flex items-center gap-4 mb-12">
+          <div className="h-px flex-1 bg-border/60" />
+          <h2 className="font-body text-[11px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+            {t('home.quickAccess')}
+          </h2>
+          <div className="h-px flex-1 bg-border/60" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
           {quickLinks.map((link) => (
-            <Link key={link.path} to={link.path}>
-              <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer border-border/40">
-                <CardContent className="flex flex-col items-center gap-4 p-8">
-                  <link.icon className="h-7 w-7 text-accent" strokeWidth={1.5} />
-                  <span className="text-sm font-medium text-foreground tracking-wide">{link.label}</span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
-                </CardContent>
-              </Card>
+            <Link key={link.path} to={link.path} className="group">
+              <div className="border border-border/50 bg-card/30 p-8 hover:border-accent/30 hover:bg-card/60 transition-all duration-300">
+                <link.icon className="h-6 w-6 text-accent/70 mb-5" strokeWidth={1.5} />
+                <h3 className="font-body text-sm font-semibold text-foreground mb-2 tracking-wide">
+                  {link.label}
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                  {link.desc}
+                </p>
+                <div className="flex items-center gap-1 text-accent/70 text-[11px] font-body font-medium tracking-wider uppercase group-hover:gap-2 transition-all">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </div>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Featured round + Rankings by category */}
+      {/* ——— RANKING + STATS ——— */}
       <section className="container pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Featured Round — clickable */}
-          <Card className="border-border/40 lg:col-span-2">
-            <CardContent className="p-7">
-              <h3 className="font-display text-lg font-semibold mb-5 tracking-tight bg-primary text-primary-foreground -mx-7 -mt-7 px-7 py-3 rounded-t-lg">
-                {nextRound ? t('home.nextRound') : t('home.lastRound')}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* General Ranking */}
+          <div className="lg:col-span-2 border border-border/50 bg-card/30">
+            <div className="flex items-center justify-between px-7 py-5 border-b border-border/40">
+              <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
+                Rànquing General
               </h3>
-              {featuredRound ? (
-                <Link to="/jornades" className="block group">
-                  <div className="space-y-3">
-                    <p className="text-xl font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
-                      {featuredRound.name}
-                      {featuredRound.is_master && (
-                        <span className="ml-2 text-[10px] bg-accent/15 text-accent px-2.5 py-0.5 rounded font-semibold uppercase tracking-wider">Master</span>
-                      )}
-                    </p>
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                      <Calendar className="h-4 w-4" strokeWidth={1.5} />
-                      <span>{format(new Date(featuredRound.date), 'dd MMMM yyyy', { locale })}</span>
-                    </div>
-                    {featuredRound.club && (
-                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                        <MapPin className="h-4 w-4" strokeWidth={1.5} />
-                        <span>{featuredRound.club}{featuredRound.course ? ` — ${featuredRound.course}` : ''}</span>
-                      </div>
-                    )}
-                    {featuredRound.sponsor && (
-                      <p className="text-xs text-muted-foreground/70 mt-1 tracking-wide">
-                        {t('rounds.sponsor')}: {featuredRound.sponsor}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 text-xs text-accent font-medium pt-2 group-hover:gap-2 transition-all">
-                      Veure resultats <ChevronRight className="h-3.5 w-3.5" />
-                    </div>
-                  </div>
-                </Link>
-              ) : (
-                <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
-              )}
-            </CardContent>
-          </Card>
+              <Link
+                to="/ranquings"
+                className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
+              >
+                Veure rànquing complet <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
 
-          {/* Top classified by category */}
-          <Card className="border-border/40 lg:col-span-3">
-            <CardContent className="p-7">
-              <div className="flex items-center justify-between mb-5 bg-primary -mx-7 -mt-7 px-7 py-3 rounded-t-lg">
-                <h3 className="font-display text-lg font-semibold tracking-tight bg-primary text-primary-foreground">{t('home.topPlayers')}</h3>
-                <Link to="/ranquings" className="text-xs text-accent font-medium hover:underline flex items-center gap-1">
-                  Veure rànquings <ChevronRight className="h-3 w-3" />
-                </Link>
+            <div className="px-7 py-2">
+              {/* Table header */}
+              <div className="grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+                <span>Pos.</span>
+                <span>Jugador</span>
+                <span className="text-right">Torneigs</span>
+                <span className="text-right">Punts</span>
+                <span className="text-right">Mitjana</span>
+                <span className="text-right">Últim</span>
               </div>
-              <Tabs defaultValue="hcpLow">
-                <TabsList className="h-auto gap-1 flex-wrap mb-4">
-                  {categories.map(cat => (
-                    <TabsTrigger key={cat.key} value={cat.key} className="text-xs">
-                      {cat.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                {categories.map(cat => (
-                  <TabsContent key={cat.key} value={cat.key}>
-                    {renderCategoryList((categoryResults as any)[cat.key])}
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
+
+              {generalRanking.length > 0 ? (
+                generalRanking.map((p, i) => (
+                  <Link
+                    key={p.playerId}
+                    to={`/jugadors/${p.playerId}`}
+                    className={`grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 items-center py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
+                      i < 3 ? 'bg-accent/[0.04]' : ''
+                    }`}
+                  >
+                    <span className={`text-sm font-body font-semibold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
+                      {i + 1}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center">
+                        <Users className="h-3 w-3 text-muted-foreground/60" />
+                      </div>
+                      <span className="text-sm font-body font-medium text-foreground">{p.name}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground text-right font-mono">{p.rounds}</span>
+                    <span className={`text-sm text-right font-mono font-bold ${i < 3 ? 'text-accent' : 'text-foreground'}`}>
+                      {p.totalPoints.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-muted-foreground text-right font-mono">
+                      {p.rounds > 0 ? (p.totalPoints / p.rounds).toFixed(2) : '—'}
+                    </span>
+                    <span className="text-right">
+                      <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded-sm font-mono ${
+                        i < 3
+                          ? 'bg-accent/15 text-accent'
+                          : 'bg-muted/30 text-muted-foreground'
+                      }`}>
+                        {i + 1}r
+                      </span>
+                    </span>
+                  </Link>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Stats cards */}
+          <div className="flex flex-col gap-4">
+            <StatCard
+              label="Torneigs disputats"
+              value={totalRounds}
+              sub="de 10"
+              icon={<Calendar className="h-5 w-5" />}
+            />
+            <StatCard
+              label="Jugadors actius"
+              value={uniquePlayers}
+              icon={<Users className="h-5 w-5" />}
+            />
+            <StatCard
+              label="Punts acumulats"
+              value={totalPoints.toLocaleString()}
+              icon={<TrendingUp className="h-5 w-5" />}
+            />
+          </div>
         </div>
       </section>
     </div>
   );
 };
+
+function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
+  return (
+    <div className="border border-border/50 bg-card/30 p-7 flex flex-col justify-between flex-1">
+      <div className="flex items-center justify-between mb-6">
+        <span className="font-body text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground">
+          {label}
+        </span>
+        <span className="text-accent/50">{icon}</span>
+      </div>
+      <div>
+        <span className="font-display text-4xl font-semibold text-foreground">{value}</span>
+        {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
+      </div>
+    </div>
+  );
+}
 
 export default Index;
