@@ -1,6 +1,4 @@
 import heroBg from '@/assets/hero-editorial.png';
-import sponsors from '@/assets/sponsors-row.png';
-import logo from '@/assets/logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
