@@ -145,7 +145,7 @@ const Index = () => {
             {t('home.subtitle')}
           </p>
           <div className="mt-12 pt-6 border-t border-white/10 px-4">
-            <div className="flex items-center justify-center gap-5 flex-wrap max-w-5xl mx-auto">
+            <div className="flex items-center justify-center gap-4 max-w-5xl mx-auto">
               {[
                 { src: sponsorEscampa, alt: 'Escampa Hotels' },
                 { src: sponsorBonarea, alt: 'bonÀrea' },
@@ -154,11 +154,11 @@ const Index = () => {
                 { src: sponsorPrunacar, alt: 'Pruna Car Go' },
                 { src: sponsorTancat, alt: 'Tancat de Codorniu' },
               ].map((s) => (
-                <div key={s.alt} className="bg-white/90 rounded px-4 py-2.5 flex items-center justify-center shrink-0">
+                <div key={s.alt} className="bg-white/90 rounded px-3 py-2 flex items-center justify-center min-w-0">
                   <img
                     src={s.src}
                     alt={s.alt}
-                    className="h-12 w-auto object-contain"
+                    className="h-9 w-auto object-contain"
                   />
                 </div>
               ))}
