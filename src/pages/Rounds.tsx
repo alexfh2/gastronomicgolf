@@ -11,9 +11,6 @@ import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
-import { format } from 'date-fns';
-import { ca, es } from 'date-fns/locale';
-import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 const Rounds = () => {
   const { t, i18n } = useTranslation();
