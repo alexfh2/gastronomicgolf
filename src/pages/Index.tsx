@@ -78,8 +78,11 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </section>
 
-      {/* ——— QUICK ACCESS ——— */}
+      {/* ——— TEMPORADA + QUICK ACCESS ——— */}
       <section className="container py-6">
+        <p className="text-center text-accent text-xs font-body font-medium tracking-[0.35em] uppercase mb-6">
+          {t('common.season')} 2026
+        </p>
         <div className="flex items-center gap-4 mb-4">
           <div className="h-px flex-1 bg-border/60" />
           <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
