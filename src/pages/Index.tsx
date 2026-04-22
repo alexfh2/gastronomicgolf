@@ -70,18 +70,23 @@ const Index = () => {
 
   return (
     <div className="animate-fade-in pb-14">
-      {/* ——— HERO (just the background image) ——— */}
-      <section className="relative h-[28vh] overflow-hidden">
+      {/* ——— HERO with sponsors overlay ——— */}
+      <section className="relative h-[22vh] overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+
+        {/* Sponsors overlay inside hero */}
+        <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-3">
+          <img src={sponsors} alt="Patrocinadors" className="max-w-2xl w-full opacity-30" />
+        </div>
       </section>
 
       {/* ——— TEMPORADA + QUICK ACCESS ——— */}
-      <section className="container py-6">
-        <p className="text-center text-accent text-xs font-body font-medium tracking-[0.35em] uppercase mb-6">
+      <section className="container pt-3 pb-4">
+        <p className="text-center text-accent text-xs font-body font-medium tracking-[0.35em] uppercase mb-4">
           {t('common.season')} 2026
         </p>
         <div className="flex items-center gap-4 mb-4">
