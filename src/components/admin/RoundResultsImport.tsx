@@ -116,7 +116,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
           source_url: `excel:${file.name}`,
           _selected: true,
           _is_np: false,
-          _is_senior: r.age != null ? r.age >= SENIOR_AGE : false,
+          _is_senior: r.is_senior || (r.age != null ? r.age >= SENIOR_AGE : false),
         }));
 
       setSource(`Excel: ${file.name}`);
