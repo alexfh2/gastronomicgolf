@@ -79,7 +79,9 @@ function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range)
   // Match semantic fields
   for (const h of headers) {
     // Check if it's a hole number (1-18)
-    const holeNum = parseInt(h.raw, 10);
+    // Matches: "1", "01", "H1", "h1", "Hoyo 1", "hoyo1", "Hole 1", etc.
+    const holeMatch = h.raw.match(/^(?:h(?:oyo|ole)?\s*)?(\d{1,2})$/i);
+    const holeNum = holeMatch ? parseInt(holeMatch[1], 10) : NaN;
     if (!isNaN(holeNum) && holeNum >= 1 && holeNum <= 18) {
       map.holeColumns.push(h.col);
       continue;
