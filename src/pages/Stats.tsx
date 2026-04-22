@@ -2,40 +2,24 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown } from 'lucide-react';
+import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
-type CourseAggregate = {
-  displayName: string;
-  scores: number[];
-  holes: Map<number, HoleAggregate>;
-};
+type CourseAggregate = { displayName: string; scores: number[]; holes: Map<number, HoleAggregate> };
 
 const COURSE_STOPWORDS = new Set(['golf', 'club', 'de', 'del', 'la', 'el', 'los', 'las']);
 
 const normalizeText = (value: string) =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
 const getCourseKey = (name: string) => {
   const normalized = normalizeText(name);
-  const significantTokens = normalized
-    .split(' ')
-    .filter(token => token && !COURSE_STOPWORDS.has(token))
-    .map(token => token.slice(0, 4));
-
+  const significantTokens = normalized.split(' ').filter(token => token && !COURSE_STOPWORDS.has(token)).map(token => token.slice(0, 4));
   return significantTokens.join('-') || normalized.replace(/\s+/g, '-') || 'desconegut';
 };
 
@@ -59,72 +43,78 @@ const getMostCommonPar = (parCounts: Record<string, number>) => {
 type LeaderPlayer = { name: string; totalPoints: number; handicap: number | null; playerId: string };
 type LeadersData = Record<string, LeaderPlayer[]>;
 
-const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string; onSelectPlayer: (id: string) => void }) => {
-  const [open, setOpen] = useState(false);
+const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, onToggle }: { categories: { key: string; label: string }[]; data: LeadersData; noDataLabel: string; onSelectPlayer: (id: string) => void; isOpen: boolean; onToggle: () => void }) => {
   const [activeTab, setActiveTab] = useState(categories[0]?.key);
   const activePlayers = data[activeTab] || [];
   const leader = activePlayers[0];
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className="border-border/60 transition-shadow cursor-pointer hover:shadow-md">
+    <Collapsible open={isOpen} onOpenChange={onToggle}>
+      <div className="border border-border/50 bg-card/30 transition-all">
         <CollapsibleTrigger asChild>
-          <div>
-            <CardHeader className="pb-0 pt-4 px-6 flex-row items-center gap-3 space-y-0 bg-primary/70 rounded-t-lg min-h-[48px]">
-              <Crown className="h-5 w-5 text-primary-foreground" />
-              <CardTitle className="text-sm font-medium text-primary-foreground flex-1">Líders per categoria</CardTitle>
-              <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
-            </CardHeader>
-            <CardContent className="pt-5">
-              <p className="text-2xl font-semibold tracking-tight text-foreground">
-                {leader ? `${leader.totalPoints} pts` : '—'}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
+          <button className="w-full text-left">
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
+              <Crown className="h-4 w-4 text-accent/70" strokeWidth={1.5} />
+              <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">Líders per categoria</span>
+              <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
+            </div>
+            <div className="px-5 py-4">
+              <p className="text-2xl font-display font-semibold text-foreground">{leader ? `${leader.totalPoints} pts` : '—'}</p>
+              <p className="text-[11px] font-body text-muted-foreground mt-1">
                 {leader ? `${leader.name} · ${categories.find(c => c.key === activeTab)?.label}` : noDataLabel}
               </p>
-            </CardContent>
-          </div>
+            </div>
+          </button>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="pt-0 pb-4">
-            <div className="border-t border-border/60 pt-3">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="h-auto gap-1 flex-wrap mb-3 w-full">
-                  {categories.map(cat => (
-                    <TabsTrigger key={cat.key} value={cat.key} className="text-[11px] px-2 py-1">{cat.label}</TabsTrigger>
-                  ))}
-                </TabsList>
-                {categories.map(cat => {
-                  const players = data[cat.key] || [];
-                  return (
-                    <TabsContent key={cat.key} value={cat.key} className="mt-0">
-                      {!players.length ? (
-                        <p className="text-muted-foreground text-sm py-2">{noDataLabel}</p>
-                      ) : (
-                        <div className="space-y-1.5">
-                          {players.map((p, i) => (
-                            <button
-                              key={p.playerId}
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); onSelectPlayer(p.playerId); }}
-                              className="w-full flex items-center gap-2 text-sm hover:text-primary transition-colors text-left"
-                            >
-                              <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
-                              <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{p.name}</span>
-                              <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
+          <div className="px-5 pb-4">
+            <div className="border-t border-border/30 pt-3">
+              <div className="flex flex-wrap gap-2 mb-3">
+                {categories.map(cat => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveTab(cat.key)}
+                    className={`px-3 py-1.5 text-[10px] font-body font-medium tracking-[0.15em] uppercase transition-all border ${
+                      activeTab === cat.key
+                        ? 'border-accent/40 bg-accent/10 text-accent'
+                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+              {categories.map(cat => {
+                if (cat.key !== activeTab) return null;
+                const players = data[cat.key] || [];
+                return (
+                  <div key={cat.key}>
+                    {!players.length ? (
+                      <p className="text-muted-foreground text-sm py-2">{noDataLabel}</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {players.map((p, i) => (
+                          <button
+                            key={p.playerId}
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onSelectPlayer(p.playerId); }}
+                            className="w-full flex items-center gap-2 text-sm hover:text-accent transition-colors text-left"
+                          >
+                            <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
+                            <span className="flex-1 min-w-0 text-foreground font-body leading-tight truncate">{p.name}</span>
+                            <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          </CardContent>
+          </div>
         </CollapsibleContent>
-      </Card>
+      </div>
     </Collapsible>
   );
 };
@@ -137,8 +127,7 @@ const Stats = () => {
   const toggleCard = (idx: number) => {
     setOpenCards(prev => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
       return next;
     });
   };
@@ -164,13 +153,8 @@ const Stats = () => {
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
       const existing = agg.get(r.player_id);
-      if (existing) {
-        existing.totalPoints += pts;
-        existing.rounds += 1;
-        if (hcp != null) existing.handicap = hcp;
-      } else {
-        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, gender: p.gender, is_senior: p.is_senior, handicap: hcp, playerId: r.player_id });
-      }
+      if (existing) { existing.totalPoints += pts; existing.rounds += 1; if (hcp != null) existing.handicap = hcp; }
+      else { agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, gender: p.gender, is_senior: p.is_senior, handicap: hcp, playerId: r.player_id }); }
     }
     const all = Array.from(agg.values());
     return {
@@ -192,45 +176,32 @@ const Stats = () => {
     if (!results?.length) return { stats: null, leaderboards: [] as LeaderboardEntry[][] };
 
     const byPlayer = new Map<string, { name: string; stableford: number[]; birdies: number; rounds: { name: string; number: number; pts: number }[] }>();
-    const specialShots: LeaderboardEntry[] = []; // hole-in-ones, albatrosses, eagles
+    const specialShots: LeaderboardEntry[] = [];
 
     for (const r of results) {
       const name = (r.players_public as any)?.name || 'Desconegut';
       const pid = r.player_id;
-      if (!byPlayer.has(pid)) {
-        byPlayer.set(pid, { name, stableford: [], birdies: 0, rounds: [] });
-      }
+      if (!byPlayer.has(pid)) byPlayer.set(pid, { name, stableford: [], birdies: 0, rounds: [] });
       const player = byPlayer.get(pid)!;
 
-      // Count birdies and special shots from scorecard vs course_par
       const pars = getHoleScores((r.rounds as any)?.course_par);
       const scores = getHoleScores(r.scorecard);
       const hcps = getHoleScores((r.rounds as any)?.course_handicap);
       const roundClub = (r.rounds as any)?.club || (r.rounds as any)?.name || '';
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
-        if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) {
-          player.birdies++;
-        }
+        if (pars[h] > 0 && scores[h] > 0 && scores[h] <= pars[h] - 1) player.birdies++;
         if (pars[h] > 0 && scores[h] > 0) {
           const diff = scores[h] - pars[h];
           const hcpLabel = hcps[h] > 0 ? ` · HCP ${hcps[h]}` : '';
-          if (scores[h] === 1) {
-            specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
-          } else if (diff <= -3) {
-            specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
-          } else if (diff === -2) {
-            specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
-          }
+          if (scores[h] === 1) specialShots.push({ name, value: 1, detail: `Hole-in-One · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
+          else if (diff <= -3) specialShots.push({ name, value: 1, detail: `Albatros · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
+          else if (diff === -2) specialShots.push({ name, value: 1, detail: `Eagle · Forat ${h + 1} (Par ${pars[h]}${hcpLabel}) · ${roundClub}`, playerId: pid });
         }
       }
 
       if (r.stableford_points != null) {
         player.stableford.push(r.stableford_points);
-        player.rounds.push({
-          name: (r.rounds as any)?.name || '',
-          number: (r.rounds as any)?.round_number || 0,
-          pts: r.stableford_points,
-        });
+        player.rounds.push({ name: (r.rounds as any)?.name || '', number: (r.rounds as any)?.round_number || 0, pts: r.stableford_points });
       }
     }
 
@@ -238,14 +209,7 @@ const Stats = () => {
 
     const allRounds: LeaderboardEntry[] = [];
     for (const r of results) {
-      if (r.stableford_points != null) {
-        allRounds.push({
-          name: (r.players_public as any)?.name || '',
-          value: r.stableford_points,
-          detail: (r.rounds as any)?.name || '',
-          playerId: r.player_id,
-        });
-      }
+      if (r.stableford_points != null) allRounds.push({ name: (r.players_public as any)?.name || '', value: r.stableford_points, detail: (r.rounds as any)?.name || '', playerId: r.player_id });
     }
     allRounds.sort((a, b) => b.value - a.value);
     const top10BestRound = allRounds.slice(0, 10);
@@ -254,142 +218,51 @@ const Stats = () => {
     for (const [pid, player] of players) {
       if (player.stableford.length >= 3) {
         const avg = player.stableford.reduce((a, b) => a + b, 0) / player.stableford.length;
-        avgList.push({
-          name: player.name,
-          value: Math.round(avg * 10) / 10,
-          detail: `${player.stableford.length} jornades`,
-          playerId: pid,
-        });
+        avgList.push({ name: player.name, value: Math.round(avg * 10) / 10, detail: `${player.stableford.length} jornades`, playerId: pid });
       }
     }
     avgList.sort((a, b) => b.value - a.value);
     const top10Avg = avgList.slice(0, 10);
 
-    const regList: LeaderboardEntry[] = [];
-    for (const [, player] of players) {
-      regList.push({ name: player.name, value: player.stableford.length });
-    }
-    regList.sort((a, b) => b.value - a.value);
-    const top10Reg = regList.slice(0, 10);
-
     const birdieList: LeaderboardEntry[] = [];
     for (const [pid, player] of players) {
-      if (player.birdies > 0) {
-        birdieList.push({ name: player.name, value: player.birdies, playerId: pid });
-      }
+      if (player.birdies > 0) birdieList.push({ name: player.name, value: player.birdies, playerId: pid });
     }
     birdieList.sort((a, b) => b.value - a.value);
     const top10Birdies = birdieList.slice(0, 10);
 
     const roundNumbers = new Set<number>();
-    for (const [, player] of players) {
-      for (const round of player.rounds) roundNumbers.add(round.number);
-    }
+    for (const [, player] of players) for (const round of player.rounds) roundNumbers.add(round.number);
     const sortedRoundNums = Array.from(roundNumbers).sort((a, b) => a - b);
 
-    const climbList: LeaderboardEntry[] = [];
-    if (sortedRoundNums.length >= 2) {
-      for (let i = 1; i < sortedRoundNums.length; i++) {
-        const prevRoundNum = sortedRoundNums[i - 1];
-        const currRoundNum = sortedRoundNums[i];
-
-        const prevTotals: { pid: string; name: string; total: number }[] = [];
-        const currTotals: { pid: string; name: string; total: number }[] = [];
-
-        for (const [pid, player] of players) {
-          const prevSum = player.rounds.filter(round => round.number <= prevRoundNum).reduce((sum, round) => sum + round.pts, 0);
-          const currSum = player.rounds.filter(round => round.number <= currRoundNum).reduce((sum, round) => sum + round.pts, 0);
-
-          if (player.rounds.some(round => round.number <= prevRoundNum)) {
-            prevTotals.push({ pid, name: player.name, total: prevSum });
-          }
-          if (player.rounds.some(round => round.number <= currRoundNum)) {
-            currTotals.push({ pid, name: player.name, total: currSum });
-          }
-        }
-
-        prevTotals.sort((a, b) => b.total - a.total);
-        currTotals.sort((a, b) => b.total - a.total);
-
-        const prevRank = new Map(prevTotals.map((entry, idx) => [entry.pid, idx + 1]));
-        const currRank = new Map(currTotals.map((entry, idx) => [entry.pid, idx + 1]));
-
-        const firstPlayer = players[0]?.[1];
-        const roundName = firstPlayer?.rounds.find(round => round.number === currRoundNum)?.name || `J${currRoundNum}`;
-
-        for (const [pid, currentRank] of currRank) {
-          const previousRank = prevRank.get(pid);
-          if (previousRank != null) {
-            const climb = previousRank - currentRank;
-            if (climb > 0) {
-              climbList.push({
-                name: byPlayer.get(pid)?.name || '',
-                value: climb,
-                detail: `${roundName} (${previousRank}→${currentRank})`,
-              });
-            }
-          }
-        }
-      }
-    }
-    climbList.sort((a, b) => b.value - a.value);
-    const top10Climb = climbList.slice(0, 10);
-
     const courseAggregates = new Map<string, CourseAggregate>();
-
     for (const r of results) {
       const rawCourseName = (r.rounds as any)?.course || (r.rounds as any)?.club || '';
       if (!rawCourseName) continue;
-
       const courseKey = getCourseKey(rawCourseName);
-      const courseAggregate = courseAggregates.get(courseKey) ?? {
-        displayName: rawCourseName,
-        scores: [],
-        holes: new Map<number, HoleAggregate>(),
-      };
-
+      const courseAggregate = courseAggregates.get(courseKey) ?? { displayName: rawCourseName, scores: [], holes: new Map<number, HoleAggregate>() };
       courseAggregate.displayName = pickDisplayName(courseAggregate.displayName, rawCourseName);
-
-      if (r.stableford_points != null) {
-        courseAggregate.scores.push(r.stableford_points);
-      }
+      if (r.stableford_points != null) courseAggregate.scores.push(r.stableford_points);
 
       const pars = getHoleScores((r.rounds as any)?.course_par);
       const scores = getHoleScores(r.scorecard);
       const hcps = getHoleScores((r.rounds as any)?.course_handicap);
-
       for (let h = 0; h < Math.min(scores.length, pars.length); h++) {
         if (isNaN(pars[h]) || pars[h] === 0) continue;
-
-        const holeAggregate = courseAggregate.holes.get(h + 1) ?? {
-          totalOverPar: 0,
-          count: 0,
-          parCounts: {},
-          hcpCounts: {},
-        };
-
+        const holeAggregate = courseAggregate.holes.get(h + 1) ?? { totalOverPar: 0, count: 0, parCounts: {}, hcpCounts: {} };
         const holeScore = !scores[h] || isNaN(scores[h]) || scores[h] === 0 ? pars[h] + 4 : scores[h];
         holeAggregate.totalOverPar += holeScore - pars[h];
         holeAggregate.count += 1;
         holeAggregate.parCounts[String(pars[h])] = (holeAggregate.parCounts[String(pars[h])] || 0) + 1;
-        if (hcps[h] > 0) {
-          holeAggregate.hcpCounts[String(hcps[h])] = (holeAggregate.hcpCounts[String(hcps[h])] || 0) + 1;
-        }
-
+        if (hcps[h] > 0) holeAggregate.hcpCounts[String(hcps[h])] = (holeAggregate.hcpCounts[String(hcps[h])] || 0) + 1;
         courseAggregate.holes.set(h + 1, holeAggregate);
       }
-
       courseAggregates.set(courseKey, courseAggregate);
     }
 
     const courseList: LeaderboardEntry[] = Array.from(courseAggregates.values())
       .filter(course => course.scores.length > 0)
-      .map(course => ({
-        name: course.displayName,
-        value: Math.round((course.scores.reduce((a, b) => a + b, 0) / course.scores.length) * 10) / 10,
-        detail: '',
-      }));
-
+      .map(course => ({ name: course.displayName, value: Math.round((course.scores.reduce((a, b) => a + b, 0) / course.scores.length) * 10) / 10, detail: '' }));
     const coursesByDifficulty = [...courseList].sort((a, b) => a.value - b.value);
     const top10Courses = coursesByDifficulty.slice(0, 10);
 
@@ -397,194 +270,153 @@ const Stats = () => {
     for (const [, course] of courseAggregates) {
       for (const [holeNum, hole] of course.holes) {
         if (hole.count < 3) continue;
-
         const par = getMostCommonPar(hole.parCounts);
         const hcp = getMostCommonPar(hole.hcpCounts);
         const avgOver = hole.totalOverPar / hole.count;
         const avgStrokes = par + avgOver;
-        holeList.push({
-          name: `Forat ${holeNum} (${course.displayName})`,
-          avgStrokes: Math.round(avgStrokes * 100) / 100,
-          avgOver,
-          par,
-          hcp: Object.keys(hole.hcpCounts).length > 0 ? hcp : null,
-        });
+        holeList.push({ name: `Forat ${holeNum} (${course.displayName})`, avgStrokes: Math.round(avgStrokes * 100) / 100, avgOver, par, hcp: Object.keys(hole.hcpCounts).length > 0 ? hcp : null });
       }
     }
 
-    const hardestHoles: LeaderboardEntry[] = [...holeList]
-      .sort((a, b) => b.avgOver - a.avgOver)
-      .slice(0, 10)
-      .map(hole => ({
-        name: hole.name,
-        value: hole.avgStrokes,
-        detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
-      }));
-
-    const easiestHoles: LeaderboardEntry[] = [...holeList]
-      .sort((a, b) => a.avgOver - b.avgOver)
-      .slice(0, 10)
-      .map(hole => ({
-        name: hole.name,
-        value: hole.avgStrokes,
-        detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}`,
-      }));
+    const hardestHoles: LeaderboardEntry[] = [...holeList].sort((a, b) => b.avgOver - a.avgOver).slice(0, 10)
+      .map(hole => ({ name: hole.name, value: hole.avgStrokes, detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}` }));
+    const easiestHoles: LeaderboardEntry[] = [...holeList].sort((a, b) => a.avgOver - b.avgOver).slice(0, 10)
+      .map(hole => ({ name: hole.name, value: hole.avgStrokes, detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}` }));
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
     const bestAvg = top10Avg[0] || { name: '—', value: 0 };
-    const mostReg = top10Reg[0] || { name: '—', value: 0 };
-    const bestClimb = top10Climb[0] || { name: '—', value: 0 };
     const topBirdie = top10Birdies[0] || { name: '—', value: 0 };
     const hardestCourse = top10Courses[0] || { name: '—', value: 0 };
     const hardestHole = hardestHoles[0] || { name: '—', value: 0, detail: '' };
     const easiestHole = easiestHoles[0] || { name: '—', value: 0, detail: '' };
 
     return {
-      stats: {
-        bestRound,
-        bestAvg,
-        mostReg,
-        bestClimb,
-        topBirdie,
-        hardestCourse,
-        hardestHole,
-        easiestHole,
-        totalPlayers: players.length,
-        totalResults: results.length,
-        specialShots,
-      },
+      stats: { bestRound, bestAvg, topBirdie, hardestCourse, hardestHole, easiestHole, totalPlayers: players.length, totalResults: results.length, specialShots },
       leaderboards: [top10BestRound, top10Avg, specialShots, top10Birdies, hardestHoles, easiestHoles, top10Courses],
     };
   }, [results]);
 
   const statCards = stats
     ? [
-        { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, subtitle: '', unit: 'pts' },
-        { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, subtitle: '', unit: 'pts' },
-        { icon: Star, label: 'Hole-in-One / Eagles / Albatros', value: stats.specialShots.length > 0 ? `${stats.specialShots.length}` : 'Cap encara', detail: stats.specialShots.length > 0 ? stats.specialShots[0].detail || '' : 'Encara no s\'ha aconseguit cap cop especial al circuit', subtitle: '', unit: 'special' },
-        { icon: Bird, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, subtitle: t('stats.birdiesDesc', 'Birdies o millor aconseguits al circuit'), unit: 'birdies' },
-        { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, subtitle: t('stats.hardestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
-        { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, subtitle: t('stats.easiestHoleDesc', 'Mitjana de cops per hoyo'), unit: 'cops' },
-        { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, subtitle: t('stats.courseDifficultyDesc', 'Mitjana Stableford per camp (menor = més exigent)'), unit: 'pts' },
+        { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
+        { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, unit: 'pts' },
+        { icon: Star, label: 'Hole-in-One / Eagles / Albatros', value: stats.specialShots.length > 0 ? `${stats.specialShots.length}` : 'Cap encara', detail: stats.specialShots.length > 0 ? stats.specialShots[0].detail || '' : 'Encara no s\'ha aconseguit cap cop especial', unit: 'special' },
+        { icon: Bird, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, unit: 'birdies' },
+        { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, unit: 'cops' },
+        { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, unit: 'cops' },
+        { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, unit: 'pts' },
       ]
     : [];
 
   return (
-    <div className="container py-8 lg:py-12 animate-fade-in">
-      <div className="bg-primary rounded-xl px-5 py-5 mb-8 shadow-md">
-        <h1 className="font-display text-3xl font-bold text-primary-foreground">{t('stats.title')}</h1>
-        <p className="text-primary-foreground/70 mt-1">{t('common.season')} 2026</p>
-      </div>
-
-      {isLoading ? (
-        <p className="text-muted-foreground">{t('common.loading')}</p>
-      ) : !stats ? (
-        <p className="text-muted-foreground">{t('common.noData')}</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <LeadersCard categories={leaderCategories} data={categoryLeaders} noDataLabel={t('common.noData')} onSelectPlayer={setSelectedPlayerId} />
-          {statCards.map((card, idx) => {
-            const lb = leaderboards[idx] || [];
-            const hasLeaderboard = lb.length > 0;
-            const isOpen = openCards.has(idx);
-
-            return (
-              <Collapsible key={card.label} open={isOpen} onOpenChange={() => hasLeaderboard && toggleCard(idx)}>
-                <Card className={cn('border-border/60 transition-shadow', hasLeaderboard && 'cursor-pointer hover:shadow-md')}>
-                  <CollapsibleTrigger asChild disabled={!hasLeaderboard}>
-                    <div>
-                      <CardHeader className="pb-0 pt-4 px-6 flex-row items-center gap-3 space-y-0 bg-primary/70 rounded-t-lg min-h-[48px]">
-                        <card.icon className="h-5 w-5 text-primary-foreground" />
-                        <CardTitle className="text-sm font-medium text-primary-foreground flex-1">{card.label}</CardTitle>
-                        {hasLeaderboard && (
-                          <ChevronDown
-                            className={cn(
-                              'h-4 w-4 text-muted-foreground transition-transform duration-200',
-                              isOpen && 'rotate-180',
-                            )}
-                          />
-                        )}
-                      </CardHeader>
-                      <CardContent className="pt-5">
-                        <p className="text-2xl font-semibold tracking-tight text-foreground">{card.value}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{card.detail}</p>
-                        {card.subtitle && <p className="text-xs text-muted-foreground/70 mt-2 italic">{card.subtitle}</p>}
-                      </CardContent>
-                    </div>
-                  </CollapsibleTrigger>
-
-                  {hasLeaderboard && (
-                    <CollapsibleContent>
-                      <CardContent className="pt-0 pb-4">
-                        <div className="border-t border-border/60 pt-3 space-y-1.5">
-                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
-                          {lb.map((entry, i) => {
-                            const isHoleStat = card.unit === 'cops';
-                            const isSpecial = card.unit === 'special';
-                            return (
-                              <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/30 last:border-b-0' : 'flex flex-col gap-0.5')}>
-                                {isSpecial ? (
-                                  <>
-                                    <div className="flex items-center gap-2">
-                                      <span className={cn('w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0', i === 0 && 'bg-primary/15 text-primary', i <= 2 && i > 0 && 'bg-muted text-muted-foreground', i > 2 && 'text-muted-foreground')}>{i + 1}</span>
-                                      {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-semibold text-foreground hover:text-primary transition-colors text-left">{entry.name}</button> : <span className="font-semibold text-foreground">{entry.name}</span>}
-                                    </div>
-                                    {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
-                                  </>
-                                ) : isHoleStat ? (
-                                  <>
-                                    <div className="flex items-center gap-2">
-                                      <span
-                                        className={cn(
-                                          'w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0',
-                                          i === 0 && 'bg-primary/15 text-primary',
-                                          i <= 2 && i > 0 && 'bg-muted text-muted-foreground',
-                                          i > 2 && 'text-muted-foreground',
-                                        )}
-                                      >
-                                        {i + 1}
-                                      </span>
-                                      <span className="font-semibold text-foreground tabular-nums">
-                                        {entry.value} <span className="text-xs font-normal text-muted-foreground">{card.unit}</span>
-                                      </span>
-                                      {entry.detail && <span className="text-xs text-muted-foreground">· {entry.detail}</span>}
-                                    </div>
-                                    <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.name}</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="flex items-center gap-2">
-                                      <span
-                                        className={cn(
-                                          'w-6 text-center font-bold text-xs rounded-full py-0.5 shrink-0',
-                                          i === 0 && 'bg-primary/15 text-primary',
-                                          i <= 2 && i > 0 && 'bg-muted text-muted-foreground',
-                                          i > 2 && 'text-muted-foreground',
-                                        )}
-                                      >
-                                        {i + 1}
-                                      </span>
-                                      {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 text-foreground leading-tight hover:text-primary transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 text-foreground leading-tight truncate">{entry.name}</span>}
-                                      <span className="font-semibold text-foreground tabular-nums whitespace-nowrap">
-                                        {entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span>
-                                      </span>
-                                    </div>
-                                    {entry.detail && <span className="text-xs text-muted-foreground pl-8 leading-snug">{entry.detail}</span>}
-                                  </>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </CollapsibleContent>
-                  )}
-                </Card>
-              </Collapsible>
-            );
-          })}
+    <div className="animate-fade-in">
+      <section className="container pt-6 pb-4">
+        <div className="flex items-center gap-3 mb-1">
+          <BarChart3 className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
+          <h1 className="font-display text-2xl font-semibold text-foreground">{t('stats.title')}</h1>
         </div>
-      )}
+        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+          {t('common.season')} 2026
+        </p>
+      </section>
+
+      <section className="container pb-14">
+        {isLoading ? (
+          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+        ) : !stats ? (
+          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            <LeadersCard
+              categories={leaderCategories}
+              data={categoryLeaders}
+              noDataLabel={t('common.noData')}
+              onSelectPlayer={setSelectedPlayerId}
+              isOpen={openCards.has(-1)}
+              onToggle={() => {
+                setOpenCards(prev => {
+                  const next = new Set(prev);
+                  if (next.has(-1)) next.delete(-1); else next.add(-1);
+                  return next;
+                });
+              }}
+            />
+            {statCards.map((card, idx) => {
+              const lb = leaderboards[idx] || [];
+              const hasLeaderboard = lb.length > 0;
+              const isOpen = openCards.has(idx);
+
+              return (
+                <Collapsible key={card.label} open={isOpen} onOpenChange={() => hasLeaderboard && toggleCard(idx)}>
+                  <div className={cn('border border-border/50 bg-card/30 transition-all', hasLeaderboard && 'cursor-pointer hover:bg-muted/10')}>
+                    <CollapsibleTrigger asChild disabled={!hasLeaderboard}>
+                      <button className="w-full text-left">
+                        <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
+                          <card.icon className="h-4 w-4 text-accent/70" strokeWidth={1.5} />
+                          <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">{card.label}</span>
+                          {hasLeaderboard && (
+                            <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
+                          )}
+                        </div>
+                        <div className="px-5 py-4">
+                          <p className="text-2xl font-display font-semibold text-foreground">{card.value}</p>
+                          <p className="text-[11px] font-body text-muted-foreground mt-1">{card.detail}</p>
+                        </div>
+                      </button>
+                    </CollapsibleTrigger>
+
+                    {hasLeaderboard && (
+                      <CollapsibleContent>
+                        <div className="px-5 pb-4">
+                          <div className="border-t border-border/30 pt-3 space-y-1.5">
+                            <p className="text-[10px] font-body font-medium text-muted-foreground/70 tracking-[0.2em] uppercase mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
+                            {lb.map((entry, i) => {
+                              const isHoleStat = card.unit === 'cops';
+                              const isSpecial = card.unit === 'special';
+                              return (
+                                <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-b-0' : 'flex flex-col gap-0.5')}>
+                                  {isSpecial ? (
+                                    <>
+                                      <div className="flex items-center gap-2">
+                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
+                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-body font-semibold text-foreground hover:text-accent transition-colors text-left">{entry.name}</button> : <span className="font-body font-semibold text-foreground">{entry.name}</span>}
+                                      </div>
+                                      {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.detail}</span>}
+                                    </>
+                                  ) : isHoleStat ? (
+                                    <>
+                                      <div className="flex items-center gap-2">
+                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
+                                        <span className="font-mono font-semibold text-foreground tabular-nums">{entry.value} <span className="text-xs font-normal text-muted-foreground">{card.unit}</span></span>
+                                        {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60">· {entry.detail}</span>}
+                                      </div>
+                                      <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.name}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="flex items-center gap-2">
+                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
+                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 font-body text-foreground leading-tight hover:text-accent transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 font-body text-foreground leading-tight truncate">{entry.name}</span>}
+                                        <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">{entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span></span>
+                                      </div>
+                                      {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.detail}</span>}
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    )}
+                  </div>
+                </Collapsible>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       <PlayerProfileDialog playerId={selectedPlayerId} open={!!selectedPlayerId} onOpenChange={(o) => !o && setSelectedPlayerId(null)} />
     </div>
   );
