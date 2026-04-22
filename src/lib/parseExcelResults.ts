@@ -13,6 +13,7 @@ export interface ExcelParsedResult {
   scratch_score: number | null;
   scores: (number | null)[];
   is_np: boolean;
+  is_senior: boolean;
 }
 
 // Normalize header text for matching
@@ -32,6 +33,7 @@ const HEADER_ALIASES: Record<string, string[]> = {
   license:  ['licencia', 'llicencia', 'lic', 'license', 'nlic', 'nlicencia'],
   hex:      ['hex', 'hexacto', 'handicapexacto', 'hcpexacto', 'hcpex'],
   nvh:      ['nvh', 'hj', 'handicapjuego'],
+  niv:      ['niv', 'nivel', 'level', 'senior'],
   age:      ['edad', 'edat', 'age'],
   gender:   ['sex', 'sexo', 'genero', 'genre', 'gen', 'g'],
   category: ['cat', 'categoria', 'category'],
@@ -47,6 +49,7 @@ interface ColumnMap {
   license: number | null;
   hex: number | null;
   nvh: number | null;
+  niv: number | null;
   age: number | null;
   gender: number | null;
   category: number | null;
