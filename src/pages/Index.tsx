@@ -158,7 +158,7 @@ const Index = () => {
                   key={s.alt}
                   src={s.src}
                   alt={s.alt}
-                  className="h-10 md:h-12 w-auto object-contain brightness-0 invert opacity-70"
+                  className="h-10 md:h-12 w-auto object-contain opacity-70"
                 />
               ))}
             </div>
