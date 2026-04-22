@@ -86,7 +86,7 @@ const Index = () => {
 
       {/* ——— TEMPORADA + QUICK ACCESS ——— */}
       <section className="container pt-3 pb-4">
-        <p className="text-center text-accent text-xs font-body font-medium tracking-[0.35em] uppercase mb-4">
+        <p className="text-center text-accent font-body font-medium tracking-[0.35em] uppercase mb-4 text-4xl">
           {t('common.season')} 2026
         </p>
         <div className="flex items-center gap-4 mb-4">
