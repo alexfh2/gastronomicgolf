@@ -13,6 +13,7 @@ export interface ExcelParsedResult {
   scratch_score: number | null;
   scores: (number | null)[];
   is_np: boolean;
+  is_senior: boolean;
 }
 
 // Normalize header text for matching
@@ -32,6 +33,7 @@ const HEADER_ALIASES: Record<string, string[]> = {
   license:  ['licencia', 'llicencia', 'lic', 'license', 'nlic', 'nlicencia'],
   hex:      ['hex', 'hexacto', 'handicapexacto', 'hcpexacto', 'hcpex'],
   nvh:      ['nvh', 'hj', 'handicapjuego'],
+  niv:      ['niv', 'nivel', 'level', 'senior'],
   age:      ['edad', 'edat', 'age'],
   gender:   ['sex', 'sexo', 'genero', 'genre', 'gen', 'g'],
   category: ['cat', 'categoria', 'category'],
@@ -47,6 +49,7 @@ interface ColumnMap {
   license: number | null;
   hex: number | null;
   nvh: number | null;
+  niv: number | null;
   age: number | null;
   gender: number | null;
   category: number | null;
@@ -58,7 +61,7 @@ interface ColumnMap {
 
 function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range): ColumnMap {
   const map: ColumnMap = {
-    pos: null, name: null, license: null, hex: null, nvh: null,
+    pos: null, name: null, license: null, hex: null, nvh: null, niv: null,
     age: null, gender: null, category: null, hpu: null, total: null,
     scratch: null, holeColumns: [],
   };
@@ -180,6 +183,7 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
         scratch_score: null,
         scores: [],
         is_np: true,
+        is_senior: String(getVal(cols.niv) || '').toUpperCase() === 'S',
       });
       continue;
     }
@@ -214,6 +218,7 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParsedResult[] {
       scratch_score: hasLiftedBall ? null : (scratchScore ?? null),
       scores,
       is_np: false,
+      is_senior: String(getVal(cols.niv) || '').toUpperCase() === 'S',
     });
   }
 
