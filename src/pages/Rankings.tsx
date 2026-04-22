@@ -10,6 +10,20 @@ import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } 
 
 type Result = PublicResult;
 
+function computeScratchStableford(scorecard: any, coursePar: any): number | null {
+  if (!scorecard?.scores || !coursePar) return null;
+  const scores: (number | null)[] = scorecard.scores;
+  const pars: number[] = coursePar;
+  if (scores.length !== pars.length) return null;
+  let total = 0;
+  for (let i = 0; i < scores.length; i++) {
+    const s = scores[i];
+    if (s == null || s === 0) continue; // picked up = 0 scratch pts
+    total += Math.max(0, 2 - (s - pars[i]));
+  }
+  return total;
+}
+
 const Rankings = () => {
   const { t } = useTranslation();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
@@ -51,6 +65,7 @@ const Rankings = () => {
 
     const roundMap = new Map(rounds.map(r => [r.id, r]));
 
+    // --- Stableford rankings ---
     const byPlayer = new Map<string, {
       name: string;
       gender: string | null;
@@ -118,30 +133,78 @@ const Rankings = () => {
       });
     };
 
-    // HCP Bajo: handicap ≤ 15.0
     const hcpLow = buildRanking(p => p.handicap != null && p.handicap <= 15.0);
     hcpLow.sort((a, b) => b.total - a.total);
 
-    // HCP Alto: handicap 15.1 - 36
-    const hcpHigh = buildRanking(p => p.handicap != null && p.handicap > 15.0 && p.handicap <= 36);
+    const hcpHigh = buildRanking(p => p.handicap != null && p.handicap > 15.0);
     hcpHigh.sort((a, b) => b.total - a.total);
 
-    // Female
     const female = buildRanking(p => p.gender === 'F');
     female.sort((a, b) => b.total - a.total);
 
-    // Senior
     const senior = buildRanking(p => p.is_senior);
     senior.sort((a, b) => b.total - a.total);
 
-    return { hcpLow, hcpHigh, female, senior };
+    // --- Scratch ranking ---
+    const scratchByPlayer = new Map<string, {
+      name: string;
+      handicap: number | null;
+      scratchScores: { points: number; roundId: string }[];
+    }>();
+
+    for (const r of results) {
+      if (!r.players_public) continue;
+      const pid = r.player_id;
+
+      // Compute scratch stableford from scorecard + course_par
+      let scratchPts = computeScratchStableford(r.scorecard, r.rounds?.course_par);
+
+      // Fallback: use scratch_score if it looks like scratch stableford (≤50)
+      if (scratchPts == null && r.scratch_score != null && r.scratch_score <= 50) {
+        scratchPts = r.scratch_score;
+      }
+
+      if (scratchPts == null) continue;
+
+      if (!scratchByPlayer.has(pid)) {
+        scratchByPlayer.set(pid, {
+          name: r.players_public.name,
+          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
+          scratchScores: [],
+        });
+      }
+      scratchByPlayer.get(pid)!.scratchScores.push({ points: scratchPts, roundId: r.round_id });
+    }
+
+    const scratch = Array.from(scratchByPlayer.entries()).map(([id, p]) => {
+      const roundScores = new Map<string, { points: number; weighted: number }>();
+      for (const s of p.scratchScores) {
+        roundScores.set(s.roundId, { points: s.points, weighted: s.points });
+      }
+      const sorted = [...p.scratchScores].sort((a, b) => b.points - a.points).slice(0, bestN);
+      const total = sorted.reduce((sum, s) => sum + s.points, 0);
+      return {
+        id,
+        name: p.name,
+        gender: null,
+        is_senior: false,
+        handicap: p.handicap,
+        total,
+        roundsPlayed: p.scratchScores.length,
+        roundScores,
+      };
+    });
+    scratch.sort((a, b) => b.total - a.total);
+
+    return { hcpLow, hcpHigh, female, senior, scratch };
   }, [results, rounds, bestN]);
 
   const categories = [
     { key: 'hcpLow', label: 'HCP Baix (≤15.0)' },
-    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)' },
+    { key: 'hcpHigh', label: 'HCP Alt (>15.0)' },
     { key: 'female', label: t('categories.female') },
     { key: 'senior', label: t('categories.senior') },
+    { key: 'scratch', label: 'Scratch' },
   ];
 
   const renderTable = (players: any[] | undefined) => {
