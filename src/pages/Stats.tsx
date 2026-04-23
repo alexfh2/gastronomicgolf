@@ -70,7 +70,7 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
               className="flex items-center gap-3 px-5 py-3 border-b border-border/30"
               style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.14) 0%, hsl(var(--accent) / 0.06) 45%, hsl(var(--card) / 0.4) 100%)' }}
             >
-              <Crown className="h-4 w-4 text-accent" strokeWidth={1.5} />
+              <StatIcon src={iconLaurel} alt="" />
               <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">Líders per categoria</span>
               <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
             </div>
@@ -317,13 +317,13 @@ const Stats = () => {
 
   const statCards = stats
     ? [
-        { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
-        { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, unit: 'pts' },
-        { icon: Star, label: 'Hole-in-One / Eagles / Albatros', value: stats.specialShots.length > 0 ? `${stats.specialShots.length}` : 'Cap encara', detail: stats.specialShots.length > 0 ? stats.specialShots[0].detail || '' : 'Encara no s\'ha aconseguit cap cop especial', unit: 'special' },
-        { icon: Bird, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, unit: 'birdies' },
-        { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, unit: 'cops' },
-        { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, unit: 'cops' },
-        { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, unit: 'pts' },
+        { icon: iconTrophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
+        { icon: iconBars, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, unit: 'pts' },
+        { icon: iconHoleInOne, label: 'Hole-in-One / Eagles / Albatros', value: stats.specialShots.length > 0 ? `${stats.specialShots.length}` : 'Cap encara', detail: stats.specialShots.length > 0 ? stats.specialShots[0].detail || '' : 'Encara no s\'ha aconseguit cap cop especial', unit: 'special' },
+        { icon: iconBirdie, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, unit: 'birdies' },
+        { icon: iconBogey2, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, unit: 'cops' },
+        { icon: iconBogey1, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, unit: 'cops' },
+        { icon: iconPin, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, unit: 'pts' },
       ]
     : [];
 
@@ -331,7 +331,7 @@ const Stats = () => {
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
         <div className="flex items-center gap-3 mb-1">
-          <BarChart3 className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
+          <img src={iconRankings} alt="" className="h-7 w-7 object-contain" />
           <h1 className="font-display text-2xl font-semibold text-foreground">{t('stats.title')}</h1>
         </div>
         <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
@@ -374,7 +374,7 @@ const Stats = () => {
                           className="flex items-center gap-3 px-5 py-3 border-b border-border/30"
                           style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--accent) / 0.04) 50%, hsl(var(--card) / 0.4) 100%)' }}
                         >
-                          <card.icon className="h-4 w-4 text-accent" strokeWidth={1.5} />
+                          <StatIcon src={card.icon} alt="" />
                           <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">{card.label}</span>
                           {hasLeaderboard && (
                             <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
