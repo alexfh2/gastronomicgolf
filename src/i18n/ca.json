@@ -60,7 +60,8 @@
     "title": "Rànquings",
     "generalClassification": "Classificació general",
     "byRound": "Per jornada",
-    "variation": "Variació"
+    "variation": "Variació",
+    "position": "Posició al rànquing"
   },
   "rounds": {
     "title": "Jornades",
@@ -91,7 +92,13 @@
     "pars": "Pars",
     "bogeys": "Bogeys",
     "notableHoles": "Forats destacats",
-    "compareWith": "Comparar amb..."
+    "compareWith": "Comparar amb...",
+    "singleRound": "prova disputada",
+    "multipleRounds": "proves disputades",
+    "hcpEvolution": "Evolució HCP",
+    "roundsPlayed": "Proves disputades",
+    "noScorecard": "Sense targeta hoyo a hoyo",
+    "noRounds": "Sense proves disputades"
   },
   "compare": {
     "title": "Comparador",
