@@ -54,6 +54,53 @@
     --cream-dark: 40 12% 70%;
   }
 
+  .light {
+    /* Light mode — inverted editorial palette */
+    --background: 40 30% 97%;
+    --foreground: 220 14% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 14% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 14% 12%;
+
+    --primary: 158 32% 22%;
+    --primary-foreground: 40 30% 97%;
+
+    --secondary: 40 20% 92%;
+    --secondary-foreground: 220 14% 18%;
+
+    --muted: 40 18% 93%;
+    --muted-foreground: 220 8% 38%;
+
+    --accent: 40 55% 42%;
+    --accent-foreground: 40 30% 97%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 12% 85%;
+    --input: 40 12% 88%;
+    --ring: 40 55% 42%;
+
+    --sidebar-background: 40 25% 95%;
+    --sidebar-foreground: 220 14% 12%;
+    --sidebar-primary: 40 55% 42%;
+    --sidebar-primary-foreground: 40 30% 97%;
+    --sidebar-accent: 40 18% 90%;
+    --sidebar-accent-foreground: 220 14% 12%;
+    --sidebar-border: 40 12% 85%;
+    --sidebar-ring: 40 55% 42%;
+
+    --gold: 40 55% 42%;
+    --gold-foreground: 40 30% 97%;
+    --green-deep: 158 32% 22%;
+    --green-light: 158 22% 38%;
+    --cream: 220 14% 12%;
+    --cream-dark: 220 8% 30%;
+  }
+
   .dark {
     /* Same as root — the site IS dark by default */
     --background: 220 14% 8%;

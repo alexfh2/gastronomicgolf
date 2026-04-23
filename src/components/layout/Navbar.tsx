@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import LanguageSwitcher from './LanguageSwitcher';
+import ThemeToggle from './ThemeToggle';
 import logo from '@/assets/logo.png';
 
 const navItems = [
@@ -72,6 +73,7 @@ const Navbar = () => {
             Temporada 2026
           </span>
           <LanguageSwitcher />
+          <ThemeToggle isHome={isHome} />
 
           {/* Mobile menu */}
           <Sheet open={open} onOpenChange={setOpen}>
