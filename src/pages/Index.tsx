@@ -104,13 +104,21 @@ const Index = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
           {quickLinks.map((link) => (
             <Link key={link.path} to={link.path} className="group">
-              <div className="border border-border/50 bg-card/30 px-4 py-3 hover:border-accent/30 hover:bg-card/60 transition-all duration-300 flex items-center gap-3">
+              <div
+                className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+                style={{
+                  background:
+                    'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
+                  boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+                }}
+              >
+                <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <link.icon className="h-4 w-4 text-accent/70 shrink-0" strokeWidth={1.5} />
                 <div className="min-w-0">
                   <h3 className="font-body text-xs font-semibold text-foreground tracking-wide">{link.label}</h3>
                   <p className="text-[10px] text-muted-foreground leading-snug truncate">{link.desc}</p>
                 </div>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/60 transition-colors" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
               </div>
             </Link>
           ))}
@@ -121,7 +129,15 @@ const Index = () => {
       <section className="container pb-14">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* General Ranking */}
-          <div className="lg:col-span-2 border border-border/50 bg-card/30">
+          <div
+            className="lg:col-span-2 relative overflow-hidden border border-border/50"
+            style={{
+              background:
+                'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 90% 0%, hsl(var(--accent) / 0.07), transparent 40%)',
+              boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
+            }}
+          >
+            <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/40">
               <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
                 Rànquing General
@@ -198,13 +214,24 @@ const Index = () => {
 
 function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
   return (
-    <div className="border border-border/50 bg-card/30 p-7 flex flex-col justify-between flex-1">
-      <div className="flex items-center justify-between mb-6">
+    <div className="group relative overflow-hidden border border-border/50 p-7 flex flex-col justify-between flex-1 transition-all duration-500 hover:border-accent/30"
+      style={{
+        background:
+          'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 85% 15%, hsl(var(--accent) / 0.1), transparent 55%)',
+        boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
+      }}
+    >
+      {/* gold top accent */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
+      {/* subtle radial highlight on hover */}
+      <span aria-hidden className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+      <div className="relative flex items-center justify-between mb-6">
         <span className="font-body text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground">{label}</span>
-        <span className="text-accent/50">{icon}</span>
+        <span className="text-accent/60 transition-colors group-hover:text-accent/90">{icon}</span>
       </div>
-      <div>
-        <span className="font-display text-4xl font-semibold text-foreground">{value}</span>
+      <div className="relative">
+        <span className="font-display text-4xl font-semibold text-foreground tracking-tight">{value}</span>
         {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
       </div>
     </div>
