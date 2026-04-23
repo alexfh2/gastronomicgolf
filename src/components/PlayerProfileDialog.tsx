@@ -25,6 +25,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'ca' ? ca : es;
   const [openCards, setOpenCards] = useState<string[]>([]);
+  const [scratchMode, setScratchMode] = useState<Record<string, boolean>>({});
 
   const { data: player } = useQuery({
     queryKey: [...publicCircuitDataQueryKey, 'dialog-player', playerId],
