@@ -65,17 +65,17 @@ const Index = () => {
   return (
     <div className="animate-fade-in">
       {/* ——— HERO ——— */}
-      <section className="relative min-h-[55vh] lg:min-h-[60vh] overflow-hidden flex items-end">
+      <section className="relative min-h-[42vh] lg:min-h-[46vh] overflow-hidden flex items-center">
         {/* Background image */}
         <div className="absolute inset-0">
           <img src={heroBg} alt="" className="w-full h-full object-cover object-right-top" />
         </div>
-        {/* Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        {/* Gradients — keep top transparent so navbar blends */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent" />
 
-        {/* Hero text */}
-        <div className="relative z-10 container pb-8 pt-16">
+        {/* Hero text — vertically centered, balanced spacing */}
+        <div className="relative z-10 container py-10">
           <p className="font-body text-[11px] font-medium tracking-[0.35em] uppercase text-accent/80 mb-3">
             {t('common.season')} 2026
           </p>
