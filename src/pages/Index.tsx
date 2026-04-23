@@ -129,7 +129,15 @@ const Index = () => {
       <section className="container pb-14">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* General Ranking */}
-          <div className="lg:col-span-2 border border-border/50 bg-card/30">
+          <div
+            className="lg:col-span-2 relative overflow-hidden border border-border/50"
+            style={{
+              background:
+                'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 90% 0%, hsl(var(--accent) / 0.07), transparent 40%)',
+              boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
+            }}
+          >
+            <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
             <div className="flex items-center justify-between px-7 py-5 border-b border-border/40">
               <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
                 Rànquing General
