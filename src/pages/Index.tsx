@@ -2,7 +2,7 @@ import heroBg from '@/assets/hero-editorial.png';
 import sponsors from '@/assets/sponsors-row.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Calendar, ChevronRight, Users, MapPin } from 'lucide-react';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
@@ -10,18 +10,17 @@ import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicC
 const Index = () => {
   const { t, i18n } = useTranslation();
 
-  const { data: allSeasonRounds } = useQuery({
-    queryKey: ['public-rounds-all-season'],
+  const { data: rounds } = useQuery({
+    queryKey: ['public-rounds-home'],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
         .select('id, name, date, end_date, club, course, sponsor, status, is_master, round_number')
+        .eq('status', 'published')
         .order('date', { ascending: true });
       return data || [];
     },
   });
-
-  const publishedRounds = allSeasonRounds?.filter(r => r.status === 'published') || [];
 
   const { data: topResults } = useQuery({
     queryKey: [...publicCircuitDataQueryKey, 'home-top-results'],
@@ -54,10 +53,9 @@ const Index = () => {
     return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
   })();
 
-  const totalPublished = publishedRounds.length;
-  const totalSeasonRounds = allSeasonRounds?.length ?? 0;
+  const totalRounds = rounds?.length ?? 0;
   const uniquePlayers = topResults ? new Set(topResults.map(r => r.player_id)).size : 0;
-  const uniqueCourses = allSeasonRounds ? new Set(allSeasonRounds.filter(r => r.course).map(r => r.course)).size : 0;
+  const totalPoints = topResults ? topResults.reduce((s, r) => s + (r.stableford_points ?? 0), 0) : 0;
 
   const quickLinks = [
     { icon: Trophy, label: t('home.viewRankings'), desc: 'Consulta la classificació general i per categories', path: '/ranquings' },
@@ -194,9 +192,9 @@ const Index = () => {
 
           {/* Stats cards */}
           <div className="flex flex-col gap-4">
-            <StatCard label="Torneigs disputats" value={totalPublished} sub={`de ${totalSeasonRounds}`} icon={<Calendar className="h-5 w-5" />} />
+            <StatCard label="Torneigs disputats" value={totalRounds} sub="de 10" icon={<Calendar className="h-5 w-5" />} />
             <StatCard label="Jugadors actius" value={uniquePlayers} icon={<Users className="h-5 w-5" />} />
-            <StatCard label="Camps diferents" value={uniqueCourses} icon={<MapPin className="h-5 w-5" />} />
+            <StatCard label="Punts acumulats" value={totalPoints.toLocaleString()} icon={<TrendingUp className="h-5 w-5" />} />
           </div>
         </div>
       </section>
