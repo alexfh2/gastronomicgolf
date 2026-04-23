@@ -98,7 +98,7 @@ const Index = () => {
         </div>
         {/* Gradients — keep top transparent so navbar blends */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/50 to-transparent" />
 
         {/* Hero text — vertically centered, balanced spacing */}
         <div className="relative z-10 container py-10">
