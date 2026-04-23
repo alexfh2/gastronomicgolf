@@ -224,15 +224,15 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
         </tr>
         {halfStb && (
           <tr>
-            <td className={`${resultLabelClass} font-semibold text-primary`}>Stb</td>
+            <td className={`${resultLabelClass} font-bold text-accent uppercase tracking-wider bg-secondary/30`}>Stb</td>
             {halfStb.map((pts, i) => (
-              <td key={i} className={`${resultCellClass} bg-background`}>
-                <span className={`inline-flex items-center justify-center w-7 h-7 rounded text-[11px] ${getStbStyle(pts)}`}>
+              <td key={i} className={`${resultCellClass} bg-secondary/20`}>
+                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-md text-sm ${getStbStyle(pts)}`}>
                   {pts != null ? pts : '—'}
                 </span>
               </td>
             ))}
-            <td className={`${resultCellClass} ${totalCellClass} text-primary text-sm bg-muted/30`}>
+            <td className={`${resultCellClass} ${totalCellClass} text-accent-foreground bg-accent text-base font-bold`}>
               {sumStb(halfStb)}
             </td>
           </tr>
