@@ -128,10 +128,22 @@ const Rounds = () => {
           </thead>
           <tbody>
             {results.map((r: any, i: number) => {
-              const isTop3 = i < 3;
+              const position = i + 1;
+              const isTop3 = position <= 3;
+              const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
               return (
-                <tr key={r.id} className={`border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors ${isTop3 ? 'bg-accent/[0.04]' : ''}`}>
-                  <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>{i + 1}</td>
+                <tr
+                  key={r.id}
+                  className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors"
+                  style={
+                    isTop3
+                      ? {
+                          background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 30%, transparent 70%)`,
+                        }
+                      : undefined
+                  }
+                >
+                  <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>{position}</td>
                   <td className="py-3.5">
                     <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="flex items-center gap-2 hover:text-accent transition-colors text-left">
                       <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
