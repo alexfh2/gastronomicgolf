@@ -234,6 +234,44 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ——— SPONSORS ——— */}
+      <section className="container pb-14">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="h-px flex-1 bg-border/60" />
+          <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+            Patrocinadors
+          </h2>
+          <div className="h-px flex-1 bg-border/60" />
+        </div>
+        <div
+          className="relative overflow-hidden border border-border/30 px-6 py-8"
+          style={{
+            background:
+              'linear-gradient(180deg, hsl(var(--card) / 0.35) 0%, hsl(var(--card) / 0.1) 100%)',
+            boxShadow: 'inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+          }}
+        >
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-6 sm:gap-8 items-center justify-items-center">
+            {[
+              { src: sponsorBonarea, alt: 'bonÀrea' },
+              { src: sponsorPruna, alt: 'Pruna Car Go - Omoda Jaecoo' },
+              { src: sponsorTancat, alt: 'Tancat de Codorniu' },
+              { src: sponsorOptimotor, alt: 'Grup Optimotor' },
+              { src: sponsorEscampa, alt: 'Escampa Hotels' },
+              { src: sponsorPamies, alt: 'Santi Pàmies Joiers' },
+            ].map((s) => (
+              <img
+                key={s.alt}
+                src={s.src}
+                alt={s.alt}
+                loading="lazy"
+                className="max-h-12 sm:max-h-14 w-auto object-contain opacity-60 hover:opacity-90 transition-opacity duration-500 mix-blend-luminosity dark:invert dark:brightness-200 dark:contrast-100"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
       <PlayerProfileDialog
         playerId={selectedPlayerId}
         open={!!selectedPlayerId}
