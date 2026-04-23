@@ -355,6 +355,19 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                   const scorecard: number[] | null = Array.isArray(raw) ? raw : raw?.scores ?? null;
                   const handicapPlay: number | null = raw?.handicap_play ?? null;
                   const coursePar: number[] | undefined = Array.isArray(round?.course_par) ? round.course_par : undefined;
+                  // Scratch Stableford = puntos sin hándicap. Bolas levantadas (s===0) = Par+4 → 0 puntos.
+                  const scratchStableford = scorecard && coursePar && scorecard.length === coursePar.length
+                    ? scorecard.reduce((total, s, i) => {
+                        if (s == null || s === 0) return total;
+                        const diff = s - coursePar[i];
+                        if (diff <= -3) return total + 5;
+                        if (diff === -2) return total + 4;
+                        if (diff === -1) return total + 3;
+                        if (diff === 0) return total + 2;
+                        if (diff === 1) return total + 1;
+                        return total;
+                      }, 0)
+                    : null;
 
                   return (
                     <AccordionItem key={r.id} value={r.id} className="border border-border/50 rounded-md overflow-hidden bg-card">
@@ -372,7 +385,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                       <AccordionContent className="px-3 pb-3 bg-secondary/20">
                         <div className="flex gap-4 mb-2 text-xs flex-wrap text-foreground">
                           <span>Stb: <strong className="text-accent">{r.stableford_points ?? '—'}</strong></span>
-                          <span className="text-muted-foreground">Scratch: <strong className="text-foreground">{r.scratch_score ?? '—'}</strong></span>
+                          <span className="text-muted-foreground">Scratch Stb: <strong className="text-foreground">{scratchStableford ?? '—'}</strong></span>
                           <span className="text-muted-foreground">
                             HCP: <strong className="text-foreground">{r.handicap_at_round ?? '—'}</strong>{handicapPlay != null ? ` (HPU: ${handicapPlay})` : ''}
                           </span>
