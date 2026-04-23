@@ -39,27 +39,35 @@ const Index = () => {
         .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0)),
   });
 
-  const generalRanking = (() => {
+  const buildRanking = (cat: 'hcp_low' | 'hcp_high') => {
     if (!topResults?.length) return [];
-    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; lastRound: string | null }>();
+    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; category: string | null }>();
+    // First pass: determine each player's primary category (first appearance)
+    const playerCat = new Map<string, string>();
+    for (const r of topResults) {
+      if (r.category && !playerCat.has(r.player_id)) {
+        playerCat.set(r.player_id, r.category);
+      }
+    }
     for (const r of topResults) {
       const p = (r as any).players_public;
       if (!p) continue;
+      if (playerCat.get(r.player_id) !== cat) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
-      const roundName = (r as any).rounds?.name ?? null;
       const existing = agg.get(r.player_id);
       if (existing) {
         existing.totalPoints += pts;
         existing.rounds += 1;
         if (hcp != null) existing.handicap = hcp;
-        existing.lastRound = roundName;
       } else {
-        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, lastRound: roundName });
+        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, category: cat });
       }
     }
     return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
-  })();
+  };
+  const rankingLow = buildRanking('hcp_low');
+  const rankingHigh = buildRanking('hcp_high');
 
   const totalRounds = rounds?.length ?? 0;
   const uniquePlayers = topResults ? new Set(topResults.map(r => r.player_id)).size : 0;
