@@ -91,8 +91,8 @@ const Index = () => {
           </p>
 
           {/* Sponsors bar */}
-          <div className="mt-8 border border-border/30 bg-card/20 backdrop-blur-sm px-6 py-4 max-w-3xl">
-            <img src={sponsors} alt="Patrocinadors" className="w-full opacity-60 brightness-150" />
+          <div className="mt-8 max-w-3xl">
+            <img src={sponsors} alt="Patrocinadors" className="w-full invert opacity-70" />
           </div>
         </div>
       </section>
