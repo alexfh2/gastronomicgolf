@@ -1,5 +1,5 @@
 import heroBg from '@/assets/hero-editorial.png';
-import sponsors from '@/assets/sponsors-white.png';
+import sponsors from '@/assets/sponsors-row.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
@@ -92,7 +92,7 @@ const Index = () => {
 
           {/* Sponsors bar */}
           <div className="mt-8 max-w-3xl">
-            <img src={sponsors} alt="Patrocinadors" className="w-full opacity-60" />
+            <img src={sponsors} alt="Patrocinadors" className="w-full mix-blend-screen opacity-80" />
           </div>
         </div>
       </section>
