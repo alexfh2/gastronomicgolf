@@ -105,7 +105,7 @@ const Index = () => {
           {quickLinks.map((link) => (
             <Link key={link.path} to={link.path} className="group">
               <div
-                className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+                className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-4 sm:py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 sm:gap-3"
                 style={{
                   background:
                     'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
@@ -113,12 +113,12 @@ const Index = () => {
                 }}
               >
                 <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <link.icon className="h-4 w-4 text-accent/70 shrink-0" strokeWidth={1.5} />
-                <div className="min-w-0">
-                  <h3 className="font-body text-xs font-semibold text-foreground tracking-wide">{link.label}</h3>
-                  <p className="text-[10px] text-muted-foreground leading-snug truncate">{link.desc}</p>
+                <link.icon className="h-6 w-6 sm:h-4 sm:w-4 text-accent/80 sm:text-accent/70 shrink-0" strokeWidth={1.5} />
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-body text-base sm:text-xs font-semibold text-foreground tracking-wide">{link.label}</h3>
+                  <p className="hidden sm:block text-[10px] text-muted-foreground leading-snug truncate">{link.desc}</p>
                 </div>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-5 w-5 sm:h-3.5 sm:w-3.5 text-muted-foreground/40 sm:text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
               </div>
             </Link>
           ))}
@@ -138,7 +138,7 @@ const Index = () => {
             }}
           >
             <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
-            <div className="flex items-center justify-between px-7 py-5 border-b border-border/40">
+            <div className="flex items-center justify-between px-4 sm:px-7 py-5 border-b border-border/40">
               <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
                 Rànquing General
               </h3>
@@ -146,12 +146,15 @@ const Index = () => {
                 to="/ranquings"
                 className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
               >
-                Veure rànquing complet <ChevronRight className="h-3 w-3" />
+                <span className="hidden sm:inline">Veure rànquing complet</span>
+                <span className="sm:hidden">Veure tot</span>
+                <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
 
-            <div className="px-7 py-2">
-              <div className="grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+            <div className="px-4 sm:px-7 py-2">
+              {/* Header row — different columns for mobile vs desktop */}
+              <div className="hidden sm:grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
                 <span>Pos.</span>
                 <span>Jugador</span>
                 <span className="text-right">Torneigs</span>
@@ -159,33 +162,38 @@ const Index = () => {
                 <span className="text-right">Mitjana</span>
                 <span className="text-right">Últim</span>
               </div>
+              <div className="sm:hidden grid grid-cols-[2rem_1fr_4rem] gap-3 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+                <span>Pos.</span>
+                <span>Jugador</span>
+                <span className="text-right">Punts</span>
+              </div>
 
               {generalRanking.length > 0 ? (
                 generalRanking.map((p, i) => (
                   <Link
                     key={p.playerId}
                     to={`/jugadors/${p.playerId}`}
-                    className={`grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 items-center py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
+                    className={`grid grid-cols-[2rem_1fr_4rem] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-3 sm:gap-2 items-center py-4 sm:py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
                       i < 3 ? 'bg-accent/[0.04]' : ''
                     }`}
                   >
-                    <span className={`text-sm font-body font-semibold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
+                    <span className={`text-base sm:text-sm font-body font-semibold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
                       {i + 1}
                     </span>
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center">
-                        <Users className="h-3 w-3 text-muted-foreground/60" />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="h-7 w-7 sm:h-6 sm:w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+                        <Users className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-muted-foreground/60" />
                       </div>
-                      <span className="text-sm font-body font-medium text-foreground">{p.name}</span>
+                      <span className="text-sm font-body font-medium text-foreground truncate">{p.name}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground text-right font-mono">{p.rounds}</span>
-                    <span className={`text-sm text-right font-mono font-bold ${i < 3 ? 'text-accent' : 'text-foreground'}`}>
+                    <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">{p.rounds}</span>
+                    <span className={`text-base sm:text-sm text-right font-mono font-bold ${i < 3 ? 'text-accent' : 'text-foreground'}`}>
                       {p.totalPoints.toLocaleString()}
                     </span>
-                    <span className="text-xs text-muted-foreground text-right font-mono">
+                    <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">
                       {p.rounds > 0 ? (p.totalPoints / p.rounds).toFixed(2) : '—'}
                     </span>
-                    <span className="text-right">
+                    <span className="hidden sm:inline text-right">
                       <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded-sm font-mono ${
                         i < 3 ? 'bg-accent/15 text-accent' : 'bg-muted/30 text-muted-foreground'
                       }`}>
