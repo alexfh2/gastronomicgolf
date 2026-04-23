@@ -41,7 +41,7 @@ const getStbStyle = (pts: number | null): string => {
   if (pts == null) return 'text-muted-foreground';
   if (pts >= 4) return 'bg-accent text-accent-foreground font-bold ring-2 ring-accent/40 shadow-md';
   if (pts === 3) return 'bg-accent/80 text-accent-foreground font-bold shadow-sm';
-  if (pts === 2) return 'bg-cream text-primary font-bold';
+  if (pts === 2) return 'text-accent font-bold border border-accent/50';
   if (pts === 1) return 'bg-cream/40 text-cream font-semibold';
   return 'bg-destructive/30 text-destructive-foreground font-semibold';
 };
