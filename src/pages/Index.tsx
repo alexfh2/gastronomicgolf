@@ -100,6 +100,35 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ——— SPONSORS ——— */}
+      <section className="container pt-8 pb-2">
+        <div className="flex items-center gap-4 mb-5">
+          <div className="h-px flex-1 bg-border/40" />
+          <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
+            Patrocinadors
+          </h2>
+          <div className="h-px flex-1 bg-border/40" />
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-6 gap-y-5 sm:gap-x-10 items-center justify-items-center px-2">
+          {[
+            { src: sponsorBonarea, alt: 'bonÀrea' },
+            { src: sponsorPruna, alt: 'Pruna Car Go - Omoda Jaecoo' },
+            { src: sponsorTancat, alt: 'Tancat de Codorniu' },
+            { src: sponsorOptimotor, alt: 'Grup Optimotor' },
+            { src: sponsorEscampa, alt: 'Escampa Hotels' },
+            { src: sponsorPamies, alt: 'Santi Pàmies Joiers' },
+          ].map((s) => (
+            <img
+              key={s.alt}
+              src={s.src}
+              alt={s.alt}
+              loading="lazy"
+              className="max-h-9 sm:max-h-11 w-auto object-contain opacity-50 hover:opacity-90 transition-opacity duration-500 dark:invert"
+            />
+          ))}
+        </div>
+      </section>
+
       {/* ——— QUICK ACCESS ——— */}
       <section className="container pt-6 pb-4">
         <div className="flex items-center gap-4 mb-4">
