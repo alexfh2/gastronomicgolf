@@ -396,7 +396,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                               }`}
                               aria-pressed={!scratchMode[r.id]}
                             >
-                              Amb HCP <strong className="ml-1 font-mono">{r.stableford_points ?? '—'}</strong>
+                              Stb HCP <strong className="ml-1 font-mono">{r.stableford_points ?? '—'}</strong>
                             </button>
                             <button
                               type="button"
