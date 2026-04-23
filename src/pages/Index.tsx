@@ -8,7 +8,8 @@ import sponsorPamies from '@/assets/sponsors/santi-pamies.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp, Crown, Medal, Award } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
@@ -39,27 +40,35 @@ const Index = () => {
         .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0)),
   });
 
-  const generalRanking = (() => {
+  const buildRanking = (cat: 'hcp_low' | 'hcp_high') => {
     if (!topResults?.length) return [];
-    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; lastRound: string | null }>();
+    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; category: string | null }>();
+    // First pass: determine each player's primary category (first appearance)
+    const playerCat = new Map<string, string>();
+    for (const r of topResults) {
+      if (r.category && !playerCat.has(r.player_id)) {
+        playerCat.set(r.player_id, r.category);
+      }
+    }
     for (const r of topResults) {
       const p = (r as any).players_public;
       if (!p) continue;
+      if (playerCat.get(r.player_id) !== cat) continue;
       const hcp = r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
-      const roundName = (r as any).rounds?.name ?? null;
       const existing = agg.get(r.player_id);
       if (existing) {
         existing.totalPoints += pts;
         existing.rounds += 1;
         if (hcp != null) existing.handicap = hcp;
-        existing.lastRound = roundName;
       } else {
-        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, lastRound: roundName });
+        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, category: cat });
       }
     }
     return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
-  })();
+  };
+  const rankingLow = buildRanking('hcp_low');
+  const rankingHigh = buildRanking('hcp_high');
 
   const totalRounds = rounds?.length ?? 0;
   const uniquePlayers = topResults ? new Set(topResults.map(r => r.player_id)).size : 0;
@@ -176,82 +185,57 @@ const Index = () => {
             }}
           >
             <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
-            <div className="flex items-center justify-between px-4 sm:px-7 py-5 border-b border-border/40">
-              <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
-                Rànquing General
-              </h3>
-              <Link
-                to="/ranquings"
-                className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
-              >
-                <span className="hidden sm:inline">Veure rànquing complet</span>
-                <span className="sm:hidden">Veure tot</span>
-                <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            <div className="px-4 sm:px-7 py-2">
-              {/* Header row — different columns for mobile vs desktop */}
-              <div className="hidden sm:grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                <span>Pos.</span>
-                <span>Jugador</span>
-                <span className="text-right">Torneigs</span>
-                <span className="text-right">Punts</span>
-                <span className="text-right">Mitjana</span>
-                <span className="text-right">Últim</span>
-              </div>
-              <div className="sm:hidden grid grid-cols-[2rem_1fr_4rem] gap-3 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                <span>Pos.</span>
-                <span>Jugador</span>
-                <span className="text-right">Punts</span>
-              </div>
-
-              {generalRanking.length > 0 ? (
-                generalRanking.map((p, i) => (
-                  <button
-                    key={p.playerId}
-                    type="button"
-                    onClick={() => setSelectedPlayerId(p.playerId)}
-                    className={`w-full text-left grid grid-cols-[2rem_1fr_4rem] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-3 sm:gap-2 items-center py-4 sm:py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
-                      i < 3 ? 'bg-accent/[0.04]' : ''
-                    }`}
+            <Tabs defaultValue="low" className="w-full">
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-7 py-4 border-b border-border/40 flex-wrap">
+                <TabsList className="bg-muted/30 border border-border/40 h-auto p-1">
+                  <TabsTrigger
+                    value="low"
+                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
                   >
-                    <span className={`text-base sm:text-sm font-body font-semibold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
-                      {i + 1}
-                    </span>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="h-7 w-7 sm:h-6 sm:w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                        <Users className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-muted-foreground/60" />
-                      </div>
-                      <span className="text-sm font-body font-medium text-foreground truncate">
-                        {p.name}
-                        {p.handicap != null && (
-                          <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                            ({Number(p.handicap).toFixed(1)})
-                          </span>
-                        )}
-                      </span>
+                    HCP Inferior
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="high"
+                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
+                  >
+                    HCP Superior
+                  </TabsTrigger>
+                </TabsList>
+                <Link
+                  to="/ranquings"
+                  className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
+                >
+                  <span className="hidden sm:inline">Veure rànquing complet</span>
+                  <span className="sm:hidden">Veure tot</span>
+                  <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {(['low', 'high'] as const).map((key) => {
+                const list = key === 'low' ? rankingLow : rankingHigh;
+                return (
+                  <TabsContent key={key} value={key} className="mt-0">
+                    <div className="px-3 sm:px-5 py-2">
+                      {list.length > 0 ? (
+                        list.map((p, i) => (
+                          <RankingRow
+                            key={p.playerId}
+                            position={i + 1}
+                            name={p.name}
+                            handicap={p.handicap}
+                            points={p.totalPoints}
+                            rounds={p.rounds}
+                            onClick={() => setSelectedPlayerId(p.playerId)}
+                          />
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+                      )}
                     </div>
-                    <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">{p.rounds}</span>
-                    <span className={`text-base sm:text-sm text-right font-mono font-bold ${i < 3 ? 'text-accent' : 'text-foreground'}`}>
-                      {p.totalPoints.toLocaleString()}
-                    </span>
-                    <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">
-                      {p.rounds > 0 ? (p.totalPoints / p.rounds).toFixed(2) : '—'}
-                    </span>
-                    <span className="hidden sm:inline text-right">
-                      <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded-sm font-mono ${
-                        i < 3 ? 'bg-accent/15 text-accent' : 'bg-muted/30 text-muted-foreground'
-                      }`}>
-                        {i + 1}r
-                      </span>
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
-              )}
-            </div>
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
           </div>
 
           {/* Stats cards */}
@@ -294,6 +278,95 @@ function StatCard({ label, value, sub, icon }: { label: string; value: string | 
         {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
       </div>
     </div>
+  );
+}
+
+function RankingRow({
+  position,
+  name,
+  handicap,
+  points,
+  rounds,
+  onClick,
+}: {
+  position: number;
+  name: string;
+  handicap: number | null;
+  points: number;
+  rounds: number;
+  onClick: () => void;
+}) {
+  const podium: Record<number, { color: string; Icon: typeof Crown }> = {
+    1: { color: '45 90% 55%', Icon: Crown },
+    2: { color: '0 0% 75%', Icon: Medal },
+    3: { color: '25 60% 50%', Icon: Award },
+  };
+  const isPodium = position <= 3;
+  const p = podium[position];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center py-3.5 border-b border-border/15 hover:bg-muted/15 transition-all overflow-hidden group"
+      style={
+        isPodium
+          ? {
+              background: `linear-gradient(90deg, hsl(${p.color} / 0.18) 0%, hsl(${p.color} / 0.06) 35%, transparent 75%)`,
+            }
+          : undefined
+      }
+    >
+      {isPodium && (
+        <span
+          aria-hidden
+          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r"
+          style={{ background: `linear-gradient(180deg, hsl(${p.color}) 0%, hsl(${p.color} / 0.3) 100%)` }}
+        />
+      )}
+
+      <div className="flex items-center justify-center">
+        {isPodium ? (
+          <span
+            className="inline-flex items-center justify-center h-7 w-7 rounded-full font-body font-bold text-[12px]"
+            style={{
+              background: `linear-gradient(135deg, hsl(${p.color} / 0.95) 0%, hsl(${p.color} / 0.55) 100%)`,
+              color: 'hsl(220 14% 12%)',
+              boxShadow: `0 2px 8px -2px hsl(${p.color} / 0.55)`,
+            }}
+          >
+            {position}
+          </span>
+        ) : (
+          <span className="text-sm font-body font-medium text-muted-foreground/70 w-7 text-center">{position}</span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2.5 min-w-0">
+        {isPodium && p && (
+          <p.Icon className="h-4 w-4 shrink-0" style={{ color: `hsl(${p.color})` }} strokeWidth={2} />
+        )}
+        <span className="text-sm sm:text-[15px] font-body font-medium text-foreground truncate">
+          {name}
+          {handicap != null && (
+            <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+              ({Number(handicap).toFixed(1)})
+            </span>
+          )}
+        </span>
+      </div>
+
+      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">{rounds}</span>
+      <span
+        className={`text-base sm:text-lg text-right font-mono font-bold ${isPodium ? '' : 'text-foreground'}`}
+        style={isPodium ? { color: `hsl(${p.color})` } : undefined}
+      >
+        {points.toLocaleString()}
+      </span>
+      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">
+        {rounds > 0 ? (points / rounds).toFixed(1) : '—'}
+      </span>
+    </button>
   );
 }
 
