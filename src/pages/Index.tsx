@@ -185,82 +185,57 @@ const Index = () => {
             }}
           >
             <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
-            <div className="flex items-center justify-between px-4 sm:px-7 py-5 border-b border-border/40">
-              <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
-                Rànquing General
-              </h3>
-              <Link
-                to="/ranquings"
-                className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
-              >
-                <span className="hidden sm:inline">Veure rànquing complet</span>
-                <span className="sm:hidden">Veure tot</span>
-                <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            <div className="px-4 sm:px-7 py-2">
-              {/* Header row — different columns for mobile vs desktop */}
-              <div className="hidden sm:grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                <span>Pos.</span>
-                <span>Jugador</span>
-                <span className="text-right">Torneigs</span>
-                <span className="text-right">Punts</span>
-                <span className="text-right">Mitjana</span>
-                <span className="text-right">Últim</span>
-              </div>
-              <div className="sm:hidden grid grid-cols-[2rem_1fr_4rem] gap-3 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                <span>Pos.</span>
-                <span>Jugador</span>
-                <span className="text-right">Punts</span>
-              </div>
-
-              {generalRanking.length > 0 ? (
-                generalRanking.map((p, i) => (
-                  <button
-                    key={p.playerId}
-                    type="button"
-                    onClick={() => setSelectedPlayerId(p.playerId)}
-                    className={`w-full text-left grid grid-cols-[2rem_1fr_4rem] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-3 sm:gap-2 items-center py-4 sm:py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
-                      i < 3 ? 'bg-accent/[0.04]' : ''
-                    }`}
+            <Tabs defaultValue="low" className="w-full">
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-7 py-4 border-b border-border/40 flex-wrap">
+                <TabsList className="bg-muted/30 border border-border/40 h-auto p-1">
+                  <TabsTrigger
+                    value="low"
+                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
                   >
-                    <span className={`text-base sm:text-sm font-body font-semibold ${i < 3 ? 'text-accent' : 'text-muted-foreground'}`}>
-                      {i + 1}
-                    </span>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="h-7 w-7 sm:h-6 sm:w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                        <Users className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-muted-foreground/60" />
-                      </div>
-                      <span className="text-sm font-body font-medium text-foreground truncate">
-                        {p.name}
-                        {p.handicap != null && (
-                          <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                            ({Number(p.handicap).toFixed(1)})
-                          </span>
-                        )}
-                      </span>
+                    HCP Inferior
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="high"
+                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
+                  >
+                    HCP Superior
+                  </TabsTrigger>
+                </TabsList>
+                <Link
+                  to="/ranquings"
+                  className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
+                >
+                  <span className="hidden sm:inline">Veure rànquing complet</span>
+                  <span className="sm:hidden">Veure tot</span>
+                  <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {(['low', 'high'] as const).map((key) => {
+                const list = key === 'low' ? rankingLow : rankingHigh;
+                return (
+                  <TabsContent key={key} value={key} className="mt-0">
+                    <div className="px-3 sm:px-5 py-2">
+                      {list.length > 0 ? (
+                        list.map((p, i) => (
+                          <RankingRow
+                            key={p.playerId}
+                            position={i + 1}
+                            name={p.name}
+                            handicap={p.handicap}
+                            points={p.totalPoints}
+                            rounds={p.rounds}
+                            onClick={() => setSelectedPlayerId(p.playerId)}
+                          />
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+                      )}
                     </div>
-                    <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">{p.rounds}</span>
-                    <span className={`text-base sm:text-sm text-right font-mono font-bold ${i < 3 ? 'text-accent' : 'text-foreground'}`}>
-                      {p.totalPoints.toLocaleString()}
-                    </span>
-                    <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">
-                      {p.rounds > 0 ? (p.totalPoints / p.rounds).toFixed(2) : '—'}
-                    </span>
-                    <span className="hidden sm:inline text-right">
-                      <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded-sm font-mono ${
-                        i < 3 ? 'bg-accent/15 text-accent' : 'bg-muted/30 text-muted-foreground'
-                      }`}>
-                        {i + 1}r
-                      </span>
-                    </span>
-                  </button>
-                ))
-              ) : (
-                <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
-              )}
-            </div>
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
           </div>
 
           {/* Stats cards */}
