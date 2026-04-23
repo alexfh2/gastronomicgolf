@@ -253,7 +253,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
       {/* Totales 18 hoyos dentro de la tarjeta */}
       <div className="grid grid-cols-3 gap-2 border-2 border-accent/40 rounded-lg bg-secondary/30 p-3">
         <div className="text-center">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Par 18</div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">PAR CAMP</div>
           <div className="font-mono font-bold text-base text-foreground mt-1">{totalPar}</div>
         </div>
         <div className="text-center border-x border-border/40">
