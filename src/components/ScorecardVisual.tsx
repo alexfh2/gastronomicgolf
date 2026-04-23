@@ -41,7 +41,7 @@ const getStbStyle = (pts: number | null): string => {
   if (pts == null) return 'text-muted-foreground';
   if (pts >= 4) return 'bg-accent text-accent-foreground font-bold ring-2 ring-accent/40 shadow-md';
   if (pts === 3) return 'bg-accent/80 text-accent-foreground font-bold shadow-sm';
-  if (pts === 2) return 'bg-cream text-primary font-bold';
+  if (pts === 2) return 'text-accent font-bold border border-accent/50';
   if (pts === 1) return 'bg-cream/40 text-cream font-semibold';
   return 'bg-destructive/30 text-destructive-foreground font-semibold';
 };
@@ -241,14 +241,37 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     </table>
   );
 
+  const totalStb = stablefordPoints ? stablefordPoints.reduce((s, v) => s + (v ?? 0), 0) : null;
+  const totalStrokes = frontTotal != null && backTotal != null ? frontTotal + backTotal : null;
+  const totalPar = par.reduce((a, b) => a + b, 0);
+
   return (
     <div className="space-y-3">
       {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)}
       {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
-      <div className="flex items-center gap-4 pt-2 border-t border-border/40 flex-wrap">
-        <span className="text-xs text-muted-foreground">
-          Total cops: {frontTotal != null && backTotal != null ? frontTotal + backTotal : '—'}
-          {hasLiftedBall && ' (incomplet)'}
+
+      {/* Totales 18 hoyos dentro de la tarjeta */}
+      <div className="grid grid-cols-3 gap-2 border-2 border-accent/40 rounded-lg bg-secondary/30 p-3">
+        <div className="text-center">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Par 18</div>
+          <div className="font-mono font-bold text-base text-foreground mt-1">{totalPar}</div>
+        </div>
+        <div className="text-center border-x border-border/40">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Total cops</div>
+          <div className="font-mono font-bold text-base text-cream mt-1">
+            {totalStrokes != null ? totalStrokes : '—'}
+            {hasLiftedBall && <span className="text-[9px] text-muted-foreground ml-1">(incomplet)</span>}
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-[10px] uppercase tracking-wider text-accent font-semibold">Total Stb</div>
+          <div className="font-mono font-bold text-lg text-accent mt-1">{totalStb ?? '—'}</div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 flex-wrap">
+        <span className="sr-only">
+          Total: {totalStrokes ?? '—'}
         </span>
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground ml-auto flex-wrap">
           <span className="inline-flex items-center gap-1">
