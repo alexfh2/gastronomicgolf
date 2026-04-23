@@ -36,14 +36,14 @@ const calcStablefordPoints = (
   return 0;
 };
 
-/** Color scale for Stableford points */
+/** Color scale for Stableford points - bright & prominent for dark bg */
 const getStbStyle = (pts: number | null): string => {
   if (pts == null) return 'text-muted-foreground';
-  if (pts >= 4) return 'bg-primary/20 text-primary font-bold';
-  if (pts === 3) return 'bg-primary/10 text-primary font-semibold';
-  if (pts === 2) return 'bg-accent/15 text-accent-foreground font-medium';
-  if (pts === 1) return 'bg-muted text-muted-foreground';
-  return 'bg-destructive/10 text-destructive font-medium';
+  if (pts >= 4) return 'bg-accent text-accent-foreground font-bold ring-2 ring-accent/40 shadow-md';
+  if (pts === 3) return 'bg-accent/80 text-accent-foreground font-bold shadow-sm';
+  if (pts === 2) return 'bg-cream text-primary font-bold';
+  if (pts === 1) return 'bg-cream/40 text-cream font-semibold';
+  return 'bg-destructive/30 text-destructive-foreground font-semibold';
 };
 
 const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, playerHandicap }) => {
