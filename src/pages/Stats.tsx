@@ -50,11 +50,14 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
 
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
-      <div className="border border-border/50 bg-card/30 transition-all">
+      <div className="border border-border/50 bg-card/30 transition-all overflow-hidden">
         <CollapsibleTrigger asChild>
           <button className="w-full text-left">
-            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
-              <Crown className="h-4 w-4 text-accent/70" strokeWidth={1.5} />
+            <div
+              className="flex items-center gap-3 px-5 py-3 border-b border-border/30"
+              style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.14) 0%, hsl(var(--accent) / 0.06) 45%, hsl(var(--card) / 0.4) 100%)' }}
+            >
+              <Crown className="h-4 w-4 text-accent" strokeWidth={1.5} />
               <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">Líders per categoria</span>
               <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
             </div>
