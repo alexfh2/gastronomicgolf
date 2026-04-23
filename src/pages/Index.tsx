@@ -5,13 +5,10 @@ import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-import { ca, es } from 'date-fns/locale';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 
 const Index = () => {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'ca' ? ca : es;
 
   const { data: rounds } = useQuery({
     queryKey: ['public-rounds-home'],
@@ -34,7 +31,6 @@ const Index = () => {
         .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0)),
   });
 
-  // Aggregate rankings
   const generalRanking = (() => {
     if (!topResults?.length) return [];
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; lastRound: string | null }>();
@@ -57,7 +53,6 @@ const Index = () => {
     return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
   })();
 
-  // Stats
   const totalRounds = rounds?.length ?? 0;
   const uniquePlayers = topResults ? new Set(topResults.map(r => r.player_id)).size : 0;
   const totalPoints = topResults ? topResults.reduce((s, r) => s + (r.stableford_points ?? 0), 0) : 0;
@@ -70,25 +65,40 @@ const Index = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* ——— HERO with sponsors overlay ——— */}
-      <section className="relative h-[22vh] overflow-hidden">
+      {/* ——— HERO ——— */}
+      <section className="relative min-h-[55vh] lg:min-h-[60vh] overflow-hidden flex items-end">
+        {/* Background image */}
         <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover" />
+          <img src={heroBg} alt="" className="w-full h-full object-cover object-right-top" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+        {/* Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
-        {/* Sponsors overlay inside hero */}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-2">
-          <img src={sponsors} alt="Patrocinadors" className="max-w-2xl w-full opacity-25 brightness-150" />
+        {/* Hero text */}
+        <div className="relative z-10 container pb-8 pt-16">
+          <p className="font-body text-[11px] font-medium tracking-[0.35em] uppercase text-accent/80 mb-3">
+            {t('common.season')} 2026
+          </p>
+          <h1 className="font-display text-5xl lg:text-7xl font-bold text-foreground leading-[0.95] mb-1">
+            Gastronòmic Golf
+          </h1>
+          <p className="font-display text-2xl lg:text-3xl text-accent/70 italic font-light mb-3">
+            circuit de golf
+          </p>
+          <p className="font-body text-sm text-muted-foreground/70 tracking-wide">
+            Classificació i seguiment del circuit
+          </p>
+
+          {/* Sponsors bar */}
+          <div className="mt-8 border border-border/30 bg-card/20 backdrop-blur-sm px-6 py-4 max-w-3xl">
+            <img src={sponsors} alt="Patrocinadors" className="w-full opacity-60 brightness-150" />
+          </div>
         </div>
       </section>
 
-      {/* ——— TEMPORADA + QUICK ACCESS ——— */}
-      <section className="container pt-3 pb-4">
-        <p className="text-center text-accent font-body font-medium tracking-[0.35em] uppercase mb-4 text-4xl">
-          {t('common.season')} 2026
-        </p>
+      {/* ——— QUICK ACCESS ——— */}
+      <section className="container pt-6 pb-4">
         <div className="flex items-center gap-4 mb-4">
           <div className="h-px flex-1 bg-border/60" />
           <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
@@ -103,12 +113,8 @@ const Index = () => {
               <div className="border border-border/50 bg-card/30 px-4 py-3 hover:border-accent/30 hover:bg-card/60 transition-all duration-300 flex items-center gap-3">
                 <link.icon className="h-4 w-4 text-accent/70 shrink-0" strokeWidth={1.5} />
                 <div className="min-w-0">
-                  <h3 className="font-body text-xs font-semibold text-foreground tracking-wide">
-                    {link.label}
-                  </h3>
-                  <p className="text-[10px] text-muted-foreground leading-snug truncate">
-                    {link.desc}
-                  </p>
+                  <h3 className="font-body text-xs font-semibold text-foreground tracking-wide">{link.label}</h3>
+                  <p className="text-[10px] text-muted-foreground leading-snug truncate">{link.desc}</p>
                 </div>
                 <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/60 transition-colors" />
               </div>
@@ -135,7 +141,6 @@ const Index = () => {
             </div>
 
             <div className="px-7 py-2">
-              {/* Table header */}
               <div className="grid grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-2 py-3 border-b border-border/30 text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
                 <span>Pos.</span>
                 <span>Jugador</span>
@@ -172,9 +177,7 @@ const Index = () => {
                     </span>
                     <span className="text-right">
                       <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded-sm font-mono ${
-                        i < 3
-                          ? 'bg-accent/15 text-accent'
-                          : 'bg-muted/30 text-muted-foreground'
+                        i < 3 ? 'bg-accent/15 text-accent' : 'bg-muted/30 text-muted-foreground'
                       }`}>
                         {i + 1}r
                       </span>
@@ -189,22 +192,9 @@ const Index = () => {
 
           {/* Stats cards */}
           <div className="flex flex-col gap-4">
-            <StatCard
-              label="Torneigs disputats"
-              value={totalRounds}
-              sub="de 10"
-              icon={<Calendar className="h-5 w-5" />}
-            />
-            <StatCard
-              label="Jugadors actius"
-              value={uniquePlayers}
-              icon={<Users className="h-5 w-5" />}
-            />
-            <StatCard
-              label="Punts acumulats"
-              value={totalPoints.toLocaleString()}
-              icon={<TrendingUp className="h-5 w-5" />}
-            />
+            <StatCard label="Torneigs disputats" value={totalRounds} sub="de 10" icon={<Calendar className="h-5 w-5" />} />
+            <StatCard label="Jugadors actius" value={uniquePlayers} icon={<Users className="h-5 w-5" />} />
+            <StatCard label="Punts acumulats" value={totalPoints.toLocaleString()} icon={<TrendingUp className="h-5 w-5" />} />
           </div>
         </div>
       </section>
@@ -216,9 +206,7 @@ function StatCard({ label, value, sub, icon }: { label: string; value: string | 
   return (
     <div className="border border-border/50 bg-card/30 p-7 flex flex-col justify-between flex-1">
       <div className="flex items-center justify-between mb-6">
-        <span className="font-body text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground">
-          {label}
-        </span>
+        <span className="font-body text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground">{label}</span>
         <span className="text-accent/50">{icon}</span>
       </div>
       <div>
