@@ -265,8 +265,7 @@ const Index = () => {
                 src={s.src}
                 alt={s.alt}
                 loading="lazy"
-                className="max-h-10 sm:max-h-12 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500 dark:invert dark:brightness-0 dark:contrast-200"
-                style={{ filter: 'grayscale(100%)' }}
+                className="max-h-10 sm:max-h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-500 dark:invert"
               />
             ))}
           </div>
