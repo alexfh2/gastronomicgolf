@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { useCategoryRankings, buildPlayerRankPositions, type CategoryKey } from '@/hooks/useCategoryRankings';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import {
@@ -57,6 +56,11 @@ const formatHcp = (h: number | null) => {
   if (h === null || h === undefined) return '—';
   if (h < 0) return `+${Math.abs(h).toFixed(1)}`;
   return h.toFixed(1);
+};
+
+const formatDate = (s: string) => {
+  const d = new Date(s);
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 };
 
 const nameSortKey = (name: string) => {
@@ -203,7 +207,7 @@ const Players = () => {
           />
         </div>
 
-        {/* Filter & Sort pills */}
+        {/* Filter pills */}
         <div className="flex items-center gap-4 mb-3">
           <div className="h-px flex-1 bg-border/60" />
           <span className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">Categories</span>
@@ -225,6 +229,7 @@ const Players = () => {
           ))}
         </div>
 
+        {/* Sort pills */}
         <div className="flex items-center gap-4 mb-3">
           <div className="h-px flex-1 bg-border/60" />
           <span className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">Ordenar</span>
@@ -253,64 +258,68 @@ const Players = () => {
         ) : (
           <>
             <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-3">{filtered.length} jugadors</p>
-            <div className="border border-border/50 bg-card/30">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-separate border-spacing-0">
-                  <thead>
-                    <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                      <th className="text-left py-3 pl-5 border-b border-border/30">{t('common.name')}</th>
-                      <th className="text-center py-3 px-2 border-b border-border/30">Hdcp</th>
-                      <th className="text-center py-3 px-2 border-b border-border/30">Rànquing</th>
-                      <th className="text-center py-3 px-2 border-b border-border/30">Proves</th>
-                      <th className="text-center py-3 px-2 border-b border-border/30">Ø Stb</th>
-                      <th className="text-center py-3 px-2 border-b border-border/30">Millor</th>
-                      <th className="text-center py-3 pr-5 border-b border-border/30">Tendència</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map(({ player: p, stats, ranks }) => {
-                      const rankBadges = (Object.keys(ranks) as CategoryKey[])
-                        .map((k) => ({ key: k, pos: ranks[k]! }))
-                        .filter((r) => r.pos)
-                        .sort((a, b) => a.pos - b.pos);
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filtered.map(({ player: p, stats, ranks }) => {
+                const rankBadges = (Object.keys(ranks) as CategoryKey[])
+                  .map((k) => ({ key: k, pos: ranks[k]! }))
+                  .filter((r) => r.pos)
+                  .sort((a, b) => a.pos - b.pos);
 
-                      return (
-                        <tr key={p.id} className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors">
-                          <td className="py-3 pl-5">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedPlayerId(p.id)}
-                              className="flex items-center gap-2.5 hover:text-accent transition-colors text-left"
-                            >
-                              <Avatar className="h-7 w-7 border border-border/30">
-                                {p.photo_url && <AvatarImage src={p.photo_url} alt={p.name} />}
-                                <AvatarFallback className="bg-muted/40 text-[9px] font-body font-semibold">{initials(p.name)}</AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm font-body font-medium text-foreground">{p.name}</span>
-                            </button>
-                          </td>
-                          <td className="py-3 px-2 text-center font-mono text-xs text-muted-foreground">{formatHcp(p.current_handicap)}</td>
-                          <td className="py-3 px-2 text-center">
-                            <div className="flex flex-wrap gap-1 justify-center">
-                              {rankBadges.length > 0 ? rankBadges.map((r) => (
-                                <span key={r.key} className="text-[9px] font-mono text-accent/80">#{r.pos} {RANK_LABELS[r.key]}</span>
-                              )) : <span className="text-muted-foreground/30 text-xs">—</span>}
-                            </div>
-                          </td>
-                          <td className="py-3 px-2 text-center font-mono text-xs text-muted-foreground">{stats?.rounds ?? 0}</td>
-                          <td className="py-3 px-2 text-center font-mono text-xs text-foreground">{stats?.avgStableford ?? '—'}</td>
-                          <td className="py-3 px-2 text-center font-mono text-xs font-bold text-foreground">{stats?.bestStableford || '—'}</td>
-                          <td className="py-3 pr-5 text-center">
-                            {stats?.trend === 'up' && <TrendingUp className="h-3.5 w-3.5 text-accent inline-block" />}
-                            {stats?.trend === 'down' && <TrendingDown className="h-3.5 w-3.5 text-destructive inline-block" />}
-                            {(!stats || stats.trend === 'stable') && <Minus className="h-3.5 w-3.5 text-muted-foreground/40 inline-block" />}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                return (
+                  <div key={p.id} className="border border-border/50 bg-card/30 p-4 hover:bg-muted/10 hover:border-accent/20 transition-all">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Avatar className="h-11 w-11 border border-border/30">
+                        {p.photo_url && <AvatarImage src={p.photo_url} alt={p.name} />}
+                        <AvatarFallback className="bg-muted/40 text-[10px] font-body font-semibold text-muted-foreground">{initials(p.name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPlayerId(p.id)}
+                          className="font-body font-medium text-sm leading-tight hover:text-accent transition-colors block truncate text-left w-full text-foreground"
+                        >
+                          {p.name}
+                        </button>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          <span className="text-[9px] px-2 py-0.5 border border-border/40 text-muted-foreground font-mono tracking-wide">
+                            Hdcp {formatHcp(p.current_handicap)}
+                          </span>
+                          {rankBadges.map((r) => (
+                            <span key={r.key} className="text-[9px] px-2 py-0.5 border border-accent/30 text-accent/80 font-mono tracking-wide">
+                              #{r.pos} {RANK_LABELS[r.key]}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="shrink-0" title={
+                        stats?.trend === 'up' ? 'Millora' : stats?.trend === 'down' ? 'Empitjora' : 'Estable'
+                      }>
+                        {stats?.trend === 'up' && <TrendingUp className="h-4 w-4 text-accent" />}
+                        {stats?.trend === 'down' && <TrendingDown className="h-4 w-4 text-destructive" />}
+                        {(!stats || stats.trend === 'stable') && <Minus className="h-4 w-4 text-muted-foreground/30" />}
+                      </div>
+                    </div>
+
+                    {stats ? (
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-mono tracking-wide">
+                        <span className="flex items-center gap-1">
+                          <BarChart3 className="h-3 w-3" /> Ø{stats.avgStableford} pts
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Trophy className="h-3 w-3" /> {stats.bestStableford || '—'}
+                        </span>
+                        <span>{stats.rounds} {stats.rounds === 1 ? 'prova' : 'proves'}</span>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground/50 font-body italic">Sense proves jugades</p>
+                    )}
+
+                    <div className="mt-3 pt-3 border-t border-border/20 text-[9px] text-muted-foreground/50 font-body">
+                      Act. {formatDate(p.updated_at)}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
