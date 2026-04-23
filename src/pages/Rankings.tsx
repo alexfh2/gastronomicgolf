@@ -217,15 +217,24 @@ const Rankings = () => {
           </thead>
           <tbody>
             {players.map((p: any, i: number) => {
-              const isTop3 = i < 3;
+              const position = i + 1;
+              const isTop3 = position <= 3;
+              const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
 
               return (
                 <tr
                   key={p.id}
-                  className={`border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors ${isTop3 ? 'bg-accent/[0.04]' : ''}`}
+                  className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors relative"
+                  style={
+                    isTop3
+                      ? {
+                          background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 30%, transparent 70%)`,
+                        }
+                      : undefined
+                  }
                 >
                   <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>
-                    {i + 1}
+                    {position}
                   </td>
                   <td className="py-3.5">
                     <button
