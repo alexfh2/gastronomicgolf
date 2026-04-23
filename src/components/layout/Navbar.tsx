@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import LanguageSwitcher from './LanguageSwitcher';
+import logo from '@/assets/logo.png';
 
 const navItems = [
   { key: 'overview', path: '/' },
@@ -19,48 +20,43 @@ const Navbar = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const isHome = location.pathname === '/';
 
   return (
     <header
-      className="sticky top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-white/[0.04]"
-      style={{ background: 'linear-gradient(180deg, hsl(220 14% 4% / 0.85), hsl(220 14% 4% / 0.55))' }}
+      className={`${
+        isHome ? 'absolute' : 'sticky'
+      } top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        isHome
+          ? 'bg-transparent'
+          : 'bg-background/95 backdrop-blur border-b border-border/40'
+      }`}
     >
-      <div className="container flex h-[84px] items-center justify-between gap-6">
-        {/* Brand: heraldic crest + name */}
-        <Link to="/" className="flex items-center gap-3.5">
-          <span className="crest crest-sm" aria-hidden />
-          <span className="leading-none">
-            <strong className="block font-display text-xl font-semibold tracking-tight">
-              Gastronòmic Golf
-            </strong>
-            <span className="block mt-1.5 text-[11px] text-muted-foreground uppercase" style={{ letterSpacing: '0.18em' }}>
-              circuit de golf
-            </span>
-          </span>
+      <div className="container flex h-18 items-center justify-between py-4">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5">
+          <img
+            src={logo}
+            alt="Gastronòmic Golf"
+            className="h-10 w-auto brightness-0 invert opacity-90"
+          />
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-7">
+        <nav className="hidden lg:flex items-center gap-0.5">
           {navItems.map((item) => {
-            const isActive =
-              item.path === '/'
-                ? location.pathname === '/'
-                : location.pathname.startsWith(item.path);
+            const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.key}
                 to={item.path}
-                className={`text-[13px] uppercase transition-all ${
+                className={`px-4 py-2 text-[11px] font-body font-medium uppercase tracking-[0.2em] transition-colors ${
                   isActive
-                    ? 'text-[hsl(220_14%_5%)] font-semibold px-3.5 py-3 rounded-[10px] shadow-[0_8px_18px_hsl(36_32%_50%/0.18)]'
-                    : 'text-cream-dark/85 hover:text-cream'
+                    ? 'text-accent border border-accent/40 rounded-sm'
+                    : isHome
+                    ? 'text-foreground/60 hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
-                style={{
-                  letterSpacing: '0.14em',
-                  background: isActive
-                    ? 'linear-gradient(180deg, hsl(36 35% 60%), hsl(36 32% 42%))'
-                    : undefined,
-                }}
               >
                 {t(`nav.${item.key}`)}
               </Link>
@@ -70,10 +66,9 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          <span
-            className="hidden sm:inline-flex text-[12px] uppercase text-muted-foreground"
-            style={{ letterSpacing: '0.24em' }}
-          >
+          <span className={`hidden sm:inline-flex text-[10px] font-body font-medium tracking-[0.2em] uppercase ${
+            isHome ? 'text-foreground/40' : 'text-muted-foreground'
+          }`}>
             Temporada 2026
           </span>
           <LanguageSwitcher />
@@ -81,32 +76,27 @@ const Navbar = () => {
           {/* Mobile menu */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="text-cream-dark hover:text-cream">
+              <Button variant="ghost" size="icon" className={isHome ? 'text-foreground/70 hover:text-foreground' : ''}>
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 bg-background border-border">
-              <SheetTitle className="flex items-center gap-3">
-                <span className="crest crest-sm" aria-hidden />
-                <span className="font-display text-lg font-semibold">Gastronòmic Golf</span>
+              <SheetTitle className="flex items-center gap-2">
+                <img src={logo} alt="Gastronòmic Golf" className="h-8 w-auto" />
               </SheetTitle>
-              <nav className="mt-8 flex flex-col gap-1">
+              <nav className="mt-8 flex flex-col gap-0.5">
                 {navItems.map((item) => {
-                  const isActive =
-                    item.path === '/'
-                      ? location.pathname === '/'
-                      : location.pathname.startsWith(item.path);
+                  const isActive = location.pathname === item.path;
                   return (
                     <Link
                       key={item.key}
                       to={item.path}
                       onClick={() => setOpen(false)}
-                      className={`px-4 py-3 text-xs uppercase transition-colors ${
+                      className={`px-4 py-3 text-xs font-body font-medium uppercase tracking-[0.15em] transition-colors ${
                         isActive
                           ? 'text-accent border-l-2 border-accent'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
-                      style={{ letterSpacing: '0.15em' }}
                     >
                       {t(`nav.${item.key}`)}
                     </Link>
