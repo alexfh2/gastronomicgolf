@@ -384,24 +384,35 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-3 pb-3 bg-secondary/20">
-                        <div className="flex gap-4 mb-2 text-xs flex-wrap text-foreground">
-                          <button
-                            type="button"
-                            onClick={() => setScratchMode((m) => ({ ...m, [r.id]: false }))}
-                            className={`transition-colors ${!scratchMode[r.id] ? 'text-accent font-semibold' : 'text-muted-foreground hover:text-foreground'} cursor-pointer`}
-                            aria-pressed={!scratchMode[r.id]}
-                          >
-                            Stb: <strong className={!scratchMode[r.id] ? 'text-accent' : 'text-foreground'}>{r.stableford_points ?? '—'}</strong>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setScratchMode((m) => ({ ...m, [r.id]: true }))}
-                            className={`transition-colors ${scratchMode[r.id] ? 'text-accent font-semibold' : 'text-muted-foreground hover:text-foreground'} cursor-pointer`}
-                            aria-pressed={!!scratchMode[r.id]}
-                          >
-                            Scratch Stb: <strong className={scratchMode[r.id] ? 'text-accent' : 'text-foreground'}>{scratchStableford ?? '—'}</strong>
-                          </button>
-                          <span className="text-muted-foreground">
+                        <div className="flex items-center gap-3 mb-3 text-xs flex-wrap">
+                          <div className="inline-flex rounded-md border border-accent/30 overflow-hidden shadow-sm" role="group" aria-label="Modo de puntuación">
+                            <button
+                              type="button"
+                              onClick={() => setScratchMode((m) => ({ ...m, [r.id]: false }))}
+                              className={`px-3 py-1.5 text-xs font-medium transition-all ${
+                                !scratchMode[r.id]
+                                  ? 'bg-accent text-accent-foreground shadow-inner'
+                                  : 'bg-card text-muted-foreground hover:bg-accent/10 hover:text-foreground'
+                              }`}
+                              aria-pressed={!scratchMode[r.id]}
+                            >
+                              Amb HCP <strong className="ml-1 font-mono">{r.stableford_points ?? '—'}</strong>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setScratchMode((m) => ({ ...m, [r.id]: true }))}
+                              className={`px-3 py-1.5 text-xs font-medium transition-all border-l border-accent/30 ${
+                                scratchMode[r.id]
+                                  ? 'bg-accent text-accent-foreground shadow-inner'
+                                  : 'bg-card text-muted-foreground hover:bg-accent/10 hover:text-foreground'
+                              }`}
+                              aria-pressed={!!scratchMode[r.id]}
+                            >
+                              Scratch <strong className="ml-1 font-mono">{scratchStableford ?? '—'}</strong>
+                            </button>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground italic">Clica per alternar</span>
+                          <span className="text-muted-foreground ml-auto">
                             HCP: <strong className="text-foreground">{r.handicap_at_round ?? '—'}</strong>{handicapPlay != null ? ` (HPU: ${handicapPlay})` : ''}
                           </span>
                         </div>
