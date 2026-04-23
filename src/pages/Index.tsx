@@ -227,6 +227,12 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <PlayerProfileDialog
+        playerId={selectedPlayerId}
+        open={!!selectedPlayerId}
+        onOpenChange={(open) => !open && setSelectedPlayerId(null)}
+      />
     </div>
   );
 };
