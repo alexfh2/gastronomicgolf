@@ -4,9 +4,22 @@ import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { useQuery } from '@tanstack/react-query';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown, BarChart3 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import iconTrophy from '@/assets/icons/trophy.png';
+import iconBars from '@/assets/icons/bars.png';
+import iconLaurel from '@/assets/icons/laurel.png';
+import iconRankings from '@/assets/icons/rankings.png';
+import iconBirdie from '@/assets/icons/birdie.png';
+import iconHoleInOne from '@/assets/icons/hole-in-one.png';
+import iconBogey1 from '@/assets/icons/bogey-plus1.png';
+import iconBogey2 from '@/assets/icons/bogey-plus2.png';
+import iconPin from '@/assets/icons/pin.png';
+
+const StatIcon = ({ src, alt }: { src: string; alt: string }) => (
+  <img src={src} alt={alt} className="h-6 w-6 object-contain shrink-0" loading="lazy" />
+);
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
