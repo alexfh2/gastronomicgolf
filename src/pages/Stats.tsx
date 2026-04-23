@@ -354,11 +354,14 @@ const Stats = () => {
 
               return (
                 <Collapsible key={card.label} open={isOpen} onOpenChange={() => hasLeaderboard && toggleCard(idx)}>
-                  <div className={cn('border border-border/50 bg-card/30 transition-all', hasLeaderboard && 'cursor-pointer hover:bg-muted/10')}>
+                  <div className={cn('border border-border/50 bg-card/30 transition-all overflow-hidden', hasLeaderboard && 'cursor-pointer hover:bg-muted/10')}>
                     <CollapsibleTrigger asChild disabled={!hasLeaderboard}>
                       <button className="w-full text-left">
-                        <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
-                          <card.icon className="h-4 w-4 text-accent/70" strokeWidth={1.5} />
+                        <div
+                          className="flex items-center gap-3 px-5 py-3 border-b border-border/30"
+                          style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--accent) / 0.04) 50%, hsl(var(--card) / 0.4) 100%)' }}
+                        >
+                          <card.icon className="h-4 w-4 text-accent" strokeWidth={1.5} />
                           <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">{card.label}</span>
                           {hasLeaderboard && (
                             <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
