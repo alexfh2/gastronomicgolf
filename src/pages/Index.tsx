@@ -8,7 +8,7 @@ import sponsorPamies from '@/assets/sponsors/santi-pamies.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp, Crown, Medal, Award } from 'lucide-react';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
