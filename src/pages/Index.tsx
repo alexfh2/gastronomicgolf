@@ -281,4 +281,93 @@ function StatCard({ label, value, sub, icon }: { label: string; value: string | 
   );
 }
 
+function RankingRow({
+  position,
+  name,
+  handicap,
+  points,
+  rounds,
+  onClick,
+}: {
+  position: number;
+  name: string;
+  handicap: number | null;
+  points: number;
+  rounds: number;
+  onClick: () => void;
+}) {
+  const podium: Record<number, { color: string; Icon: typeof Crown }> = {
+    1: { color: '45 90% 55%', Icon: Crown },
+    2: { color: '0 0% 75%', Icon: Medal },
+    3: { color: '25 60% 50%', Icon: Award },
+  };
+  const isPodium = position <= 3;
+  const p = podium[position];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center py-3.5 border-b border-border/15 hover:bg-muted/15 transition-all overflow-hidden group"
+      style={
+        isPodium
+          ? {
+              background: `linear-gradient(90deg, hsl(${p.color} / 0.18) 0%, hsl(${p.color} / 0.06) 35%, transparent 75%)`,
+            }
+          : undefined
+      }
+    >
+      {isPodium && (
+        <span
+          aria-hidden
+          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r"
+          style={{ background: `linear-gradient(180deg, hsl(${p.color}) 0%, hsl(${p.color} / 0.3) 100%)` }}
+        />
+      )}
+
+      <div className="flex items-center justify-center">
+        {isPodium ? (
+          <span
+            className="inline-flex items-center justify-center h-7 w-7 rounded-full font-body font-bold text-[12px]"
+            style={{
+              background: `linear-gradient(135deg, hsl(${p.color} / 0.95) 0%, hsl(${p.color} / 0.55) 100%)`,
+              color: 'hsl(220 14% 12%)',
+              boxShadow: `0 2px 8px -2px hsl(${p.color} / 0.55)`,
+            }}
+          >
+            {position}
+          </span>
+        ) : (
+          <span className="text-sm font-body font-medium text-muted-foreground/70 w-7 text-center">{position}</span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2.5 min-w-0">
+        {isPodium && p && (
+          <p.Icon className="h-4 w-4 shrink-0" style={{ color: `hsl(${p.color})` }} strokeWidth={2} />
+        )}
+        <span className="text-sm sm:text-[15px] font-body font-medium text-foreground truncate">
+          {name}
+          {handicap != null && (
+            <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+              ({Number(handicap).toFixed(1)})
+            </span>
+          )}
+        </span>
+      </div>
+
+      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">{rounds}</span>
+      <span
+        className={`text-base sm:text-lg text-right font-mono font-bold ${isPodium ? '' : 'text-foreground'}`}
+        style={isPodium ? { color: `hsl(${p.color})` } : undefined}
+      >
+        {points.toLocaleString()}
+      </span>
+      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">
+        {rounds > 0 ? (points / rounds).toFixed(1) : '—'}
+      </span>
+    </button>
+  );
+}
+
 export default Index;
