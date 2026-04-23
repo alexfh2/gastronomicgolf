@@ -1,13 +1,16 @@
 import heroBg from '@/assets/hero-editorial.png';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Index = () => {
   const { t, i18n } = useTranslation();
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const { data: rounds } = useQuery({
     queryKey: ['public-rounds-home'],
