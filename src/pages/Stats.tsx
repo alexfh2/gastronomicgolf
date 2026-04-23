@@ -50,11 +50,14 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
 
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
-      <div className="border border-border/50 bg-card/30 transition-all">
+      <div className="border border-border/50 bg-card/30 transition-all overflow-hidden">
         <CollapsibleTrigger asChild>
           <button className="w-full text-left">
-            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
-              <Crown className="h-4 w-4 text-accent/70" strokeWidth={1.5} />
+            <div
+              className="flex items-center gap-3 px-5 py-3 border-b border-border/30"
+              style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.14) 0%, hsl(var(--accent) / 0.06) 45%, hsl(var(--card) / 0.4) 100%)' }}
+            >
+              <Crown className="h-4 w-4 text-accent" strokeWidth={1.5} />
               <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">Líders per categoria</span>
               <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
             </div>
@@ -77,9 +80,12 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                     onClick={() => setActiveTab(cat.key)}
                     className={`px-3 py-1.5 text-[10px] font-body font-medium tracking-[0.15em] uppercase transition-all border ${
                       activeTab === cat.key
-                        ? 'border-accent/40 bg-accent/10 text-accent'
-                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                        ? 'border-accent/50 text-accent'
+                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/30 hover:text-foreground'
                     }`}
+                    style={activeTab === cat.key ? {
+                      background: 'linear-gradient(90deg, hsl(var(--accent) / 0.18) 0%, hsl(var(--accent) / 0.06) 100%)',
+                    } : undefined}
                   >
                     {cat.label}
                   </button>
@@ -348,11 +354,14 @@ const Stats = () => {
 
               return (
                 <Collapsible key={card.label} open={isOpen} onOpenChange={() => hasLeaderboard && toggleCard(idx)}>
-                  <div className={cn('border border-border/50 bg-card/30 transition-all', hasLeaderboard && 'cursor-pointer hover:bg-muted/10')}>
+                  <div className={cn('border border-border/50 bg-card/30 transition-all overflow-hidden', hasLeaderboard && 'cursor-pointer hover:bg-muted/10')}>
                     <CollapsibleTrigger asChild disabled={!hasLeaderboard}>
                       <button className="w-full text-left">
-                        <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30">
-                          <card.icon className="h-4 w-4 text-accent/70" strokeWidth={1.5} />
+                        <div
+                          className="flex items-center gap-3 px-5 py-3 border-b border-border/30"
+                          style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--accent) / 0.04) 50%, hsl(var(--card) / 0.4) 100%)' }}
+                        >
+                          <card.icon className="h-4 w-4 text-accent" strokeWidth={1.5} />
                           <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">{card.label}</span>
                           {hasLeaderboard && (
                             <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
