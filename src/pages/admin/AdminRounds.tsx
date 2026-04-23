@@ -529,69 +529,154 @@ const AdminRounds = () => {
       ) : (
         <div className="space-y-3">
           {rounds.map((round) => (
-            <Card key={round.id} className="border-border/60">
-              <CardHeader className="flex flex-row items-center justify-between py-4">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
-                    {round.is_master && <Star className="h-4 w-4 text-accent fill-accent" />}
-                    <Badge variant="outline" className="text-xs">J{round.round_number}</Badge>
-                    {round.name}
-                  </CardTitle>
-                  <Badge className={statusColors[round.status]}>
-                    {statusLabels[round.status]}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{round.date}</span>
-                  {round.end_date && round.end_date !== round.date && (
-                    <span className="text-xs text-muted-foreground">→ {round.end_date}</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1">
-                  {/* Publish / Unpublish */}
-                  {round.status !== 'published' ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => publishMutation.mutate(round.id)}
-                      title="Publicar"
-                      className="text-emerald-600 hover:text-emerald-700"
-                      disabled={publishMutation.isPending}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => unpublishMutation.mutate(round.id)}
-                      title="Despublicar"
-                      className="text-muted-foreground hover:text-foreground text-xs"
-                      disabled={unpublishMutation.isPending}
-                    >
-                      Despublicar
-                    </Button>
-                  )}
-                  {/* Generate news - only when published */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setNewsRound(round)}
-                    title="Generar notícia"
-                    disabled={round.status !== 'published'}
-                    className={round.status === 'published' ? 'text-primary hover:text-primary' : ''}
-                  >
-                    <Newspaper className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setResultsRound(round)} title="Importar resultats">
-                    <FileSpreadsheet className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(round)} title="Editar">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setDeletingRound(round)} title="Eliminar" className="text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
+            <Card key={round.id} className="border-border/60 overflow-hidden">
+              <Collapsible>
+                <CollapsibleTrigger className="w-full text-left group">
+                  <CardHeader className="flex flex-row items-center justify-between py-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                      <CardTitle className="text-base font-semibold flex items-center gap-2">
+                        {round.is_master && <Star className="h-4 w-4 text-accent fill-accent" />}
+                        <Badge variant="outline" className="text-xs">J{round.round_number}</Badge>
+                        {round.name}
+                      </CardTitle>
+                      <Badge className={statusColors[round.status]}>
+                        {statusLabels[round.status]}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{round.date}</span>
+                      {round.end_date && round.end_date !== round.date && (
+                        <span className="text-xs text-muted-foreground">→ {round.end_date}</span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground hidden sm:inline-block mr-2">
+                      Clica per gestionar
+                    </span>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="border-t border-border/40 bg-muted/10 pt-5 pb-5 space-y-4">
+                    <p className="text-xs text-muted-foreground">
+                      Selecciona què vols fer amb aquesta jornada. Cada acció obre una finestra amb instruccions detallades.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* Fill course data */}
+                      <button
+                        onClick={() => openEdit(round)}
+                        className="text-left p-4 rounded-lg border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary/20">
+                            <Flag className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm mb-1">Omplir dades del camp</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">
+                              Edita el nom, data, patrocinador i el par + handicap de cada forat (pots pujar foto/PDF de la tarjeta).
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Fill results */}
+                      <button
+                        onClick={() => setResultsRound(round)}
+                        className="text-left p-4 rounded-lg border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary/20">
+                            <FileSpreadsheet className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm mb-1">Omplir resultats</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">
+                              Importa els resultats des d'un Excel, GolfDirecto o Teeone, o introdueix-los manualment.
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Generate news */}
+                      <button
+                        onClick={() => round.status === 'published' && setNewsRound(round)}
+                        disabled={round.status !== 'published'}
+                        className="text-left p-4 rounded-lg border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:bg-card"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary/20 group-disabled:bg-muted group-disabled:text-muted-foreground">
+                            <Newspaper className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm mb-1">Generar notícia amb IA</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">
+                              {round.status === 'published'
+                                ? 'Crea automàticament un text en català i castellà destacant els guanyadors.'
+                                : 'Disponible només quan la jornada estigui publicada.'}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Publish / Unpublish */}
+                      {round.status !== 'published' ? (
+                        <button
+                          onClick={() => publishMutation.mutate(round.id)}
+                          disabled={publishMutation.isPending}
+                          className="text-left p-4 rounded-lg border border-accent/40 bg-accent/5 hover:border-accent hover:bg-accent/10 transition-all group disabled:opacity-50"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-md bg-accent/20 text-accent-foreground group-hover:bg-accent/30">
+                              <Send className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm mb-1">Publicar jornada</div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">
+                                Fa visible la jornada al públic. Un cop publicada podràs generar la notícia.
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => unpublishMutation.mutate(round.id)}
+                          disabled={unpublishMutation.isPending}
+                          className="text-left p-4 rounded-lg border border-border bg-card hover:border-muted-foreground/40 transition-all group disabled:opacity-50"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-md bg-muted text-muted-foreground">
+                              <Send className="h-5 w-5 rotate-180" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm mb-1">Despublicar jornada</div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">
+                                Torna la jornada a esborrany. Deixarà d'estar visible al públic.
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Delete */}
+                      <button
+                        onClick={() => setDeletingRound(round)}
+                        className="text-left p-4 rounded-lg border border-destructive/30 bg-destructive/5 hover:border-destructive hover:bg-destructive/10 transition-all group md:col-span-2"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-md bg-destructive/15 text-destructive group-hover:bg-destructive/25">
+                            <Trash2 className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm mb-1 text-destructive">Eliminar jornada</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">
+                              Esborra la jornada i tots els seus resultats, fotos i notícies. Aquesta acció no es pot desfer.
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
             </Card>
           ))}
         </div>
