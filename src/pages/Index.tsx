@@ -98,7 +98,7 @@ const Index = () => {
         </div>
         {/* Gradients — keep top transparent so navbar blends */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/50 to-transparent" />
 
         {/* Hero text — vertically centered, balanced spacing */}
         <div className="relative z-10 container py-10">
@@ -115,34 +115,39 @@ const Index = () => {
             Classificació i seguiment del circuit
           </p>
         </div>
-      </section>
 
-      {/* ——— SPONSORS ——— */}
-      <section className="container pt-8 pb-2">
-        <div className="flex items-center gap-4 mb-5">
-          <div className="h-px flex-1 bg-border/40" />
-          <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
-            Patrocinadors
-          </h2>
-          <div className="h-px flex-1 bg-border/40" />
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-6 gap-y-5 sm:gap-x-10 items-center justify-items-center px-2">
-          {[
-            { src: sponsorBonarea, alt: 'bonÀrea' },
-            { src: sponsorPruna, alt: 'Pruna Car Go - Omoda Jaecoo' },
-            { src: sponsorTancat, alt: 'Tancat de Codorniu' },
-            { src: sponsorOptimotor, alt: 'Grup Optimotor' },
-            { src: sponsorEscampa, alt: 'Escampa Hotels' },
-            { src: sponsorPamies, alt: 'Santi Pàmies Joiers' },
-          ].map((s) => (
-            <img
-              key={s.alt}
-              src={s.src}
-              alt={s.alt}
-              loading="lazy"
-              className="max-h-9 sm:max-h-11 w-auto object-contain opacity-50 hover:opacity-90 transition-opacity duration-500 dark:invert"
-            />
-          ))}
+        {/* ——— SPONSORS overlay (positioned over the lower part of the hero) ——— */}
+        <div className="absolute inset-x-0 bottom-0 z-10">
+          {/* translucent panel that blends with the image */}
+          <div className="bg-gradient-to-t from-background/85 via-background/55 to-transparent backdrop-blur-[2px] pt-10 pb-5">
+            <div className="container">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="h-px flex-1 bg-border/30" />
+                <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
+                  Patrocinadors
+                </h2>
+                <div className="h-px flex-1 bg-border/30" />
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-6 gap-y-5 sm:gap-x-10 items-center justify-items-center px-2">
+                {[
+                  { src: sponsorBonarea, alt: 'bonÀrea' },
+                  { src: sponsorPruna, alt: 'Pruna Car Go - Omoda Jaecoo' },
+                  { src: sponsorTancat, alt: 'Tancat de Codorniu' },
+                  { src: sponsorOptimotor, alt: 'Grup Optimotor' },
+                  { src: sponsorEscampa, alt: 'Escampa Hotels' },
+                  { src: sponsorPamies, alt: 'Santi Pàmies Joiers' },
+                ].map((s) => (
+                  <img
+                    key={s.alt}
+                    src={s.src}
+                    alt={s.alt}
+                    loading="lazy"
+                    className="max-h-9 sm:max-h-11 w-auto object-contain opacity-55 hover:opacity-95 transition-opacity duration-500 dark:invert"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
