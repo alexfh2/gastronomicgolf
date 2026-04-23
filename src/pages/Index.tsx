@@ -8,7 +8,7 @@ import sponsorPamies from '@/assets/sponsors/santi-pamies.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp, Crown, Medal, Award } from 'lucide-react';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -304,13 +304,9 @@ function RankingRow({
   rounds: number;
   onClick: () => void;
 }) {
-  const podium: Record<number, { color: string; Icon: typeof Crown }> = {
-    1: { color: '45 90% 55%', Icon: Crown },
-    2: { color: '0 0% 75%', Icon: Medal },
-    3: { color: '25 60% 50%', Icon: Award },
-  };
-  const isPodium = position <= 3;
-  const p = podium[position];
+  const isTop3 = position <= 3;
+  // Use accent (green) intensity instead of medal colours.
+  const accentAlpha = position === 1 ? 0.22 : position === 2 ? 0.14 : position === 3 ? 0.08 : 0;
 
   return (
     <button
@@ -318,43 +314,33 @@ function RankingRow({
       onClick={onClick}
       className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center py-3.5 border-b border-border/15 hover:bg-muted/15 transition-all overflow-hidden group"
       style={
-        isPodium
+        isTop3
           ? {
-              background: `linear-gradient(90deg, hsl(${p.color} / 0.18) 0%, hsl(${p.color} / 0.06) 35%, transparent 75%)`,
+              background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 35%, transparent 75%)`,
             }
           : undefined
       }
     >
-      {isPodium && (
+      {isTop3 && (
         <span
           aria-hidden
-          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r"
-          style={{ background: `linear-gradient(180deg, hsl(${p.color}) 0%, hsl(${p.color} / 0.3) 100%)` }}
+          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
+          style={{ background: `linear-gradient(180deg, hsl(var(--accent) / ${Math.min(1, accentAlpha * 4)}) 0%, hsl(var(--accent) / ${accentAlpha}) 100%)` }}
         />
       )}
 
       <div className="flex items-center justify-center">
-        {isPodium ? (
-          <span
-            className="inline-flex items-center justify-center h-7 w-7 rounded-full font-body font-bold text-[12px]"
-            style={{
-              background: `linear-gradient(135deg, hsl(${p.color} / 0.95) 0%, hsl(${p.color} / 0.55) 100%)`,
-              color: 'hsl(220 14% 12%)',
-              boxShadow: `0 2px 8px -2px hsl(${p.color} / 0.55)`,
-            }}
-          >
-            {position}
-          </span>
-        ) : (
-          <span className="text-sm font-body font-medium text-muted-foreground/70 w-7 text-center">{position}</span>
-        )}
+        <span
+          className={`text-sm font-body font-semibold w-7 text-center ${
+            isTop3 ? 'text-accent' : 'text-muted-foreground/70'
+          }`}
+        >
+          {position}
+        </span>
       </div>
 
       <div className="flex items-center gap-2.5 min-w-0">
-        {isPodium && p && (
-          <p.Icon className="h-4 w-4 shrink-0" style={{ color: `hsl(${p.color})` }} strokeWidth={2} />
-        )}
-        <span className="text-sm sm:text-[15px] font-body font-medium text-foreground truncate">
+        <span className={`text-sm sm:text-[15px] font-body font-medium truncate ${isTop3 ? 'text-foreground' : 'text-foreground/90'}`}>
           {name}
           {handicap != null && (
             <span className="ml-1.5 text-xs text-muted-foreground font-normal">
@@ -366,8 +352,7 @@ function RankingRow({
 
       <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">{rounds}</span>
       <span
-        className={`text-base sm:text-lg text-right font-mono font-bold ${isPodium ? '' : 'text-foreground'}`}
-        style={isPodium ? { color: `hsl(${p.color})` } : undefined}
+        className={`text-base sm:text-lg text-right font-mono font-bold ${isTop3 ? 'text-accent' : 'text-foreground'}`}
       >
         {points.toLocaleString()}
       </span>
