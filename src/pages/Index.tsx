@@ -1,5 +1,5 @@
 import heroBg from '@/assets/hero-editorial.png';
-import sponsors from '@/assets/sponsors-row-white.png';
+import sponsors from '@/assets/sponsors-white.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
