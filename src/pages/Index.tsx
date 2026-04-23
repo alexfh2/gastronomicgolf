@@ -1,5 +1,4 @@
 import heroBg from '@/assets/hero-editorial.png';
-import sponsors from '@/assets/sponsors-row.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
@@ -89,11 +88,6 @@ const Index = () => {
           <p className="font-body text-sm text-muted-foreground/70 tracking-wide">
             Classificació i seguiment del circuit
           </p>
-
-          {/* Sponsors bar */}
-          <div className="mt-8 max-w-3xl">
-            <img src={sponsors} alt="Patrocinadors" className="w-full mix-blend-screen opacity-80" />
-          </div>
         </div>
       </section>
 
