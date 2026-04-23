@@ -80,9 +80,12 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                     onClick={() => setActiveTab(cat.key)}
                     className={`px-3 py-1.5 text-[10px] font-body font-medium tracking-[0.15em] uppercase transition-all border ${
                       activeTab === cat.key
-                        ? 'border-accent/40 bg-accent/10 text-accent'
-                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                        ? 'border-accent/50 text-accent'
+                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/30 hover:text-foreground'
                     }`}
+                    style={activeTab === cat.key ? {
+                      background: 'linear-gradient(90deg, hsl(var(--accent) / 0.18) 0%, hsl(var(--accent) / 0.06) 100%)',
+                    } : undefined}
                   >
                     {cat.label}
                   </button>
