@@ -36,14 +36,14 @@ const calcStablefordPoints = (
   return 0;
 };
 
-/** Color scale for Stableford points */
+/** Color scale for Stableford points - bright & prominent for dark bg */
 const getStbStyle = (pts: number | null): string => {
   if (pts == null) return 'text-muted-foreground';
-  if (pts >= 4) return 'bg-primary/20 text-primary font-bold';
-  if (pts === 3) return 'bg-primary/10 text-primary font-semibold';
-  if (pts === 2) return 'bg-accent/15 text-accent-foreground font-medium';
-  if (pts === 1) return 'bg-muted text-muted-foreground';
-  return 'bg-destructive/10 text-destructive font-medium';
+  if (pts >= 4) return 'bg-accent text-accent-foreground font-bold ring-2 ring-accent/40 shadow-md';
+  if (pts === 3) return 'bg-accent/80 text-accent-foreground font-bold shadow-sm';
+  if (pts === 2) return 'bg-cream text-primary font-bold';
+  if (pts === 1) return 'bg-cream/40 text-cream font-semibold';
+  return 'bg-destructive/30 text-destructive-foreground font-semibold';
 };
 
 const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, playerHandicap }) => {
@@ -82,14 +82,14 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   };
 
   const renderScore = (score: number, holePar: number) => {
-    if (score == null || score === 0) return <span className="text-muted-foreground font-semibold">—</span>;
+    if (score == null || score === 0) return <span className="text-muted-foreground/60 font-semibold">—</span>;
 
     const diff = score - holePar;
 
     if (diff <= -2) {
       return (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary text-primary font-bold text-xs">
-          <span className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-full border border-primary">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-cream/60 text-cream/80 font-semibold text-xs">
+          <span className="inline-flex items-center justify-center w-5.5 h-5.5 rounded-full border border-cream/60">
             {score}
           </span>
         </span>
@@ -98,7 +98,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff === -1) {
       return (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary text-primary font-bold text-xs">
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-cream/60 text-cream/80 font-semibold text-xs">
           {score}
         </span>
       );
@@ -106,7 +106,7 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff === 0) {
       return (
-        <span className="inline-flex items-center justify-center w-8 h-8 border-2 border-foreground/60 text-foreground font-semibold text-xs">
+        <span className="inline-flex items-center justify-center w-8 h-8 border-2 border-muted-foreground/40 text-muted-foreground font-medium text-xs">
           {score}
         </span>
       );
@@ -114,14 +114,14 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
 
     if (diff === 1) {
       return (
-        <span className="inline-flex items-center justify-center w-8 h-8 bg-muted border border-border text-foreground font-semibold text-xs">
+        <span className="inline-flex items-center justify-center w-8 h-8 bg-muted/30 border border-border/40 text-muted-foreground font-medium text-xs">
           {score}
         </span>
       );
     }
 
     return (
-      <span className="inline-flex items-center justify-center w-8 h-8 bg-destructive/15 border border-destructive/30 text-destructive font-bold text-xs">
+      <span className="inline-flex items-center justify-center w-8 h-8 bg-destructive/15 border border-destructive/30 text-destructive/80 font-semibold text-xs">
         {score}
       </span>
     );
@@ -224,15 +224,15 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
         </tr>
         {halfStb && (
           <tr>
-            <td className={`${resultLabelClass} font-semibold text-primary`}>Stb</td>
+            <td className={`${resultLabelClass} font-bold text-accent uppercase tracking-wider bg-secondary/30`}>Stb</td>
             {halfStb.map((pts, i) => (
-              <td key={i} className={`${resultCellClass} bg-background`}>
-                <span className={`inline-flex items-center justify-center w-7 h-7 rounded text-[11px] ${getStbStyle(pts)}`}>
+              <td key={i} className={`${resultCellClass} bg-secondary/20`}>
+                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-md text-sm ${getStbStyle(pts)}`}>
                   {pts != null ? pts : '—'}
                 </span>
               </td>
             ))}
-            <td className={`${resultCellClass} ${totalCellClass} text-primary text-sm bg-muted/30`}>
+            <td className={`${resultCellClass} ${totalCellClass} text-accent-foreground bg-accent text-base font-bold`}>
               {sumStb(halfStb)}
             </td>
           </tr>
