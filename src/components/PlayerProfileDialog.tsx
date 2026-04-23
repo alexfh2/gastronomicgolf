@@ -195,7 +195,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
         </DialogHeader>
 
         {/* Header con gradiente sutil */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 px-6 py-5 mx-6 rounded-lg flex items-center gap-4 border border-accent/20">
+        <div className="from-primary to-primary/80 px-6 py-5 mx-6 rounded-lg flex items-center gap-4 border border-accent/20 bg-[sidebar-accent-foreground] bg-border">
           <Avatar className="h-14 w-14 border-2 border-accent/30">
             {player.photo_url && <AvatarImage src={player.photo_url} alt={player.name} />}
             <AvatarFallback className="bg-accent/20 text-accent font-semibold">
