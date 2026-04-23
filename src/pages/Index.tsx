@@ -1,4 +1,10 @@
 import heroBg from '@/assets/hero-editorial.png';
+import sponsorBonarea from '@/assets/sponsors/bonarea.png';
+import sponsorPruna from '@/assets/sponsors/pruna-car-go.png';
+import sponsorTancat from '@/assets/sponsors/tancat-codorniu.png';
+import sponsorOptimotor from '@/assets/sponsors/grup-optimotor.webp';
+import sponsorEscampa from '@/assets/sponsors/escampa-hotels.png';
+import sponsorPamies from '@/assets/sponsors/santi-pamies.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
