@@ -186,28 +186,28 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 gap-0">
-        <DialogHeader className="px-6 pt-5 pb-3">
-          <DialogTitle className="flex items-center gap-2 font-display">
-            <User className="h-5 w-5 text-primary" />
-            Fitxa del Jugador
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 gap-0 bg-card border-border">
+        <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/50">
+          <DialogTitle className="flex items-center gap-2 font-display text-foreground">
+            <User className="h-5 w-5 text-accent" />
+            {t('players.profile')}
           </DialogTitle>
         </DialogHeader>
 
-        {/* Solid green header with player name in white */}
-        <div className="bg-primary px-6 py-5 mx-6 rounded-lg flex items-center gap-4">
-          <Avatar className="h-14 w-14 border-2 border-primary-foreground/20">
+        {/* Header con gradiente sutil */}
+        <div className="bg-gradient-to-r from-primary to-primary/80 px-6 py-5 mx-6 rounded-lg flex items-center gap-4 border border-accent/20">
+          <Avatar className="h-14 w-14 border-2 border-accent/30">
             {player.photo_url && <AvatarImage src={player.photo_url} alt={player.name} />}
-            <AvatarFallback className="bg-primary-foreground/10 text-primary-foreground font-semibold">
+            <AvatarFallback className="bg-accent/20 text-accent font-semibold">
               {initials(player.name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display font-bold text-lg leading-tight text-primary-foreground truncate">
+            <h3 className="font-display font-bold text-lg leading-tight text-cream truncate">
               {player.name}
             </h3>
-            <p className="text-xs text-primary-foreground/70 mt-1">
-              {results?.length || 0} {(results?.length || 0) === 1 ? 'prova disputada' : 'proves disputades'}
+            <p className="text-xs text-cream-dark mt-1">
+              {results?.length || 0} {(results?.length || 0) === 1 ? t('players.singleRound') : t('players.multipleRounds')}
               {player.current_handicap != null && <> · Hcp {player.current_handicap}</>}
               {player.club && <> · {player.club}</>}
             </p>
@@ -218,17 +218,17 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
           {/* Category positions */}
           {mainCategory && (
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">Posició al rànquing</h4>
+              <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('rankings.position')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Main category */}
-                <div className="border border-border/50 rounded-lg p-4 bg-card">
+                <div className="border border-border/50 rounded-lg p-4 bg-secondary/30">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-medium">
                     {mainCategory.label}
                   </div>
                   <div className="flex items-end justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Trophy className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                      <span className="font-display font-extrabold text-2xl text-primary tabular-nums">
+                      <Trophy className="h-5 w-5 text-accent" strokeWidth={1.5} />
+                      <span className="font-display font-extrabold text-2xl text-foreground tabular-nums">
                         {mainCategory.pos?.pos ?? '—'}
                       </span>
                       <span className="text-xs text-muted-foreground mb-0.5">
@@ -236,22 +236,22 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                       </span>
                     </div>
                     <div className="text-right">
-                      <div className="font-mono font-bold text-base">{mainCategory.pos?.total ?? '—'}</div>
-                      <div className="text-[10px] text-muted-foreground leading-none">punts</div>
+                      <div className="font-mono font-bold text-base text-foreground">{mainCategory.pos?.total ?? '—'}</div>
+                      <div className="text-[10px] text-muted-foreground leading-none">{t('common.points')}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Subcategories */}
                 {subCategories.map((sub) => (
-                  <div key={sub.label} className="border border-border/50 rounded-lg p-4 bg-card">
+                  <div key={sub.label} className="border border-border/50 rounded-lg p-4 bg-secondary/30">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-medium">
                       {sub.label}
                     </div>
                     <div className="flex items-end justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-accent" strokeWidth={1.5} />
-                        <span className="font-display font-extrabold text-2xl text-accent tabular-nums">
+                        <span className="font-display font-extrabold text-2xl text-foreground tabular-nums">
                           {sub.pos?.pos ?? '—'}
                         </span>
                         <span className="text-xs text-muted-foreground mb-0.5">
@@ -259,8 +259,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                         </span>
                       </div>
                       <div className="text-right">
-                        <div className="font-mono font-bold text-base">{sub.pos?.total ?? '—'}</div>
-                        <div className="text-[10px] text-muted-foreground leading-none">punts</div>
+                        <div className="font-mono font-bold text-base text-foreground">{sub.pos?.total ?? '—'}</div>
+                        <div className="text-[10px] text-muted-foreground leading-none">{t('common.points')}</div>
                       </div>
                     </div>
                   </div>
@@ -301,19 +301,19 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
             return (
               <div>
-                <h4 className="font-display font-semibold text-sm mb-3">Evolució HCP</h4>
-                <div className="bg-muted/30 rounded-lg p-3 border border-border/40 overflow-x-auto">
-                  <svg width={chartW} height={chartH + 20} className="text-primary">
+                <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('players.hcpEvolution')}</h4>
+                <div className="bg-secondary/20 rounded-lg p-3 border border-border/40 overflow-x-auto">
+                  <svg width={chartW} height={chartH + 20} className="text-accent">
                     <polyline
                       points={polyline}
                       fill="none"
-                      stroke="hsl(var(--primary))"
+                      stroke="hsl(var(--accent))"
                       strokeWidth="2"
                       strokeLinejoin="round"
                     />
                     {points.map((p, i) => (
                       <g key={i}>
-                        <circle cx={p.x} cy={p.y} r="4" fill="hsl(var(--primary))" />
+                        <circle cx={p.x} cy={p.y} r="4" fill="hsl(var(--accent))" />
                         <text x={p.x} y={p.y - 8} textAnchor="middle" className="fill-foreground text-[10px] font-mono font-semibold">
                           {p.hcp}
                         </text>
@@ -331,12 +331,12 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
           {/* Statistics */}
           {n > 0 && (
             <div>
-              <h4 className="font-display font-semibold text-sm mb-3">Estadístiques</h4>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 bg-muted/30 rounded-lg p-3 border border-border/40">
+              <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('stats.title')}</h4>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 bg-secondary/20 rounded-lg p-3 border border-border/40">
                 {stats.map((s) => (
                   <div key={s.label} className="text-center">
-                    <s.icon className="h-4 w-4 mx-auto text-muted-foreground/60 mb-1" strokeWidth={1.5} />
-                    <div className="font-display font-extrabold text-base text-primary tabular-nums">{s.value}</div>
+                    <s.icon className="h-4 w-4 mx-auto text-accent/70 mb-1" strokeWidth={1.5} />
+                    <div className="font-display font-extrabold text-base text-foreground tabular-nums">{s.value}</div>
                     <div className="text-[10px] text-muted-foreground leading-tight font-bold">{s.label}</div>
                   </div>
                 ))}
@@ -346,7 +346,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
           {/* Rounds list */}
           <div>
-            <h4 className="font-display font-semibold text-sm mb-3">Proves disputades</h4>
+            <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('players.roundsPlayed')}</h4>
             {results && results.length > 0 ? (
               <Accordion type="multiple" value={openCards} onValueChange={setOpenCards} className="space-y-2">
                 {results.map((r) => {
@@ -357,24 +357,24 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                   const coursePar: number[] | undefined = Array.isArray(round?.course_par) ? round.course_par : undefined;
 
                   return (
-                    <AccordionItem key={r.id} value={r.id} className="border border-border/50 rounded-md overflow-hidden bg-background">
-                      <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/40">
+                    <AccordionItem key={r.id} value={r.id} className="border border-border/50 rounded-md overflow-hidden bg-card">
+                      <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-secondary/50 text-foreground">
                         <div className="flex items-center gap-2 text-left flex-1 min-w-0">
-                          <Badge variant="outline" className="text-[10px] font-mono shrink-0 px-1.5 py-0">J{round?.round_number}</Badge>
-                          <span className="font-medium text-sm truncate">{round?.name}</span>
+                          <Badge variant="outline" className="text-[10px] font-mono shrink-0 px-1.5 py-0 border-accent/30">J{round?.round_number}</Badge>
+                          <span className="font-medium text-sm truncate text-foreground">{round?.name}</span>
                           {round?.is_master && <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-accent/20 text-accent border-0 shrink-0">M</Badge>}
                           <span className="text-xs text-muted-foreground ml-auto mr-2 shrink-0">
                             {round?.date ? format(new Date(round.date), 'dd MMM', { locale }) : ''}
                           </span>
-                          <span className="font-mono font-bold text-sm text-primary mr-1 shrink-0">{r.stableford_points ?? '—'}</span>
+                          <span className="font-mono font-bold text-sm text-foreground mr-1 shrink-0">{r.stableford_points ?? '—'}</span>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="px-3 pb-3">
-                        <div className="flex gap-4 mb-2 text-xs flex-wrap">
-                          <span>Stb: <strong className="text-primary">{r.stableford_points ?? '—'}</strong></span>
-                          <span className="text-muted-foreground">Scratch: <strong>{r.scratch_score ?? '—'}</strong></span>
+                      <AccordionContent className="px-3 pb-3 bg-secondary/20">
+                        <div className="flex gap-4 mb-2 text-xs flex-wrap text-foreground">
+                          <span>Stb: <strong className="text-accent">{r.stableford_points ?? '—'}</strong></span>
+                          <span className="text-muted-foreground">Scratch: <strong className="text-foreground">{r.scratch_score ?? '—'}</strong></span>
                           <span className="text-muted-foreground">
-                            HCP: {r.handicap_at_round ?? '—'}{handicapPlay != null ? ` (HPU: ${handicapPlay})` : ''}
+                            HCP: <strong className="text-foreground">{r.handicap_at_round ?? '—'}</strong>{handicapPlay != null ? ` (HPU: ${handicapPlay})` : ''}
                           </span>
                         </div>
                         {scorecard && scorecard.length > 0 ? (
@@ -387,7 +387,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                             />
                           </div>
                         ) : (
-                          <p className="text-xs text-muted-foreground">Sense targeta hoyo a hoyo</p>
+                          <p className="text-xs text-muted-foreground">{t('players.noScorecard')}</p>
                         )}
                       </AccordionContent>
                     </AccordionItem>
@@ -395,7 +395,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                 })}
               </Accordion>
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">Sense proves disputades</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t('players.noRounds')}</p>
             )}
           </div>
         </div>
