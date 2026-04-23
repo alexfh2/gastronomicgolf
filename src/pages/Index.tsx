@@ -198,13 +198,24 @@ const Index = () => {
 
 function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
   return (
-    <div className="border border-border/50 bg-card/30 p-7 flex flex-col justify-between flex-1">
-      <div className="flex items-center justify-between mb-6">
+    <div className="group relative overflow-hidden border border-border/50 p-7 flex flex-col justify-between flex-1 transition-all duration-500 hover:border-accent/30"
+      style={{
+        background:
+          'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 85% 15%, hsl(var(--accent) / 0.1), transparent 55%)',
+        boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
+      }}
+    >
+      {/* gold top accent */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
+      {/* subtle radial highlight on hover */}
+      <span aria-hidden className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+      <div className="relative flex items-center justify-between mb-6">
         <span className="font-body text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground">{label}</span>
-        <span className="text-accent/50">{icon}</span>
+        <span className="text-accent/60 transition-colors group-hover:text-accent/90">{icon}</span>
       </div>
-      <div>
-        <span className="font-display text-4xl font-semibold text-foreground">{value}</span>
+      <div className="relative">
+        <span className="font-display text-4xl font-semibold text-foreground tracking-tight">{value}</span>
         {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
       </div>
     </div>
