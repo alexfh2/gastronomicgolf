@@ -104,13 +104,21 @@ const Index = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
           {quickLinks.map((link) => (
             <Link key={link.path} to={link.path} className="group">
-              <div className="border border-border/50 bg-card/30 px-4 py-3 hover:border-accent/30 hover:bg-card/60 transition-all duration-300 flex items-center gap-3">
+              <div
+                className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+                style={{
+                  background:
+                    'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
+                  boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+                }}
+              >
+                <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <link.icon className="h-4 w-4 text-accent/70 shrink-0" strokeWidth={1.5} />
                 <div className="min-w-0">
                   <h3 className="font-body text-xs font-semibold text-foreground tracking-wide">{link.label}</h3>
                   <p className="text-[10px] text-muted-foreground leading-snug truncate">{link.desc}</p>
                 </div>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/60 transition-colors" />
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
               </div>
             </Link>
           ))}
