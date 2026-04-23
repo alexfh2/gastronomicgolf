@@ -173,10 +173,11 @@ const Index = () => {
 
               {generalRanking.length > 0 ? (
                 generalRanking.map((p, i) => (
-                  <Link
+                  <button
                     key={p.playerId}
-                    to={`/jugadors/${p.playerId}`}
-                    className={`grid grid-cols-[2rem_1fr_4rem] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-3 sm:gap-2 items-center py-4 sm:py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
+                    type="button"
+                    onClick={() => setSelectedPlayerId(p.playerId)}
+                    className={`w-full text-left grid grid-cols-[2rem_1fr_4rem] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem_5rem] gap-3 sm:gap-2 items-center py-4 sm:py-3.5 border-b border-border/20 hover:bg-muted/20 transition-colors ${
                       i < 3 ? 'bg-accent/[0.04]' : ''
                     }`}
                   >
@@ -187,7 +188,14 @@ const Index = () => {
                       <div className="h-7 w-7 sm:h-6 sm:w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
                         <Users className="h-3.5 w-3.5 sm:h-3 sm:w-3 text-muted-foreground/60" />
                       </div>
-                      <span className="text-sm font-body font-medium text-foreground truncate">{p.name}</span>
+                      <span className="text-sm font-body font-medium text-foreground truncate">
+                        {p.name}
+                        {p.handicap != null && (
+                          <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+                            ({Number(p.handicap).toFixed(1)})
+                          </span>
+                        )}
+                      </span>
                     </div>
                     <span className="hidden sm:inline text-xs text-muted-foreground text-right font-mono">{p.rounds}</span>
                     <span className={`text-base sm:text-sm text-right font-mono font-bold ${i < 3 ? 'text-accent' : 'text-foreground'}`}>
@@ -203,7 +211,7 @@ const Index = () => {
                         {i + 1}r
                       </span>
                     </span>
-                  </Link>
+                  </button>
                 ))
               ) : (
                 <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
