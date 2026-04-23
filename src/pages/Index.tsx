@@ -43,12 +43,20 @@ const Index = () => {
   const buildRanking = (cat: 'hcp_low' | 'hcp_high') => {
     if (!topResults?.length) return [];
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; category: string | null }>();
-    // First pass: determine each player's primary category (first appearance)
-    const playerCat = new Map<string, string>();
+    // Determine each player's category from their first-appearance HCP (≤15 = low, >15 = high).
+    // Falls back to result.category if present.
+    const playerCat = new Map<string, 'hcp_low' | 'hcp_high'>();
     for (const r of topResults) {
-      if (r.category && !playerCat.has(r.player_id)) {
-        playerCat.set(r.player_id, r.category);
+      if (playerCat.has(r.player_id)) continue;
+      const p = (r as any).players_public;
+      const hcp = r.handicap_at_round ?? p?.current_handicap ?? p?.initial_handicap;
+      let resolved: 'hcp_low' | 'hcp_high' | null = null;
+      if (r.category === 'hcp_low' || r.category === 'hcp_high') {
+        resolved = r.category;
+      } else if (hcp != null) {
+        resolved = Number(hcp) <= 15 ? 'hcp_low' : 'hcp_high';
       }
+      if (resolved) playerCat.set(r.player_id, resolved);
     }
     for (const r of topResults) {
       const p = (r as any).players_public;
