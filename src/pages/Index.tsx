@@ -282,9 +282,9 @@ function StatCard({ label, value, sub, icon }: { label: string; value: string | 
       {/* subtle radial highlight on hover */}
       <span aria-hidden className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-      <div className="relative flex items-center justify-between mb-6">
-        <span className="font-body text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground">{label}</span>
-        <span className="text-accent/60 transition-colors group-hover:text-accent/90">{icon}</span>
+      <div className="relative flex items-center justify-between mb-6 gap-3">
+        <span className="font-body text-[13px] md:text-sm font-semibold tracking-[0.18em] uppercase text-foreground/85">{label}</span>
+        <span className="text-accent/60 transition-colors group-hover:text-accent/90 shrink-0">{icon}</span>
       </div>
       <div className="relative">
         <span className="font-display text-4xl font-semibold text-foreground tracking-tight">{value}</span>
