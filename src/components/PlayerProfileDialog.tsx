@@ -385,8 +385,22 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                       </AccordionTrigger>
                       <AccordionContent className="px-3 pb-3 bg-secondary/20">
                         <div className="flex gap-4 mb-2 text-xs flex-wrap text-foreground">
-                          <span>Stb: <strong className="text-accent">{r.stableford_points ?? '—'}</strong></span>
-                          <span className="text-muted-foreground">Scratch Stb: <strong className="text-foreground">{scratchStableford ?? '—'}</strong></span>
+                          <button
+                            type="button"
+                            onClick={() => setScratchMode((m) => ({ ...m, [r.id]: false }))}
+                            className={`transition-colors ${!scratchMode[r.id] ? 'text-accent font-semibold' : 'text-muted-foreground hover:text-foreground'} cursor-pointer`}
+                            aria-pressed={!scratchMode[r.id]}
+                          >
+                            Stb: <strong className={!scratchMode[r.id] ? 'text-accent' : 'text-foreground'}>{r.stableford_points ?? '—'}</strong>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScratchMode((m) => ({ ...m, [r.id]: true }))}
+                            className={`transition-colors ${scratchMode[r.id] ? 'text-accent font-semibold' : 'text-muted-foreground hover:text-foreground'} cursor-pointer`}
+                            aria-pressed={!!scratchMode[r.id]}
+                          >
+                            Scratch Stb: <strong className={scratchMode[r.id] ? 'text-accent' : 'text-foreground'}>{scratchStableford ?? '—'}</strong>
+                          </button>
                           <span className="text-muted-foreground">
                             HCP: <strong className="text-foreground">{r.handicap_at_round ?? '—'}</strong>{handicapPlay != null ? ` (HPU: ${handicapPlay})` : ''}
                           </span>
@@ -397,7 +411,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                               scores={scorecard}
                               par={coursePar}
                               handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
-                              playerHandicap={handicapPlay ?? r.handicap_at_round}
+                              playerHandicap={scratchMode[r.id] ? 0 : (handicapPlay ?? r.handicap_at_round)}
                             />
                           </div>
                         ) : (
