@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,92 +6,100 @@
 
 @layer base {
   :root {
-    /* Editorial Noir — dark atmospheric palette */
-    --background: 220 14% 8%;
-    --foreground: 40 18% 85%;
+    /* Editorial Noir — Premium Private Club palette */
+    --background: 220 11% 5%;
+    --foreground: 40 28% 89%;
 
-    --card: 220 12% 11%;
-    --card-foreground: 40 18% 85%;
+    --card: 220 12% 7%;
+    --card-foreground: 40 28% 89%;
 
-    --popover: 220 12% 11%;
-    --popover-foreground: 40 18% 85%;
+    --popover: 220 12% 7%;
+    --popover-foreground: 40 28% 89%;
 
-    --primary: 158 32% 14%;
-    --primary-foreground: 40 20% 90%;
+    /* Forest depths */
+    --primary: 152 32% 12%;
+    --primary-foreground: 40 30% 92%;
 
-    --secondary: 220 10% 14%;
-    --secondary-foreground: 40 15% 80%;
+    --secondary: 220 12% 9%;
+    --secondary-foreground: 40 22% 84%;
 
-    --muted: 220 10% 14%;
-    --muted-foreground: 40 8% 50%;
+    --muted: 220 10% 12%;
+    --muted-foreground: 50 6% 56%;
 
-    --accent: 40 42% 55%;
-    --accent-foreground: 220 14% 8%;
+    /* Aged brass / gold */
+    --accent: 36 32% 50%;
+    --accent-foreground: 220 14% 7%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 64% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 10% 16%;
-    --input: 220 10% 18%;
-    --ring: 40 42% 55%;
+    --border: 36 32% 50%;
+    --input: 220 10% 14%;
+    --ring: 36 32% 55%;
 
-    --radius: 0.25rem;
+    --radius: 0.875rem;
 
-    --sidebar-background: 220 14% 6%;
-    --sidebar-foreground: 40 18% 85%;
-    --sidebar-primary: 40 42% 55%;
-    --sidebar-primary-foreground: 220 14% 8%;
-    --sidebar-accent: 220 10% 12%;
-    --sidebar-accent-foreground: 40 18% 85%;
-    --sidebar-border: 220 10% 14%;
-    --sidebar-ring: 40 42% 55%;
+    --sidebar-background: 220 14% 4%;
+    --sidebar-foreground: 40 28% 89%;
+    --sidebar-primary: 36 32% 50%;
+    --sidebar-primary-foreground: 220 14% 7%;
+    --sidebar-accent: 220 10% 9%;
+    --sidebar-accent-foreground: 40 28% 89%;
+    --sidebar-border: 220 10% 11%;
+    --sidebar-ring: 36 32% 55%;
 
-    --gold: 40 42% 55%;
-    --gold-foreground: 220 14% 8%;
-    --green-deep: 158 32% 14%;
-    --green-light: 158 22% 28%;
-    --cream: 40 20% 90%;
-    --cream-dark: 40 12% 70%;
+    /* Premium tokens */
+    --gold: 36 32% 50%;
+    --gold-soft: 36 35% 66%;
+    --gold-foreground: 220 14% 7%;
+    --forest-deep: 152 32% 12%;
+    --forest: 152 27% 17%;
+    --forest-soft: 152 22% 28%;
+    --cream: 40 30% 92%;
+    --cream-dark: 45 14% 72%;
+    --line: 36 32% 50%;
+
+    /* Atmospheric backgrounds */
+    --grad-page: radial-gradient(circle at 20% 10%, hsl(36 32% 50% / 0.08), transparent 28%),
+                 radial-gradient(circle at 80% 15%, hsl(152 27% 22% / 0.18), transparent 25%),
+                 linear-gradient(180deg, hsl(152 32% 6%) 0%, hsl(220 11% 5%) 30%, hsl(220 11% 5%) 100%);
+    --grad-hero: linear-gradient(180deg, hsl(220 11% 5% / 0.18) 0%, hsl(220 11% 5% / 0.5) 35%, hsl(220 11% 5% / 0.95) 100%),
+                 linear-gradient(90deg, hsl(220 11% 5% / 0.7) 0%, hsl(220 11% 5% / 0.15) 35%, hsl(220 11% 5% / 0.4) 100%),
+                 radial-gradient(circle at 50% 10%, hsl(36 35% 66% / 0.1), transparent 22%),
+                 linear-gradient(180deg, hsl(152 24% 28%) 0%, hsl(152 27% 17%) 32%, hsl(152 18% 9%) 62%, hsl(220 11% 4%) 100%);
+    --grad-panel: linear-gradient(180deg, hsl(220 12% 7% / 0.6), hsl(220 12% 5% / 0.6));
+    --shadow-premium: 0 20px 60px hsl(220 14% 0% / 0.55);
+    --shadow-soft: 0 12px 40px hsl(220 14% 0% / 0.35);
   }
 
   .dark {
-    /* Same as root — the site IS dark by default */
-    --background: 220 14% 8%;
-    --foreground: 40 18% 85%;
-
-    --card: 220 12% 11%;
-    --card-foreground: 40 18% 85%;
-
-    --popover: 220 12% 11%;
-    --popover-foreground: 40 18% 85%;
-
-    --primary: 158 32% 14%;
-    --primary-foreground: 40 20% 90%;
-
-    --secondary: 220 10% 14%;
-    --secondary-foreground: 40 15% 80%;
-
-    --muted: 220 10% 14%;
-    --muted-foreground: 40 8% 50%;
-
-    --accent: 40 42% 55%;
-    --accent-foreground: 220 14% 8%;
-
-    --destructive: 0 62.8% 30.6%;
+    --background: 220 11% 5%;
+    --foreground: 40 28% 89%;
+    --card: 220 12% 7%;
+    --card-foreground: 40 28% 89%;
+    --popover: 220 12% 7%;
+    --popover-foreground: 40 28% 89%;
+    --primary: 152 32% 12%;
+    --primary-foreground: 40 30% 92%;
+    --secondary: 220 12% 9%;
+    --secondary-foreground: 40 22% 84%;
+    --muted: 220 10% 12%;
+    --muted-foreground: 50 6% 56%;
+    --accent: 36 32% 50%;
+    --accent-foreground: 220 14% 7%;
+    --destructive: 0 64% 48%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 220 10% 16%;
-    --input: 220 10% 18%;
-    --ring: 40 42% 55%;
-
-    --sidebar-background: 220 14% 6%;
-    --sidebar-foreground: 40 18% 85%;
-    --sidebar-primary: 40 42% 55%;
-    --sidebar-primary-foreground: 220 14% 8%;
-    --sidebar-accent: 220 10% 12%;
-    --sidebar-accent-foreground: 40 18% 85%;
-    --sidebar-border: 220 10% 14%;
-    --sidebar-ring: 40 42% 55%;
+    --border: 36 32% 50%;
+    --input: 220 10% 14%;
+    --ring: 36 32% 55%;
+    --sidebar-background: 220 14% 4%;
+    --sidebar-foreground: 40 28% 89%;
+    --sidebar-primary: 36 32% 50%;
+    --sidebar-primary-foreground: 220 14% 7%;
+    --sidebar-accent: 220 10% 9%;
+    --sidebar-accent-foreground: 40 28% 89%;
+    --sidebar-border: 220 10% 11%;
+    --sidebar-ring: 36 32% 55%;
   }
 }
 
@@ -101,10 +109,95 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply text-foreground font-body antialiased;
+    background: var(--grad-page);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+    letter-spacing: -0.03em;
   }
+}
+
+@layer components {
+  /* Subtle film grain overlay for premium texture */
+  .grain::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.05;
+    background-image:
+      radial-gradient(circle at 20% 20%, hsl(0 0% 100% / 0.18) 0 1px, transparent 1px),
+      radial-gradient(circle at 80% 30%, hsl(0 0% 100% / 0.16) 0 1px, transparent 1px),
+      radial-gradient(circle at 50% 80%, hsl(0 0% 100% / 0.14) 0 1px, transparent 1px);
+    background-size: 18px 18px, 23px 23px, 27px 27px;
+    mix-blend-mode: soft-light;
+  }
+
+  /* Section eyebrow label */
+  .eyebrow {
+    @apply font-body text-[11px] font-medium uppercase text-[hsl(var(--gold-soft))];
+    letter-spacing: 0.24em;
+  }
+
+  /* Premium card with brass top border */
+  .panel-premium {
+    @apply relative overflow-hidden rounded-[var(--radius)] border;
+    border-color: hsl(0 0% 100% / 0.06);
+    background:
+      linear-gradient(180deg, hsl(0 0% 100% / 0.02), hsl(0 0% 100% / 0.01)),
+      linear-gradient(135deg, hsl(152 18% 11%), hsl(220 12% 6%) 70%);
+    box-shadow: var(--shadow-premium);
+  }
+  .panel-premium::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--gold) / 0.18));
+  }
+
+  .panel-noir {
+    @apply relative rounded-[calc(var(--radius)+0.4rem)] border;
+    border-color: hsl(0 0% 100% / 0.06);
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.015), hsl(0 0% 100% / 0.008));
+    box-shadow: var(--shadow-premium);
+  }
+
+  /* Heraldic crest mark */
+  .crest {
+    position: relative;
+    border-radius: 9999px;
+    border: 1px solid hsl(0 0% 100% / 0.32);
+    box-shadow: inset 0 0 50px hsl(0 0% 100% / 0.03), 0 0 50px hsl(36 35% 66% / 0.08);
+  }
+  .crest::before {
+    content: "";
+    position: absolute;
+    inset: 18%;
+    border: 1px dashed hsl(0 0% 100% / 0.4);
+    border-radius: 9999px;
+  }
+  .crest::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -16%;
+    width: 4px;
+    height: 22%;
+    border-radius: 4px;
+    background: hsl(0 0% 100% / 0.78);
+    transform: translateX(-50%);
+  }
+  .crest-sm {
+    width: 42px;
+    height: 42px;
+    box-shadow: inset 0 0 24px hsl(0 0% 100% / 0.03), 0 0 18px hsl(36 35% 66% / 0.08);
+  }
+  .crest-sm::before { inset: 7px; }
+  .crest-sm::after { width: 2px; height: 12px; bottom: -7px; }
 }
