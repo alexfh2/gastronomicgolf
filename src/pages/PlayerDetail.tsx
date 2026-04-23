@@ -260,9 +260,11 @@ const PlayerDetail = () => {
           const handicapPlay: number | null = rawScorecard?.handicap_play ?? null;
 
           const coursePar: number[] | undefined = Array.isArray(round?.course_par) ? round.course_par : undefined;
+          // Scratch Stableford = puntos sin hándicap. Las bolas levantadas (s===0) cuentan como Par+4 → 0 puntos.
           const scratchStableford = scorecard && coursePar && scorecard.length === coursePar.length
             ? scorecard.reduce((total, s, i) => {
-                if (s === 0 || s == null) return total;
+                // Bola levantada o sin dato: equivale a Par+4 (0 puntos Stableford)
+                if (s == null || s === 0) return total + 0;
                 const diff = s - coursePar[i];
                 if (diff <= -3) return total + 5;
                 if (diff === -2) return total + 4;
