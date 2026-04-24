@@ -81,7 +81,7 @@ const Rankings = () => {
           name: r.players_public.name,
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
-          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
+          handicap: r.players_public.current_handicap ?? r.handicap_at_round,
           scores: [],
         });
       }
@@ -94,8 +94,8 @@ const Rankings = () => {
         isMaster: r.rounds?.is_master || false,
         coef: r.rounds?.master_coefficient || 1,
       });
-      if (r.handicap_at_round != null && !byPlayer.get(pid)!.handicap) {
-        byPlayer.get(pid)!.handicap = r.handicap_at_round;
+      if (r.players_public.current_handicap != null) {
+        byPlayer.get(pid)!.handicap = r.players_public.current_handicap;
       }
     }
 
@@ -161,7 +161,7 @@ const Rankings = () => {
       if (!scratchByPlayer.has(pid)) {
         scratchByPlayer.set(pid, {
           name: r.players_public.name,
-          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
+          handicap: r.players_public.current_handicap ?? r.handicap_at_round,
           scratchScores: [],
         });
       }

@@ -63,7 +63,7 @@ export function useCategoryRankings() {
           name: r.players_public.name,
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
-          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
+          handicap: r.players_public.current_handicap ?? r.handicap_at_round,
           scores: [],
         });
       }
@@ -71,8 +71,8 @@ export function useCategoryRankings() {
       const isMaster = r.rounds?.is_master || false;
       const weighted = Math.round(r.stableford_points * (isMaster ? coef : 1));
       byPlayer.get(pid)!.scores.push({ points: r.stableford_points, weighted });
-      if (r.handicap_at_round != null && byPlayer.get(pid)!.handicap == null) {
-        byPlayer.get(pid)!.handicap = r.handicap_at_round;
+      if (r.players_public.current_handicap != null) {
+        byPlayer.get(pid)!.handicap = r.players_public.current_handicap;
       }
     }
 
