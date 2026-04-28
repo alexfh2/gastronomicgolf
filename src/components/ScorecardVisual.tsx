@@ -86,8 +86,8 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     arr ? arr.reduce((s: number, v) => s + (v ?? 0), 0) : null;
 
   const getStrokeMarker = (holeIdx: number): number => {
-    if (!canCalcStableford || !handicap) return 0;
-    return calcExtraStrokes(handicap[holeIdx], playerHandicap!);
+    if (!canCalcStableford || !effectiveHandicap) return 0;
+    return calcExtraStrokes(effectiveHandicap[holeIdx], playerHandicap!);
   };
 
   const renderScore = (score: number, holePar: number) => {
