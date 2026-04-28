@@ -299,6 +299,8 @@ const AdminRounds = () => {
     const parStr = Array.isArray(parData) ? parData.join(', ') : '';
     const hcpData = (round as any).course_handicap;
     const hcpStr = Array.isArray(hcpData) ? hcpData.join(', ') : '';
+    const hcpWomenData = (round as any).course_handicap_women;
+    const hcpWomenStr = Array.isArray(hcpWomenData) ? hcpWomenData.join(', ') : '';
     setForm({
       name: round.name, round_number: String(round.round_number),
       date: round.date, end_date: round.end_date || '',
@@ -307,6 +309,8 @@ const AdminRounds = () => {
       season_id: round.season_id,
       course_par: parStr,
       course_handicap: hcpStr,
+      course_handicap_women: hcpWomenStr,
+      has_women_handicap: Array.isArray(hcpWomenData) && hcpWomenData.length > 0,
     });
     setDialogOpen(true);
   };
@@ -319,6 +323,7 @@ const AdminRounds = () => {
       date: '', end_date: '', club: '', course: '', sponsor: '',
       is_master: false, season_id: activeSeasonId,
       course_par: '', course_handicap: '',
+      course_handicap_women: '', has_women_handicap: false,
     });
     setDialogOpen(true);
   };
