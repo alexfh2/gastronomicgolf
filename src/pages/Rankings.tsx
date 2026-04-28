@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
-import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
+import { buildPlayerCategoryHandicapMap, buildPlayerLastHandicapMap } from '@/lib/playerCategoryHandicap';
 import { Trophy, ChevronRight, Users } from 'lucide-react';
 
 type Result = PublicResult;
@@ -66,12 +66,14 @@ const Rankings = () => {
 
     const roundMap = new Map(rounds.map(r => [r.id, r]));
     const categoryHcpMap = buildPlayerCategoryHandicapMap(results as any);
+    const lastHcpMap = buildPlayerLastHandicapMap(results as any);
 
     const byPlayer = new Map<string, {
       name: string;
       gender: string | null;
       is_senior: boolean;
-      handicap: number | null;
+      handicap: number | null; // categoría (fijo)
+      displayHandicap: number | null; // último jugado
       scores: { points: number; roundId: string; roundNumber: number; roundName: string; isMaster: boolean; coef: number }[];
     }>();
 
@@ -84,6 +86,7 @@ const Rankings = () => {
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
           handicap: categoryHcpMap.get(pid) ?? r.players_public.current_handicap ?? r.handicap_at_round,
+          displayHandicap: lastHcpMap.get(pid) ?? r.players_public.current_handicap ?? r.handicap_at_round,
           scores: [],
         });
       }
@@ -124,6 +127,7 @@ const Rankings = () => {
           gender: p.gender,
           is_senior: p.is_senior,
           handicap: p.handicap,
+          displayHandicap: p.displayHandicap,
           total,
           roundsPlayed: p.scores.length,
           roundScores,
@@ -146,6 +150,7 @@ const Rankings = () => {
     const scratchByPlayer = new Map<string, {
       name: string;
       handicap: number | null;
+      displayHandicap: number | null;
       scratchScores: { points: number; roundId: string }[];
     }>();
 
@@ -161,6 +166,7 @@ const Rankings = () => {
         scratchByPlayer.set(pid, {
           name: r.players_public.name,
           handicap: r.players_public.current_handicap ?? r.handicap_at_round,
+          displayHandicap: lastHcpMap.get(pid) ?? r.players_public.current_handicap ?? r.handicap_at_round,
           scratchScores: [],
         });
       }
@@ -180,6 +186,7 @@ const Rankings = () => {
         gender: null,
         is_senior: false,
         handicap: p.handicap,
+        displayHandicap: p.displayHandicap,
         total,
         roundsPlayed: p.scratchScores.length,
         roundScores,
@@ -243,7 +250,7 @@ const Rankings = () => {
                         <Users className="h-3 w-3 text-muted-foreground/60" />
                       </div>
                       <span className="text-sm font-body font-medium text-foreground">{p.name}</span>
-                      {p.handicap != null && <span className="text-[10px] text-muted-foreground/60 font-mono">({p.handicap})</span>}
+                      {p.displayHandicap != null && <span className="text-[10px] text-muted-foreground/60 font-mono">({Number(p.displayHandicap).toFixed(1)})</span>}
                     </button>
                   </td>
                   {rounds?.map((r, ri) => {

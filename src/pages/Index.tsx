@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
-import { buildPlayerCategoryHandicapMap, categorizeByHandicap } from '@/lib/playerCategoryHandicap';
+import { buildPlayerCategoryHandicapMap, buildPlayerLastHandicapMap, categorizeByHandicap } from '@/lib/playerCategoryHandicap';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Index = () => {
@@ -42,6 +42,8 @@ const Index = () => {
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; category: string | null }>();
     // Categoría fijada por el HCP de la primera ronda jugada (consistente con Rankings).
     const categoryHcpMap = buildPlayerCategoryHandicapMap(topResults as any);
+    // Para mostrar al lado del nombre: último HCP jugado.
+    const lastHcpMap = buildPlayerLastHandicapMap(topResults as any);
     const playerCat = new Map<string, 'hcp_low' | 'hcp_high'>();
     for (const r of topResults) {
       if (playerCat.has(r.player_id)) continue;
@@ -52,14 +54,14 @@ const Index = () => {
       const p = (r as any).players_public;
       if (!p) continue;
       if (playerCat.get(r.player_id) !== cat) continue;
-      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
+      const displayHcp = lastHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
       const existing = agg.get(r.player_id);
       if (existing) {
         existing.totalPoints += pts;
         existing.rounds += 1;
       } else {
-        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, category: cat });
+        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: displayHcp, playerId: r.player_id, category: cat });
       }
     }
     return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
