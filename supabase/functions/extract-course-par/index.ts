@@ -39,6 +39,13 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
 
     let messages: any[];
 
+    const userTextFile = isWomen
+      ? "Extract ONLY the women's handicap (stroke index) for each of the 18 holes from this golf course scorecard:"
+      : "Extract the par and handicap (stroke index) for each of the 18 holes from this golf course scorecard:";
+    const userTextUrlPrefix = isWomen
+      ? "Extract ONLY the women's handicap (stroke index) for each of the 18 holes from this golf course webpage:"
+      : "Extract the par and handicap (stroke index) for each of the 18 holes from this golf course webpage:";
+
     if (file) {
       // file is a base64 data URI like "data:image/jpeg;base64,..."
       messages = [
@@ -46,7 +53,7 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
         {
           role: "user",
           content: [
-            { type: "text", text: "Extract the par and handicap (stroke index) for each of the 18 holes from this golf course scorecard:" },
+            { type: "text", text: userTextFile },
             { type: "image_url", image_url: { url: file } },
           ],
         },
@@ -66,10 +73,59 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
         { role: "system", content: systemPrompt },
         {
           role: "user",
-          content: `Extract the par and handicap (stroke index) for each of the 18 holes from this golf course webpage:\n\n${truncatedHtml}`,
+          content: `${userTextUrlPrefix}\n\n${truncatedHtml}`,
         },
       ];
     }
+
+    const toolDef = isWomen
+      ? {
+          type: "function" as const,
+          function: {
+            name: "extract_women_handicap",
+            description: "Return the women's handicap (stroke index) values for all 18 holes",
+            parameters: {
+              type: "object",
+              properties: {
+                handicap_women: {
+                  type: "array",
+                  items: { type: "integer" },
+                  description: "Array of 18 women's stroke index values, one per hole (holes 1-18). Values 1-18.",
+                },
+              },
+              required: ["handicap_women"],
+              additionalProperties: false,
+            },
+          },
+        }
+      : {
+          type: "function" as const,
+          function: {
+            name: "extract_course_data",
+            description: "Return the par and handicap (stroke index) values for all 18 holes of the golf course",
+            parameters: {
+              type: "object",
+              properties: {
+                par: {
+                  type: "array",
+                  items: { type: "integer" },
+                  description: "Array of 18 par values, one per hole (holes 1-18)",
+                },
+                handicap: {
+                  type: "array",
+                  items: { type: "integer" },
+                  description: "Array of 18 stroke index/handicap values, one per hole (holes 1-18). Values 1-18.",
+                },
+                course_name: {
+                  type: "string",
+                  description: "Name of the golf course if found",
+                },
+              },
+              required: ["par", "handicap"],
+              additionalProperties: false,
+            },
+          },
+        };
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
