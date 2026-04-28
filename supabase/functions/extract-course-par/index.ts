@@ -183,20 +183,33 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
     const par: number[] = extracted.par;
     const handicap: number[] = extracted.handicap;
 
-    if (!Array.isArray(par) || par.length !== 18) {
-      throw new Error(`Expected 18 par values but got ${par?.length || 0}. Try entering manually.`);
+    if (!Array.isArray(par) || !Array.isArray(handicap)) {
+      throw new Error("AI did not return arrays. Try entering manually.");
     }
 
-    if (!Array.isArray(handicap) || handicap.length !== 18) {
-      throw new Error(`Expected 18 handicap values but got ${handicap?.length || 0}. Try entering manually.`);
-    }
+    // Tolerate off-by-one extractions (commonly the AI omits hole 18 or merges totals)
+    const padArray = (arr: number[], label: string) => {
+      if (arr.length === 18) return arr;
+      if (arr.length === 17) {
+        console.warn(`${label}: got 17 values, padding with 0 — please review manually`);
+        return [...arr, 0];
+      }
+      if (arr.length === 19) {
+        console.warn(`${label}: got 19 values, trimming last — please review manually`);
+        return arr.slice(0, 18);
+      }
+      throw new Error(`Expected 18 ${label} values but got ${arr.length}. Try entering manually.`);
+    };
+
+    const parFinal = padArray(par, "par");
+    const handicapFinal = padArray(handicap, "handicap");
 
     return new Response(JSON.stringify({
       success: true,
-      par,
-      handicap,
+      par: parFinal,
+      handicap: handicapFinal,
       course_name: extracted.course_name,
-      total_par: par.reduce((a: number, b: number) => a + b, 0),
+      total_par: parFinal.reduce((a: number, b: number) => a + b, 0),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
