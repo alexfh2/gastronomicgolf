@@ -39,7 +39,7 @@ const PlayerDetail = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('*, rounds!inner(name, date, club, round_number, status, is_master, course_par, course_handicap)')
+        .select('*, rounds!inner(name, date, club, round_number, status, is_master, course_par, course_handicap, course_handicap_women)')
         .eq('player_id', id!)
         .eq('rounds.status', 'published')
         .order('rounds(round_number)');
@@ -304,6 +304,8 @@ const PlayerDetail = () => {
                       scores={scorecard}
                       par={Array.isArray(round?.course_par) ? round.course_par : undefined}
                       handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
+                      handicapWomen={Array.isArray((round as any)?.course_handicap_women) ? (round as any).course_handicap_women : undefined}
+                      playerGender={player.gender}
                       playerHandicap={handicapPlay ?? r.handicap_at_round}
                     />
                   </div>

@@ -44,6 +44,7 @@ type RankingResultRow = {
     course: string | null;
     course_par: unknown;
     course_handicap: unknown;
+    course_handicap_women: unknown;
   } | null;
 };
 
@@ -89,7 +90,7 @@ Deno.serve(async (req) => {
         source_url,
         created_at,
         updated_at,
-        rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap),
+        rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap, course_handicap_women),
         players!inner(id, name, license, club, gender, is_senior, initial_handicap, current_handicap, photo_url, created_at, updated_at)
       `)
       .eq("rounds.status", "published")
@@ -130,6 +131,7 @@ Deno.serve(async (req) => {
             course: row.rounds.course,
             course_par: row.rounds.course_par,
             course_handicap: row.rounds.course_handicap,
+            course_handicap_women: row.rounds.course_handicap_women,
           }
         : null,
       players_public: row.players

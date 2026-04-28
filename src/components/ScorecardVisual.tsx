@@ -6,7 +6,10 @@ interface ScorecardVisualProps {
   scores: number[];
   par?: number[];
   handicap?: number[];
+  /** Optional female-specific stroke index distribution; used when playerGender === 'F' */
+  handicapWomen?: number[];
   playerHandicap?: number | null;
+  playerGender?: string | null;
 }
 
 const calcPlayingHcp = (hcp: number): number => Math.round(hcp);
@@ -47,19 +50,24 @@ const getStbStyle = (pts: number | null): string => {
   return 'bg-destructive/30 text-destructive-foreground font-semibold';
 };
 
-const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, playerHandicap }) => {
+const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, handicapWomen, playerHandicap, playerGender }) => {
+  // Pick female-specific stroke index distribution when applicable
+  const effectiveHandicap = (playerGender === 'F' && Array.isArray(handicapWomen) && handicapWomen.length === 18)
+    ? handicapWomen
+    : handicap;
+
   const front9 = scores.slice(0, 9);
   const back9 = scores.slice(9, 18);
   const frontPar = par.slice(0, 9);
   const backPar = par.slice(9, 18);
-  const frontHcp = handicap?.slice(0, 9);
-  const backHcp = handicap?.slice(9, 18);
+  const frontHcp = effectiveHandicap?.slice(0, 9);
+  const backHcp = effectiveHandicap?.slice(9, 18);
 
-  const canCalcStableford = playerHandicap != null && handicap && handicap.length === 18;
+  const canCalcStableford = playerHandicap != null && effectiveHandicap && effectiveHandicap.length === 18;
   const playingHcp = playerHandicap != null ? calcPlayingHcp(playerHandicap) : null;
 
   const stablefordPoints = canCalcStableford
-    ? scores.map((s, i) => calcStablefordPoints(s, par[i], handicap![i], playerHandicap!))
+    ? scores.map((s, i) => calcStablefordPoints(s, par[i], effectiveHandicap![i], playerHandicap!))
     : null;
 
   const frontStb = stablefordPoints?.slice(0, 9);
@@ -78,8 +86,8 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
     arr ? arr.reduce((s: number, v) => s + (v ?? 0), 0) : null;
 
   const getStrokeMarker = (holeIdx: number): number => {
-    if (!canCalcStableford || !handicap) return 0;
-    return calcExtraStrokes(handicap[holeIdx], playerHandicap!);
+    if (!canCalcStableford || !effectiveHandicap) return 0;
+    return calcExtraStrokes(effectiveHandicap[holeIdx], playerHandicap!);
   };
 
   const renderScore = (score: number, holePar: number) => {

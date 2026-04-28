@@ -39,7 +39,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     queryFn: async () => {
       const { data } = await supabase
         .from('results')
-        .select('*, rounds!inner(name, date, club, round_number, status, is_master, master_coefficient, course_par, course_handicap)')
+        .select('*, rounds!inner(name, date, club, round_number, status, is_master, master_coefficient, course_par, course_handicap, course_handicap_women)')
         .eq('player_id', playerId!)
         .eq('rounds.status', 'published')
         .order('rounds(round_number)');
@@ -422,6 +422,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                               scores={scorecard}
                               par={coursePar}
                               handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
+                              handicapWomen={Array.isArray((round as any)?.course_handicap_women) ? (round as any).course_handicap_women : undefined}
+                              playerGender={player.gender}
                               playerHandicap={scratchMode[r.id] ? 0 : (handicapPlay ?? r.handicap_at_round)}
                             />
                           </div>

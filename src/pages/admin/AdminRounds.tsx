@@ -89,6 +89,8 @@ const AdminRounds = () => {
     season_id: '',
     course_par: '' as string,
     course_handicap: '' as string,
+    course_handicap_women: '' as string,
+    has_women_handicap: false,
   });
 
   const { data: seasons } = useQuery({
@@ -218,6 +220,14 @@ const AdminRounds = () => {
         }
       }
 
+      let courseHandicapWomen: number[] | null = null;
+      if (form.has_women_handicap && form.course_handicap_women.trim()) {
+        courseHandicapWomen = form.course_handicap_women.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+        if (courseHandicapWomen.length !== 18) {
+          throw new Error('El handicap femení ha de tenir exactament 18 valors');
+        }
+      }
+
       const payload: TablesInsert<'rounds'> = {
         name: form.name,
         round_number: parseInt(form.round_number),
@@ -232,6 +242,7 @@ const AdminRounds = () => {
         season_id: form.season_id || activeSeasonId,
         course_par: coursePar,
         course_handicap: courseHandicap,
+        course_handicap_women: courseHandicapWomen,
       } as any;
       if (editingRound) {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
@@ -288,6 +299,8 @@ const AdminRounds = () => {
     const parStr = Array.isArray(parData) ? parData.join(', ') : '';
     const hcpData = (round as any).course_handicap;
     const hcpStr = Array.isArray(hcpData) ? hcpData.join(', ') : '';
+    const hcpWomenData = (round as any).course_handicap_women;
+    const hcpWomenStr = Array.isArray(hcpWomenData) ? hcpWomenData.join(', ') : '';
     setForm({
       name: round.name, round_number: String(round.round_number),
       date: round.date, end_date: round.end_date || '',
@@ -296,6 +309,8 @@ const AdminRounds = () => {
       season_id: round.season_id,
       course_par: parStr,
       course_handicap: hcpStr,
+      course_handicap_women: hcpWomenStr,
+      has_women_handicap: Array.isArray(hcpWomenData) && hcpWomenData.length > 0,
     });
     setDialogOpen(true);
   };
@@ -308,6 +323,7 @@ const AdminRounds = () => {
       date: '', end_date: '', club: '', course: '', sponsor: '',
       is_master: false, season_id: activeSeasonId,
       course_par: '', course_handicap: '',
+      course_handicap_women: '', has_women_handicap: false,
     });
     setDialogOpen(true);
   };
@@ -460,7 +476,7 @@ const AdminRounds = () => {
                     <Check className="h-4 w-4 mr-2" />
                     {saveImportedRounds.isPending ? 'Guardant...' : 'Guardar totes'}
                   </Button>
-                </div>
+            </div>
 
                 {importedRounds.map((r, idx) => (
                   <Card key={idx} className="border-border/60">
@@ -822,6 +838,72 @@ const AdminRounds = () => {
                 );
               })}
             </div>
+
+            {/* Women's stroke-index distribution (optional) */}
+            <div className="space-y-3 rounded-md border border-border/60 bg-muted/20 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <Label className="font-semibold">Distribució handicaps específica per a dones</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Activa-ho si el camp té una distribució de handicap per forat diferent per a jugadores femenines. Si està activada, s'utilitzarà aquesta tarjeta per calcular els punts Stableford de les dones.
+                  </p>
+                </div>
+                <Switch
+                  checked={form.has_women_handicap}
+                  onCheckedChange={(v) => {
+                    updateField('has_women_handicap', v);
+                    if (!v) updateField('course_handicap_women', '');
+                  }}
+                />
+              </div>
+
+              {form.has_women_handicap && [0, 9].map((offset) => {
+                const hcpWArr = form.course_handicap_women ? form.course_handicap_women.split(',').map(v => v.trim()) : [];
+                const updateCellWomen = (hole: number, value: string) => {
+                  const arr = form.course_handicap_women
+                    ? form.course_handicap_women.split(',').map(v => v.trim())
+                    : Array(18).fill('');
+                  while (arr.length < 18) arr.push('');
+                  arr[hole] = value;
+                  updateField('course_handicap_women', arr.join(', '));
+                };
+                return (
+                  <div key={`women-${offset}`} className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="border border-border px-1 py-1 text-left font-semibold w-12">Forat</th>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <th key={i} className="border border-border px-1 py-1 text-center font-semibold w-8">
+                              {offset + i + 1}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="border border-border px-1 py-1 font-semibold bg-muted/30">HCP ♀</td>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <td key={i} className="border border-border p-0">
+                              <input
+                                type="number"
+                                min="1"
+                                max="18"
+                                className="w-full h-7 text-center text-xs bg-transparent focus:outline-none focus:bg-accent/20"
+                                value={hcpWArr[offset + i] || ''}
+                                onChange={(e) => updateCellWomen(offset + i, e.target.value)}
+                                placeholder="–"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+
             <div className="flex items-center gap-3">
               <Switch checked={form.is_master} onCheckedChange={(v) => updateField('is_master', v)} />
               <Label>Prova MASTER (coef. ×1.25)</Label>

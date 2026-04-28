@@ -290,6 +290,7 @@ export type Database = {
           club: string | null
           course: string | null
           course_handicap: Json | null
+          course_handicap_women: Json | null
           course_par: Json | null
           created_at: string
           date: string
@@ -310,6 +311,7 @@ export type Database = {
           club?: string | null
           course?: string | null
           course_handicap?: Json | null
+          course_handicap_women?: Json | null
           course_par?: Json | null
           created_at?: string
           date: string
@@ -330,6 +332,7 @@ export type Database = {
           club?: string | null
           course?: string | null
           course_handicap?: Json | null
+          course_handicap_women?: Json | null
           course_par?: Json | null
           created_at?: string
           date?: string
