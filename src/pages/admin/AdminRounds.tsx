@@ -82,6 +82,9 @@ const AdminRounds = () => {
   const [courseUrl, setCourseUrl] = useState('');
   const [extractingPar, setExtractingPar] = useState(false);
   const [courseFile, setCourseFile] = useState<File | null>(null);
+  const [courseUrlWomen, setCourseUrlWomen] = useState('');
+  const [courseFileWomen, setCourseFileWomen] = useState<File | null>(null);
+  const [extractingWomen, setExtractingWomen] = useState(false);
   const [calendarFile, setCalendarFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
@@ -391,6 +394,43 @@ const AdminRounds = () => {
       toast({ title: 'Error extraient dades', description: message, variant: 'destructive' });
     } finally {
       setExtractingPar(false);
+    }
+  };
+
+  // ─── EXTRACT WOMEN'S HANDICAP ───
+  const handleExtractWomen = async (source: 'url' | 'file') => {
+    setExtractingWomen(true);
+    try {
+      let body: any = { mode: 'women' };
+      if (source === 'url') {
+        if (!courseUrlWomen.trim()) return;
+        body.url = courseUrlWomen.trim();
+      } else {
+        if (!courseFileWomen) return;
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(courseFileWomen);
+        });
+        body.file = base64;
+      }
+
+      const { data, error } = await supabase.functions.invoke('extract-course-par', { body });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure les dades');
+
+      const hcpArray: number[] = data.handicap_women;
+      updateField('course_handicap_women', hcpArray.join(', '));
+      toast({
+        title: 'Handicaps de dones extrets',
+        description: `${hcpArray.length} forats`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: 'Error extraient handicaps de dones', description: message, variant: 'destructive' });
+    } finally {
+      setExtractingWomen(false);
     }
   };
 
@@ -856,6 +896,40 @@ const AdminRounds = () => {
                   }}
                 />
               </div>
+
+              {form.has_women_handicap && (
+                <>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs">URL de la web del camp (handicap dones)</Label>
+                      <Input
+                        value={courseUrlWomen}
+                        onChange={(e) => setCourseUrlWomen(e.target.value)}
+                        placeholder="https://web-del-camp.com/el-campo/"
+                      />
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleExtractWomen('url')} disabled={extractingWomen || !courseUrlWomen.trim()}>
+                      {extractingWomen ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Globe className="h-4 w-4 mr-1" />}
+                      URL
+                    </Button>
+                  </div>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs">Foto o PDF de la tarjeta (handicap dones)</Label>
+                      <Input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={(e) => setCourseFileWomen(e.target.files?.[0] || null)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleExtractWomen('file')} disabled={extractingWomen || !courseFileWomen}>
+                      {extractingWomen ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                      Fitxer
+                    </Button>
+                  </div>
+                </>
+              )}
 
               {form.has_women_handicap && [0, 9].map((offset) => {
                 const hcpWArr = form.course_handicap_women ? form.course_handicap_women.split(',').map(v => v.trim()) : [];
