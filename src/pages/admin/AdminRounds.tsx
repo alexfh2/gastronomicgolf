@@ -82,6 +82,9 @@ const AdminRounds = () => {
   const [courseUrl, setCourseUrl] = useState('');
   const [extractingPar, setExtractingPar] = useState(false);
   const [courseFile, setCourseFile] = useState<File | null>(null);
+  const [courseUrlWomen, setCourseUrlWomen] = useState('');
+  const [courseFileWomen, setCourseFileWomen] = useState<File | null>(null);
+  const [extractingWomen, setExtractingWomen] = useState(false);
   const [calendarFile, setCalendarFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     name: '', round_number: '', date: '', end_date: '',
