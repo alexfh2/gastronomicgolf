@@ -72,6 +72,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   const positions = useMemo(() => {
     if (!allResults?.length || !playerId) return null;
 
+    const categoryHcpMap = buildPlayerCategoryHandicapMap(allResults as any);
+
     const byPlayer = new Map<string, {
       gender: string | null;
       is_senior: boolean;
@@ -86,7 +88,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
         byPlayer.set(pid, {
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
-          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
+          handicap: categoryHcpMap.get(pid) ?? r.handicap_at_round ?? r.players_public.current_handicap,
           scores: [],
         });
       }
@@ -112,7 +114,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     };
 
     const hcpLow = buildRanking((p) => p.handicap != null && p.handicap <= 15.0);
-    const hcpHigh = buildRanking((p) => p.handicap != null && p.handicap > 15.0 && p.handicap <= 36);
+    const hcpHigh = buildRanking((p) => p.handicap != null && p.handicap > 15.0);
     const female = buildRanking((p) => p.gender === 'F');
     const senior = buildRanking((p) => p.is_senior);
 
@@ -121,6 +123,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
       hcpHigh: findPos(hcpHigh),
       female: findPos(female),
       senior: findPos(senior),
+      categoryHcp: categoryHcpMap.get(playerId) ?? null,
     };
   }, [allResults, playerId, bestN]);
 
