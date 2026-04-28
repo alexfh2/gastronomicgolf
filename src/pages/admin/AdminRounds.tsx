@@ -220,6 +220,14 @@ const AdminRounds = () => {
         }
       }
 
+      let courseHandicapWomen: number[] | null = null;
+      if (form.has_women_handicap && form.course_handicap_women.trim()) {
+        courseHandicapWomen = form.course_handicap_women.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+        if (courseHandicapWomen.length !== 18) {
+          throw new Error('El handicap femení ha de tenir exactament 18 valors');
+        }
+      }
+
       const payload: TablesInsert<'rounds'> = {
         name: form.name,
         round_number: parseInt(form.round_number),
@@ -234,6 +242,7 @@ const AdminRounds = () => {
         season_id: form.season_id || activeSeasonId,
         course_par: coursePar,
         course_handicap: courseHandicap,
+        course_handicap_women: courseHandicapWomen,
       } as any;
       if (editingRound) {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
