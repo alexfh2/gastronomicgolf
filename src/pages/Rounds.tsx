@@ -134,8 +134,7 @@ const Rounds = () => {
           <thead>
             <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
               <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
-              <th className="text-left py-3 border-b border-border/30">{t('common.name')}</th>
-              <th className="text-right py-3 px-2 border-b border-border/30">{t('common.handicap')}</th>
+              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span></th>
               <th className="text-right py-3 border-b border-border/30">{scoreField === 'scratch' ? 'Scratch' : 'Stableford'}</th>
             </tr>
           </thead>
@@ -166,9 +165,11 @@ const Rounds = () => {
                         <Users className="h-3 w-3 text-muted-foreground/60" />
                       </div>
                       <span className="text-sm font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
+                      {r.handicap_at_round != null && (
+                        <span className="text-[10px] text-muted-foreground/60 font-mono">({Number(r.handicap_at_round).toFixed(1)})</span>
+                      )}
                     </button>
                   </td>
-                  <td className="py-3.5 px-2 text-right font-mono text-xs text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
                   <td className={`py-3.5 text-right font-mono font-bold text-sm ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{value ?? '—'}</td>
                 </tr>
               );
