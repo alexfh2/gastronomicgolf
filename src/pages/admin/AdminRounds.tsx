@@ -397,6 +397,43 @@ const AdminRounds = () => {
     }
   };
 
+  // ─── EXTRACT WOMEN'S HANDICAP ───
+  const handleExtractWomen = async (source: 'url' | 'file') => {
+    setExtractingWomen(true);
+    try {
+      let body: any = { mode: 'women' };
+      if (source === 'url') {
+        if (!courseUrlWomen.trim()) return;
+        body.url = courseUrlWomen.trim();
+      } else {
+        if (!courseFileWomen) return;
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(courseFileWomen);
+        });
+        body.file = base64;
+      }
+
+      const { data, error } = await supabase.functions.invoke('extract-course-par', { body });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'No s\'ha pogut extreure les dades');
+
+      const hcpArray: number[] = data.handicap_women;
+      updateField('course_handicap_women', hcpArray.join(', '));
+      toast({
+        title: 'Handicaps de dones extrets',
+        description: `${hcpArray.length} forats`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: 'Error extraient handicaps de dones', description: message, variant: 'destructive' });
+    } finally {
+      setExtractingWomen(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Header */}
