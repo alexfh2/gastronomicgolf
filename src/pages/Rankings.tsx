@@ -65,6 +65,7 @@ const Rankings = () => {
     if (!results?.length || !rounds?.length) return {};
 
     const roundMap = new Map(rounds.map(r => [r.id, r]));
+    const categoryHcpMap = buildPlayerCategoryHandicapMap(results as any);
 
     const byPlayer = new Map<string, {
       name: string;
@@ -82,7 +83,7 @@ const Rankings = () => {
           name: r.players_public.name,
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
-          handicap: r.players_public.current_handicap ?? r.handicap_at_round,
+          handicap: categoryHcpMap.get(pid) ?? r.players_public.current_handicap ?? r.handicap_at_round,
           scores: [],
         });
       }
@@ -95,9 +96,6 @@ const Rankings = () => {
         isMaster: r.rounds?.is_master || false,
         coef: r.rounds?.master_coefficient || 1,
       });
-      if (r.players_public.current_handicap != null) {
-        byPlayer.get(pid)!.handicap = r.players_public.current_handicap;
-      }
     }
 
     const buildRanking = (
