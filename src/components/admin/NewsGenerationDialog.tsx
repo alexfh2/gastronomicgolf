@@ -297,6 +297,9 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                 <p className="text-xs text-muted-foreground">
                   Puja fotos de la jornada per acompanyar la notícia.
                 </p>
+                <p className="text-[11px] text-muted-foreground/80 italic">
+                  Consell: afegeix una foto <strong>horitzontal</strong> per fer-la servir com a capçalera (no es retallarà). Les <strong>verticals</strong> apareixeran a sota a la galeria. Si no n'hi ha cap d'horitzontal, la notícia no tindrà capçalera.
+                </p>
                 <input
                   ref={fileInputRef}
                   type="file"
