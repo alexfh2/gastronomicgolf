@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 
 export type CategoryKey = 'hcpInf' | 'hcpSup' | 'female' | 'senior';
 
@@ -47,6 +48,8 @@ export function useCategoryRankings() {
     const empty: CategoryRankings = { hcpInf: [], hcpSup: [], female: [], senior: [] };
     if (!results?.length) return empty;
 
+    const categoryHcpMap = buildPlayerCategoryHandicapMap(results as any);
+
     const byPlayer = new Map<string, {
       name: string;
       gender: string | null;
@@ -63,7 +66,7 @@ export function useCategoryRankings() {
           name: r.players_public.name,
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
-          handicap: r.players_public.current_handicap ?? r.handicap_at_round,
+          handicap: categoryHcpMap.get(pid) ?? r.players_public.current_handicap ?? r.handicap_at_round,
           scores: [],
         });
       }
@@ -71,9 +74,6 @@ export function useCategoryRankings() {
       const isMaster = r.rounds?.is_master || false;
       const weighted = Math.round(r.stableford_points * (isMaster ? coef : 1));
       byPlayer.get(pid)!.scores.push({ points: r.stableford_points, weighted });
-      if (r.players_public.current_handicap != null) {
-        byPlayer.get(pid)!.handicap = r.players_public.current_handicap;
-      }
     }
 
     const build = (filterFn: (p: { gender: string | null; is_senior: boolean; handicap: number | null }) => boolean): RankedPlayer[] => {

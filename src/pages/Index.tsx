@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap, categorizeByHandicap } from '@/lib/playerCategoryHandicap';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Index = () => {
@@ -39,32 +40,24 @@ const Index = () => {
   const buildRanking = (cat: 'hcp_low' | 'hcp_high') => {
     if (!topResults?.length) return [];
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; handicap: number | null; playerId: string; category: string | null }>();
-    // Determine each player's category from their first-appearance HCP (≤15 = low, >15 = high).
-    // Falls back to result.category if present.
+    // Categoría fijada por el HCP de la primera ronda jugada (consistente con Rankings).
+    const categoryHcpMap = buildPlayerCategoryHandicapMap(topResults as any);
     const playerCat = new Map<string, 'hcp_low' | 'hcp_high'>();
     for (const r of topResults) {
       if (playerCat.has(r.player_id)) continue;
-      const p = (r as any).players_public;
-      const hcp = r.handicap_at_round ?? p?.current_handicap ?? p?.initial_handicap;
-      let resolved: 'hcp_low' | 'hcp_high' | null = null;
-      if (r.category === 'hcp_low' || r.category === 'hcp_high') {
-        resolved = r.category;
-      } else if (hcp != null) {
-        resolved = Number(hcp) <= 15 ? 'hcp_low' : 'hcp_high';
-      }
+      const resolved = categorizeByHandicap(categoryHcpMap.get(r.player_id) ?? null);
       if (resolved) playerCat.set(r.player_id, resolved);
     }
     for (const r of topResults) {
       const p = (r as any).players_public;
       if (!p) continue;
       if (playerCat.get(r.player_id) !== cat) continue;
-      const hcp = r.handicap_at_round ?? p.current_handicap;
+      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
       const existing = agg.get(r.player_id);
       if (existing) {
         existing.totalPoints += pts;
         existing.rounds += 1;
-        if (hcp != null) existing.handicap = hcp;
       } else {
         agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: hcp, playerId: r.player_id, category: cat });
       }

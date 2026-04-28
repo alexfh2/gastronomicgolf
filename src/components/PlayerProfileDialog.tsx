@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 
 interface PlayerProfileDialogProps {
   playerId: string | null;
@@ -71,6 +72,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   const positions = useMemo(() => {
     if (!allResults?.length || !playerId) return null;
 
+    const categoryHcpMap = buildPlayerCategoryHandicapMap(allResults as any);
+
     const byPlayer = new Map<string, {
       gender: string | null;
       is_senior: boolean;
@@ -85,7 +88,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
         byPlayer.set(pid, {
           gender: r.players_public.gender,
           is_senior: r.players_public.is_senior,
-          handicap: r.handicap_at_round ?? r.players_public.current_handicap,
+          handicap: categoryHcpMap.get(pid) ?? r.handicap_at_round ?? r.players_public.current_handicap,
           scores: [],
         });
       }
@@ -111,7 +114,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     };
 
     const hcpLow = buildRanking((p) => p.handicap != null && p.handicap <= 15.0);
-    const hcpHigh = buildRanking((p) => p.handicap != null && p.handicap > 15.0 && p.handicap <= 36);
+    const hcpHigh = buildRanking((p) => p.handicap != null && p.handicap > 15.0);
     const female = buildRanking((p) => p.gender === 'F');
     const senior = buildRanking((p) => p.is_senior);
 
@@ -120,6 +123,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
       hcpHigh: findPos(hcpHigh),
       female: findPos(female),
       senior: findPos(senior),
+      categoryHcp: categoryHcpMap.get(playerId) ?? null,
     };
   }, [allResults, playerId, bestN]);
 
@@ -173,12 +177,13 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   ];
 
   // Determine main category (by HCP) and subcategories
-  const hcp = player.current_handicap;
+  // Categoría fijada por el HCP de la primera ronda jugada (consistente con Rankings).
+  const hcp = positions?.categoryHcp ?? player.current_handicap;
   const mainCategory =
     hcp != null && hcp <= 15.0
       ? { key: 'hcpLow', label: 'HCP Baix (≤15.0)', pos: positions?.hcpLow }
-      : hcp != null && hcp <= 36
-      ? { key: 'hcpHigh', label: 'HCP Alt (15.1-36)', pos: positions?.hcpHigh }
+      : hcp != null
+      ? { key: 'hcpHigh', label: 'HCP Alt (>15.0)', pos: positions?.hcpHigh }
       : null;
 
   const subCategories: { label: string; pos: { pos: number; total: number; of: number } | null | undefined }[] = [];
