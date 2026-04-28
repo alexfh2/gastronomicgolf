@@ -166,6 +166,20 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
     }
 
     const extracted = JSON.parse(toolCall.function.arguments);
+
+    if (isWomen) {
+      const handicapWomen: number[] = extracted.handicap_women;
+      if (!Array.isArray(handicapWomen) || handicapWomen.length !== 18) {
+        throw new Error(`Expected 18 women's handicap values but got ${handicapWomen?.length || 0}. Try entering manually.`);
+      }
+      return new Response(JSON.stringify({
+        success: true,
+        handicap_women: handicapWomen,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const par: number[] = extracted.par;
     const handicap: number[] = extracted.handicap;
 
