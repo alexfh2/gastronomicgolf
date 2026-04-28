@@ -304,6 +304,8 @@ const PlayerDetail = () => {
                       scores={scorecard}
                       par={Array.isArray(round?.course_par) ? round.course_par : undefined}
                       handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
+                      handicapWomen={Array.isArray((round as any)?.course_handicap_women) ? (round as any).course_handicap_women : undefined}
+                      playerGender={player.gender}
                       playerHandicap={handicapPlay ?? r.handicap_at_round}
                     />
                   </div>
