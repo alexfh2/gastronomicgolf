@@ -5,6 +5,7 @@ import sponsorTancat from '@/assets/sponsors/tancat-codorniu.png';
 import sponsorOptimotor from '@/assets/sponsors/grup-optimotor.webp';
 import sponsorEscampa from '@/assets/sponsors/escampa-hotels.png';
 import sponsorPamies from '@/assets/sponsors/santi-pamies.png';
+import sponsorGarmin from '@/assets/sponsors/garmin.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -128,7 +129,7 @@ const Index = () => {
                 </h2>
                 <div className="h-px flex-1 bg-border/30" />
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-6 gap-y-5 sm:gap-x-10 items-center justify-items-center px-2">
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-x-4 gap-y-4 sm:gap-x-6 items-center justify-items-center px-2">
                 {[
                   { src: sponsorBonarea, alt: 'bonÀrea' },
                   { src: sponsorPruna, alt: 'Pruna Car Go - Omoda Jaecoo' },
@@ -136,13 +137,14 @@ const Index = () => {
                   { src: sponsorOptimotor, alt: 'Grup Optimotor' },
                   { src: sponsorEscampa, alt: 'Escampa Hotels' },
                   { src: sponsorPamies, alt: 'Santi Pàmies Joiers' },
+                  { src: sponsorGarmin, alt: 'Garmin' },
                 ].map((s) => (
                   <img
                     key={s.alt}
                     src={s.src}
                     alt={s.alt}
                     loading="lazy"
-                    className="max-h-9 sm:max-h-11 w-auto object-contain opacity-55 hover:opacity-95 transition-opacity duration-500 dark:invert"
+                    className="max-h-7 sm:max-h-9 w-auto object-contain opacity-55 hover:opacity-95 transition-opacity duration-500 dark:invert"
                   />
                 ))}
               </div>
