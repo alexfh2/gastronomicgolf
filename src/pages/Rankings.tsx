@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 import { Trophy, ChevronRight, Users } from 'lucide-react';
 
 type Result = PublicResult;
