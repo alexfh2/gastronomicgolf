@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 
 interface PlayerProfileDialogProps {
   playerId: string | null;
