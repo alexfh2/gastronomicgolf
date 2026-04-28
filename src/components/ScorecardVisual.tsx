@@ -63,11 +63,11 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const frontHcp = effectiveHandicap?.slice(0, 9);
   const backHcp = effectiveHandicap?.slice(9, 18);
 
-  const canCalcStableford = playerHandicap != null && handicap && handicap.length === 18;
+  const canCalcStableford = playerHandicap != null && effectiveHandicap && effectiveHandicap.length === 18;
   const playingHcp = playerHandicap != null ? calcPlayingHcp(playerHandicap) : null;
 
   const stablefordPoints = canCalcStableford
-    ? scores.map((s, i) => calcStablefordPoints(s, par[i], handicap![i], playerHandicap!))
+    ? scores.map((s, i) => calcStablefordPoints(s, par[i], effectiveHandicap![i], playerHandicap!))
     : null;
 
   const frontStb = stablefordPoints?.slice(0, 9);
