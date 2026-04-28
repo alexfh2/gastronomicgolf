@@ -136,37 +136,8 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
       body: JSON.stringify({
         model: file ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview",
         messages,
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "extract_course_data",
-              description: "Return the par and handicap (stroke index) values for all 18 holes of the golf course",
-              parameters: {
-                type: "object",
-                properties: {
-                  par: {
-                    type: "array",
-                    items: { type: "integer" },
-                    description: "Array of 18 par values, one per hole (holes 1-18)",
-                  },
-                  handicap: {
-                    type: "array",
-                    items: { type: "integer" },
-                    description: "Array of 18 stroke index/handicap values, one per hole (holes 1-18). Values 1-18.",
-                  },
-                  course_name: {
-                    type: "string",
-                    description: "Name of the golf course if found",
-                  },
-                },
-                required: ["par", "handicap"],
-                additionalProperties: false,
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "extract_course_data" } },
+        tools: [toolDef],
+        tool_choice: { type: "function", function: { name: toolDef.function.name } },
       }),
     });
 
