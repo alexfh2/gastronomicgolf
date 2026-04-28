@@ -123,14 +123,12 @@ const Index = () => {
                 </h2>
                 <div className="h-px flex-1 bg-border/30" />
               </div>
-              <div className="px-2 overflow-x-auto sm:overflow-visible scrollbar-hide">
-                <img
-                  src={sponsorsLine}
-                  alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
-                  loading="lazy"
-                  className="h-9 sm:h-12 w-auto min-w-[640px] sm:min-w-0 sm:w-full sm:max-h-14 object-contain mx-auto opacity-70 hover:opacity-100 transition-opacity duration-500 dark:invert-0 invert"
-                />
-              </div>
+              <img
+                src={sponsorsLine}
+                alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
+                loading="lazy"
+                className="block w-full h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500 dark:invert-0 invert"
+              />
             </div>
           </div>
         </div>
