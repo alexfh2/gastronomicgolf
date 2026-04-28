@@ -174,8 +174,6 @@ const Stats = () => {
   const leaderCategories = [
     { key: 'hcpLow' as const, label: 'HCP Baix' },
     { key: 'hcpHigh' as const, label: 'HCP Alt' },
-    { key: 'female' as const, label: t('categories.female') },
-    { key: 'senior' as const, label: t('categories.senior') },
   ];
 
   const { stats, leaderboards } = useMemo(() => {

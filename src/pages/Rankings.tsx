@@ -194,8 +194,6 @@ const Rankings = () => {
   const categories = [
     { key: 'hcpLow', label: 'HCP Baix (≤15.0)' },
     { key: 'hcpHigh', label: 'HCP Alt (>15.0)' },
-    { key: 'female', label: t('categories.female') },
-    { key: 'senior', label: t('categories.senior') },
     { key: 'scratch', label: 'Scratch' },
   ];
 
