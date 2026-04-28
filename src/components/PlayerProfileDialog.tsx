@@ -422,6 +422,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                               scores={scorecard}
                               par={coursePar}
                               handicap={Array.isArray(round?.course_handicap) ? round.course_handicap : undefined}
+                              handicapWomen={Array.isArray((round as any)?.course_handicap_women) ? (round as any).course_handicap_women : undefined}
+                              playerGender={player.gender}
                               playerHandicap={scratchMode[r.id] ? 0 : (handicapPlay ?? r.handicap_at_round)}
                             />
                           </div>
