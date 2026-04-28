@@ -25,12 +25,17 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a golf course data extractor. Extract the par AND handicap (stroke index) for each hole from the provided content.
+    const systemPrompt = isWomen
+      ? `You are a golf course data extractor. Extract ONLY the WOMEN'S handicap (stroke index) for each of the 18 holes from the provided content.
+Many scorecards show separate stroke index columns for men and women (sometimes labeled "Hcp Dones", "Hcp Mujeres", "Hcp Ladies", "S.I. Ladies", "Red tees", "Rojo", or a column next to the women's/red tee yardages).
+Return an array of exactly 18 integers (values 1-18, each used once) representing the women's stroke index for holes 1-18.
+If the scorecard only shows one handicap column, return that one (it will be the same as men's).`
+      : `You are a golf course data extractor. Extract the par AND handicap (stroke index) for each hole from the provided content.
 Return structured data with two arrays of exactly 18 integers each:
 - par: the par value for holes 1-18 (typically 3, 4, or 5)
 - handicap: the stroke index/handicap for holes 1-18 (values 1-18, each used once)
 Look for patterns like "Par 4", "Par 5", "Par 3" and "Hcp", "Handicap", "Stroke Index", "S.I." associated with hole numbers.
-If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extract par from the main/yellow tees unless specified otherwise.`;
+If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extract par from the main/yellow tees unless specified otherwise. For handicap, use the men's stroke index column.`;
 
     let messages: any[];
 
