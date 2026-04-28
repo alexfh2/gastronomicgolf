@@ -7,6 +7,8 @@ import { Calendar, MapPin, Users, ChevronDown, BarChart3, CalendarPlus, Calendar
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
+import { computeScratchStableford } from '@/lib/scratchStableford';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Rounds = () => {
