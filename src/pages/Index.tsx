@@ -127,7 +127,7 @@ const Index = () => {
                 src={sponsorsLine}
                 alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
                 loading="lazy"
-                className="block w-full h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500 dark:invert-0 invert"
+                className="block mx-auto w-[85%] sm:w-[75%] h-auto object-contain opacity-65 hover:opacity-95 transition-opacity duration-500 dark:invert-0 invert"
               />
             </div>
           </div>
