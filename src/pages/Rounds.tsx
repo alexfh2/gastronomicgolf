@@ -304,7 +304,7 @@ const Rounds = () => {
                               </button>
                             ))}
                           </div>
-                          {renderResultsTable((categorized as any)[activeResultTab])}
+                          {renderResultsTable((categorized as any)[activeResultTab], activeResultTab === 'scratch' ? 'scratch' : 'stableford')}
                         </>
                       ) : (
                         <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
