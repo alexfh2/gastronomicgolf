@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap, categorizeByHandicap } from '@/lib/playerCategoryHandicap';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Index = () => {
