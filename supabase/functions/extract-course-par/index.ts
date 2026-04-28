@@ -206,10 +206,10 @@ If the scorecard shows "Amarillo/Yellow", "Blanco/White", "Rojo/Red" tees, extra
 
     return new Response(JSON.stringify({
       success: true,
-      par,
-      handicap,
+      par: parFinal,
+      handicap: handicapFinal,
       course_name: extracted.course_name,
-      total_par: par.reduce((a: number, b: number) => a + b, 0),
+      total_par: parFinal.reduce((a: number, b: number) => a + b, 0),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
