@@ -1,11 +1,4 @@
 import heroBg from '@/assets/hero-editorial.png';
-import sponsorBonarea from '@/assets/sponsors/bonarea.png';
-import sponsorPruna from '@/assets/sponsors/pruna-car-go.png';
-import sponsorTancat from '@/assets/sponsors/tancat-codorniu.png';
-import sponsorOptimotor from '@/assets/sponsors/grup-optimotor.webp';
-import sponsorEscampa from '@/assets/sponsors/escampa-hotels.png';
-import sponsorPamies from '@/assets/sponsors/santi-pamies.png';
-import sponsorGarmin from '@/assets/sponsors/garmin.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -117,40 +110,6 @@ const Index = () => {
           </p>
         </div>
 
-        {/* ——— SPONSORS overlay (positioned over the lower part of the hero) ——— */}
-        <div className="absolute inset-x-0 bottom-0 z-10">
-          {/* translucent panel that blends with the image */}
-          <div className="bg-gradient-to-t from-background/85 via-background/55 to-transparent backdrop-blur-[2px] pt-10 pb-5">
-            <div className="container">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="h-px flex-1 bg-border/30" />
-                <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
-                  Patrocinadors
-                </h2>
-                <div className="h-px flex-1 bg-border/30" />
-              </div>
-              <div className="grid grid-cols-4 sm:grid-cols-7 gap-x-4 gap-y-4 sm:gap-x-6 items-center justify-items-center px-2">
-                {[
-                  { src: sponsorBonarea, alt: 'bonÀrea' },
-                  { src: sponsorPruna, alt: 'Pruna Car Go - Omoda Jaecoo' },
-                  { src: sponsorTancat, alt: 'Tancat de Codorniu' },
-                  { src: sponsorOptimotor, alt: 'Grup Optimotor' },
-                  { src: sponsorEscampa, alt: 'Escampa Hotels' },
-                  { src: sponsorPamies, alt: 'Santi Pàmies Joiers' },
-                  { src: sponsorGarmin, alt: 'Garmin' },
-                ].map((s) => (
-                  <img
-                    key={s.alt}
-                    src={s.src}
-                    alt={s.alt}
-                    loading="lazy"
-                    className="max-h-7 sm:max-h-9 w-auto object-contain opacity-55 hover:opacity-95 transition-opacity duration-500 dark:invert"
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* ——— QUICK ACCESS ——— */}
