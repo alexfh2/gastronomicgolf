@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
         source_url,
         created_at,
         updated_at,
-        rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap),
+        rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap, course_handicap_women),
         players!inner(id, name, license, club, gender, is_senior, initial_handicap, current_handicap, photo_url, created_at, updated_at)
       `)
       .eq("rounds.status", "published")
