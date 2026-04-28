@@ -131,6 +131,7 @@ Deno.serve(async (req) => {
             course: row.rounds.course,
             course_par: row.rounds.course_par,
             course_handicap: row.rounds.course_handicap,
+            course_handicap_women: row.rounds.course_handicap_women,
           }
         : null,
       players_public: row.players
