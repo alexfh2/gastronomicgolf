@@ -11,7 +11,8 @@ serve(async (req) => {
   }
 
   try {
-    const { url, file } = await req.json();
+    const { url, file, mode } = await req.json();
+    const isWomen = mode === 'women';
     if (!url && !file) {
       return new Response(JSON.stringify({ success: false, error: "URL or file is required" }), {
         status: 400,
