@@ -89,6 +89,8 @@ const AdminRounds = () => {
     season_id: '',
     course_par: '' as string,
     course_handicap: '' as string,
+    course_handicap_women: '' as string,
+    has_women_handicap: false,
   });
 
   const { data: seasons } = useQuery({
