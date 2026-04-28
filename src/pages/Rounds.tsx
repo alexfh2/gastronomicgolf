@@ -7,6 +7,8 @@ import { Calendar, MapPin, Users, ChevronDown, BarChart3, CalendarPlus, Calendar
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
+import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
+import { computeScratchStableford } from '@/lib/scratchStableford';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
 const Rounds = () => {
@@ -75,27 +77,32 @@ const Rounds = () => {
     downloadIcs(ics, 'circuit-gastronomic-golf-2026.ics');
   };
 
-  const { data: roundResults } = useQuery({
+  const { data: roundData } = useQuery({
     queryKey: [...publicCircuitDataQueryKey, 'round-results', expandedRound],
     queryFn: async () => {
-      if (!expandedRound) return [];
+      if (!expandedRound) return { results: [], categoryHcpMap: new Map<string, number | null>() };
       const data = await fetchPublicCircuitData();
-      return data.results
+      const categoryHcpMap = buildPlayerCategoryHandicapMap(data.results as any);
+      const results = data.results
         .filter((result) => result.round_id === expandedRound)
         .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      return { results, categoryHcpMap };
     },
     enabled: !!expandedRound,
   });
 
+  const roundResults = roundData?.results;
+  const categoryHcpMap = roundData?.categoryHcpMap ?? new Map<string, number | null>();
+
   const categorizeResults = (results: typeof roundResults) => {
     if (!results) return {};
     const hcpLow = results.filter(r => {
-      const hcp = r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
+      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
       return hcp != null && hcp <= 15.0;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
     const hcpHigh = results.filter(r => {
-      const hcp = r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
-      return hcp != null && hcp > 15.0 && hcp <= 36;
+      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
+      return hcp != null && hcp > 15.0;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
     const female = results.filter(r => ((r as any).players_public)?.gender === 'F')
       .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
@@ -108,7 +115,7 @@ const Rounds = () => {
 
   const roundCategories = [
     { key: 'hcpLow', label: 'HCP Baix (≤15)' },
-    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)' },
+    { key: 'hcpHigh', label: 'HCP Alt (>15)' },
     { key: 'female', label: t('categories.female') },
     { key: 'senior', label: t('categories.senior') },
   ];
@@ -123,6 +130,7 @@ const Rounds = () => {
               <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
               <th className="text-left py-3 border-b border-border/30">{t('common.name')}</th>
               <th className="text-right py-3 px-2 border-b border-border/30">{t('common.handicap')}</th>
+              <th className="text-right py-3 px-2 border-b border-border/30">Scratch</th>
               <th className="text-right py-3 border-b border-border/30">Stableford</th>
             </tr>
           </thead>
@@ -131,6 +139,7 @@ const Rounds = () => {
               const position = i + 1;
               const isTop3 = position <= 3;
               const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
+              const scratchPts = computeScratchStableford(r.scorecard, r.rounds?.course_par);
               return (
                 <tr
                   key={r.id}
@@ -153,6 +162,7 @@ const Rounds = () => {
                     </button>
                   </td>
                   <td className="py-3.5 px-2 text-right font-mono text-xs text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
+                  <td className="py-3.5 px-2 text-right font-mono text-xs text-muted-foreground">{scratchPts ?? '—'}</td>
                   <td className={`py-3.5 text-right font-mono font-bold text-sm ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{r.stableford_points ?? '—'}</td>
                 </tr>
               );
