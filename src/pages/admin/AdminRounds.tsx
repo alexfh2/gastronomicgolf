@@ -897,6 +897,40 @@ const AdminRounds = () => {
                 />
               </div>
 
+              {form.has_women_handicap && (
+                <>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs">URL de la web del camp (handicap dones)</Label>
+                      <Input
+                        value={courseUrlWomen}
+                        onChange={(e) => setCourseUrlWomen(e.target.value)}
+                        placeholder="https://web-del-camp.com/el-campo/"
+                      />
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleExtractWomen('url')} disabled={extractingWomen || !courseUrlWomen.trim()}>
+                      {extractingWomen ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Globe className="h-4 w-4 mr-1" />}
+                      URL
+                    </Button>
+                  </div>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs">Foto o PDF de la tarjeta (handicap dones)</Label>
+                      <Input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={(e) => setCourseFileWomen(e.target.files?.[0] || null)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleExtractWomen('file')} disabled={extractingWomen || !courseFileWomen}>
+                      {extractingWomen ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                      Fitxer
+                    </Button>
+                  </div>
+                </>
+              )}
+
               {form.has_women_handicap && [0, 9].map((offset) => {
                 const hcpWArr = form.course_handicap_women ? form.course_handicap_women.split(',').map(v => v.trim()) : [];
                 const updateCellWomen = (hole: number, value: string) => {
