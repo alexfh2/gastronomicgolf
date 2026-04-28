@@ -44,6 +44,7 @@ type RankingResultRow = {
     course: string | null;
     course_par: unknown;
     course_handicap: unknown;
+    course_handicap_women: unknown;
   } | null;
 };
 
