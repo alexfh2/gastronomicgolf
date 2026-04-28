@@ -130,6 +130,7 @@ const Rounds = () => {
               <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
               <th className="text-left py-3 border-b border-border/30">{t('common.name')}</th>
               <th className="text-right py-3 px-2 border-b border-border/30">{t('common.handicap')}</th>
+              <th className="text-right py-3 px-2 border-b border-border/30">Scratch</th>
               <th className="text-right py-3 border-b border-border/30">Stableford</th>
             </tr>
           </thead>
@@ -138,6 +139,7 @@ const Rounds = () => {
               const position = i + 1;
               const isTop3 = position <= 3;
               const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
+              const scratchPts = computeScratchStableford(r.scorecard, r.rounds?.course_par);
               return (
                 <tr
                   key={r.id}
@@ -160,6 +162,7 @@ const Rounds = () => {
                     </button>
                   </td>
                   <td className="py-3.5 px-2 text-right font-mono text-xs text-muted-foreground">{r.handicap_at_round ?? '—'}</td>
+                  <td className="py-3.5 px-2 text-right font-mono text-xs text-muted-foreground">{scratchPts ?? '—'}</td>
                   <td className={`py-3.5 text-right font-mono font-bold text-sm ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{r.stableford_points ?? '—'}</td>
                 </tr>
               );
