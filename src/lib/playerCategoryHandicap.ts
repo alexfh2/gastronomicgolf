@@ -62,3 +62,37 @@ export function categorizeByHandicap(hcp: number | null | undefined): 'hcp_low' 
   if (hcp == null) return null;
   return Number(hcp) <= 15 ? 'hcp_low' : 'hcp_high';
 }
+
+/**
+ * Devuelve el ÚLTIMO handicap con el que jugó cada jugador (más reciente
+ * cronológicamente). Se usa SOLO para visualización al lado del nombre.
+ * La categorización sigue usando buildPlayerCategoryHandicapMap (primera ronda).
+ */
+export function buildPlayerLastHandicapMap(
+  results: CategoryResultLike[] | null | undefined,
+): Map<string, number | null> {
+  const map = new Map<string, number | null>();
+  if (!results?.length) return map;
+
+  const lastByPlayer = new Map<string, CategoryResultLike>();
+  for (const r of results) {
+    if (r.handicap_at_round == null) continue;
+    const prev = lastByPlayer.get(r.player_id);
+    if (!prev || sortKey(r) > sortKey(prev)) {
+      lastByPlayer.set(r.player_id, r);
+    }
+  }
+
+  for (const [pid, r] of lastByPlayer.entries()) {
+    map.set(pid, r.handicap_at_round);
+  }
+
+  for (const r of results) {
+    if (map.has(r.player_id)) continue;
+    const fallback =
+      r.players_public?.current_handicap ?? r.players_public?.initial_handicap ?? null;
+    map.set(r.player_id, fallback);
+  }
+
+  return map;
+}
