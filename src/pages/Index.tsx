@@ -1,5 +1,6 @@
 import heroBg from '@/assets/hero-editorial.png';
 import sponsorsLine from '@/assets/sponsors/sponsors-line.png';
+import sponsorsLineLight from '@/assets/sponsors/sponsors-line-light.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -124,10 +125,17 @@ const Index = () => {
                 <div className="h-px flex-1 bg-border/30" />
               </div>
               <img
-                src={sponsorsLine}
+                src={sponsorsLineLight}
                 alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
                 loading="lazy"
-                className="block mx-auto w-[85%] sm:w-[75%] h-auto object-contain opacity-65 hover:opacity-95 transition-opacity duration-500 dark:invert-0 invert"
+                className="block dark:hidden mx-auto w-[85%] sm:w-[75%] h-auto object-contain opacity-65 hover:opacity-95 transition-opacity duration-500"
+              />
+              <img
+                src={sponsorsLine}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                className="hidden dark:block mx-auto w-[85%] sm:w-[75%] h-auto object-contain opacity-65 hover:opacity-95 transition-opacity duration-500"
               />
             </div>
           </div>
