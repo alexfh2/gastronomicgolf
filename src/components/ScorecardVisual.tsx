@@ -6,7 +6,10 @@ interface ScorecardVisualProps {
   scores: number[];
   par?: number[];
   handicap?: number[];
+  /** Optional female-specific stroke index distribution; used when playerGender === 'F' */
+  handicapWomen?: number[];
   playerHandicap?: number | null;
+  playerGender?: string | null;
 }
 
 const calcPlayingHcp = (hcp: number): number => Math.round(hcp);
