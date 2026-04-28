@@ -77,27 +77,32 @@ const Rounds = () => {
     downloadIcs(ics, 'circuit-gastronomic-golf-2026.ics');
   };
 
-  const { data: roundResults } = useQuery({
+  const { data: roundData } = useQuery({
     queryKey: [...publicCircuitDataQueryKey, 'round-results', expandedRound],
     queryFn: async () => {
-      if (!expandedRound) return [];
+      if (!expandedRound) return { results: [], categoryHcpMap: new Map<string, number | null>() };
       const data = await fetchPublicCircuitData();
-      return data.results
+      const categoryHcpMap = buildPlayerCategoryHandicapMap(data.results as any);
+      const results = data.results
         .filter((result) => result.round_id === expandedRound)
         .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      return { results, categoryHcpMap };
     },
     enabled: !!expandedRound,
   });
 
+  const roundResults = roundData?.results;
+  const categoryHcpMap = roundData?.categoryHcpMap ?? new Map<string, number | null>();
+
   const categorizeResults = (results: typeof roundResults) => {
     if (!results) return {};
     const hcpLow = results.filter(r => {
-      const hcp = r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
+      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
       return hcp != null && hcp <= 15.0;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
     const hcpHigh = results.filter(r => {
-      const hcp = r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
-      return hcp != null && hcp > 15.0 && hcp <= 36;
+      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
+      return hcp != null && hcp > 15.0;
     }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
     const female = results.filter(r => ((r as any).players_public)?.gender === 'F')
       .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
@@ -110,7 +115,7 @@ const Rounds = () => {
 
   const roundCategories = [
     { key: 'hcpLow', label: 'HCP Baix (≤15)' },
-    { key: 'hcpHigh', label: 'HCP Alt (15.1-36)' },
+    { key: 'hcpHigh', label: 'HCP Alt (>15)' },
     { key: 'female', label: t('categories.female') },
     { key: 'senior', label: t('categories.senior') },
   ];
