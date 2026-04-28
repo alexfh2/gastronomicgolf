@@ -153,20 +153,21 @@ const Stats = () => {
 
   const categoryLeaders = useMemo(() => {
     if (!categoryData?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
+    const categoryHcpMap = buildPlayerCategoryHandicapMap(categoryData as any);
     const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
     for (const r of categoryData) {
       const p = r.players_public as any;
       if (!p) continue;
-      const hcp = r.handicap_at_round ?? p.current_handicap;
+      const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
       const existing = agg.get(r.player_id);
-      if (existing) { existing.totalPoints += pts; existing.rounds += 1; if (hcp != null) existing.handicap = hcp; }
+      if (existing) { existing.totalPoints += pts; existing.rounds += 1; }
       else { agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, gender: p.gender, is_senior: p.is_senior, handicap: hcp, playerId: r.player_id }); }
     }
     const all = Array.from(agg.values());
     return {
       hcpLow: all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
-      hcpHigh: all.filter(p => p.handicap != null && p.handicap > 15 && p.handicap <= 36).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
+      hcpHigh: all.filter(p => p.handicap != null && p.handicap > 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
       female: all.filter(p => p.gender === 'F').sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
       senior: all.filter(p => p.is_senior).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
     };
