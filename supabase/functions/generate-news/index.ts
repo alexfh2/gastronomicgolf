@@ -33,7 +33,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    const { round_id, language, tone, sponsor, special_mention } = await req.json();
+    const { round_id, language, tone, sponsor, special_mention, weather_conditions } = await req.json();
 
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -136,6 +136,16 @@ DADES DE LA JORNADA:
 - Patrocinador: ${sponsor || 'cap'}
 ${round.is_master ? '- JORNADA MASTER (punts x1.25)' : ''}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
+${(() => {
+  const w = weather_conditions || {};
+  const lines: string[] = [];
+  if (w.friday) lines.push(`  · Divendres: ${w.friday}`);
+  if (w.saturday) lines.push(`  · Dissabte: ${w.saturday}`);
+  if (w.sunday) lines.push(`  · Diumenge: ${w.sunday}`);
+  if (w.green_speed) lines.push(`  · Velocitat dels greens: ${w.green_speed}`);
+  if (w.wind) lines.push(`  · Vent: ${w.wind}`);
+  return lines.length ? `- Condicions meteorològiques i del camp:\n${lines.join('\n')}` : '';
+})()}
 
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
@@ -158,6 +168,7 @@ INSTRUCCIONS:
 - OBLIGATORI: inclou SEMPRE les 4 categories si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
 - Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
 - NO mencionIs resultats scratch ni cops totals
+- Si s'han proporcionat condicions meteorològiques, velocitat de greens o vent, integra-les amb naturalitat a la narració quan siguin rellevants (especialment si han estat dures: pluja, vent fort, greens molt ràpids, calor, etc.). Si són condicions normals, pots ometre-les o mencionar-les breument. No facis una secció separada de meteorologia.
 - Genera un títol atractiu
 - Un subtítol complementari
 - Un cos complet amb la narració per categories

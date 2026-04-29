@@ -42,6 +42,12 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [specialMention, setSpecialMention] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
+  // Weather conditions per day (optional)
+  const [weatherFri, setWeatherFri] = useState('');
+  const [weatherSat, setWeatherSat] = useState('');
+  const [weatherSun, setWeatherSun] = useState('');
+  const [greenSpeed, setGreenSpeed] = useState('');
+  const [windConditions, setWindConditions] = useState('');
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
   const [tone, setTone] = useState<'press' | 'whatsapp' | 'instagram'>('press');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
@@ -126,6 +132,13 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
         return { type: 'whatsapp' as const, message: data.message as string };
       }
       // Press
+      const weather_conditions = {
+        friday: weatherFri || null,
+        saturday: weatherSat || null,
+        sunday: weatherSun || null,
+        green_speed: greenSpeed || null,
+        wind: windConditions || null,
+      };
       const { data, error } = await supabase.functions.invoke('generate-news', {
         body: {
           round_id: round.id,
@@ -133,6 +146,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
           tone,
           sponsor: confirmSponsor ? round.sponsor : null,
           special_mention: specialMention || null,
+          weather_conditions,
         },
       });
       if (error) throw error;
@@ -267,6 +281,92 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                   placeholder="p. ex. homenatge a un jugador, agraïment especial..."
                 />
               </div>
+
+              {/* Meteorology / course conditions */}
+              {(() => {
+                const start = round.date ? new Date(round.date) : null;
+                const end = round.end_date ? new Date(round.end_date) : start;
+                const days = new Set<number>();
+                if (start && end) {
+                  const cur = new Date(start);
+                  while (cur <= end) {
+                    days.add(cur.getDay()); // 0=Sun, 5=Fri, 6=Sat
+                    cur.setDate(cur.getDate() + 1);
+                  }
+                }
+                const showFri = days.has(5);
+                const showSat = days.has(6);
+                const showSun = days.has(0);
+                const anyDay = showFri || showSat || showSun;
+                return (
+                  <div className="space-y-3 border border-border/50 rounded-md p-3 bg-muted/20">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Condicions meteorològiques (opcional)
+                    </p>
+                    {anyDay ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {showFri && (
+                          <div className="space-y-1">
+                            <Label className="text-xs">Divendres</Label>
+                            <Input
+                              value={weatherFri}
+                              onChange={(e) => setWeatherFri(e.target.value)}
+                              placeholder="p. ex. sol, 22°C"
+                            />
+                          </div>
+                        )}
+                        {showSat && (
+                          <div className="space-y-1">
+                            <Label className="text-xs">Dissabte</Label>
+                            <Input
+                              value={weatherSat}
+                              onChange={(e) => setWeatherSat(e.target.value)}
+                              placeholder="p. ex. núvol, pluja fluixa"
+                            />
+                          </div>
+                        )}
+                        {showSun && (
+                          <div className="space-y-1">
+                            <Label className="text-xs">Diumenge</Label>
+                            <Input
+                              value={weatherSun}
+                              onChange={(e) => setWeatherSun(e.target.value)}
+                              placeholder="p. ex. sol i calor"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Temps</Label>
+                        <Input
+                          value={weatherSat}
+                          onChange={(e) => setWeatherSat(e.target.value)}
+                          placeholder="p. ex. sol, 22°C"
+                        />
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Velocitat dels greens</Label>
+                        <Input
+                          value={greenSpeed}
+                          onChange={(e) => setGreenSpeed(e.target.value)}
+                          placeholder="p. ex. ràpids (11 stimp), mitjans..."
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Vent</Label>
+                        <Input
+                          value={windConditions}
+                          onChange={(e) => setWindConditions(e.target.value)}
+                          placeholder="p. ex. fort de tramuntana, suau..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="space-y-2">
                 <Label>Idioma</Label>
