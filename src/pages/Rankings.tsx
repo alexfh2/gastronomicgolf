@@ -208,51 +208,55 @@ const Rankings = () => {
 
     const hasManyRounds = (rounds?.length || 0) > 3;
 
+    // Solid background per row. Top 3 use a fixed accent tint (no gradient) so sticky
+    // columns and middle cells share the same color. Card base color is fully opaque
+    // to prevent scrolled round numbers bleeding through sticky name/pos/total cells.
+    const cardSolid = 'hsl(var(--card))';
+    const top3Bg = (pos: number) => {
+      if (pos === 1) return `color-mix(in srgb, hsl(var(--accent)) 14%, hsl(var(--card)))`;
+      if (pos === 2) return `color-mix(in srgb, hsl(var(--accent)) 9%, hsl(var(--card)))`;
+      if (pos === 3) return `color-mix(in srgb, hsl(var(--accent)) 5%, hsl(var(--card)))`;
+      return cardSolid;
+    };
+
     return (
       <div className="relative">
-        {/* Fade indicador de scroll lateral en móvil */}
-        {hasManyRounds && (
-          <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-card/80 to-transparent z-10 sm:hidden" />
-        )}
         <div className="overflow-x-auto scroll-smooth -mx-2 px-2 [scrollbar-width:thin]">
           <table className="w-full text-sm border-separate border-spacing-0 min-w-[420px]">
             <thead>
               <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                <th className="text-left py-3 pr-1.5 w-8 border-b border-border/30 sticky left-0 bg-card/95 backdrop-blur-sm z-[5]">Pos.</th>
-                <th className="text-left py-3 pr-2 border-b border-border/30 sticky left-8 bg-card/95 backdrop-blur-sm z-[5]">
+                <th className="text-left py-3 pr-1.5 w-8 border-b border-border/30 sticky left-0 z-[6]" style={{ background: cardSolid }}>Pos.</th>
+                <th className="text-left py-3 pr-2 border-b border-border/30 sticky left-8 z-[6]" style={{ background: cardSolid }}>
                   {t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span>
                 </th>
                 {rounds?.map((r) => (
-                  <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 font-mono text-[10px]">
+                  <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 font-mono text-[10px]" style={{ background: cardSolid }}>
                     J{r.round_number}
                   </th>
                 ))}
-                <th className="text-right py-3 pl-3 pr-1 border-b border-border/30 border-l border-border/20">{t('common.total')}</th>
+                <th className="text-right py-3 pl-3 pr-2 border-b border-border/30 border-l border-border/20 sticky right-0 z-[6]" style={{ background: cardSolid }}>{t('common.total')}</th>
               </tr>
             </thead>
             <tbody>
               {players.map((p: any, i: number) => {
                 const position = i + 1;
                 const isTop3 = position <= 3;
-                const accentAlpha = position === 1 ? 0.14 : position === 2 ? 0.09 : position === 3 ? 0.05 : 0;
-                const rowBg = isTop3
-                  ? `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.5}) 50%, hsl(var(--accent) / ${accentAlpha * 0.2}) 100%)`
-                  : undefined;
+                const rowBg = top3Bg(position);
 
                 return (
                   <tr
                     key={p.id}
-                    className="border-b border-border/20 last:border-0 hover:bg-muted/15 transition-colors group"
+                    className="border-b border-border/20 last:border-0 group"
                   >
                     <td
                       className={`py-3 pr-1.5 text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
-                      style={{ background: rowBg || 'hsl(var(--card) / 0.95)', backdropFilter: 'blur(4px)' }}
+                      style={{ background: rowBg }}
                     >
                       {position}
                     </td>
                     <td
                       className="py-3 pr-2 sticky left-8 z-[4]"
-                      style={{ background: rowBg || 'hsl(var(--card) / 0.95)', backdropFilter: 'blur(4px)' }}
+                      style={{ background: rowBg }}
                     >
                       <button
                         type="button"
@@ -284,7 +288,7 @@ const Rankings = () => {
                       );
                     })}
                     <td
-                      className={`py-3 pl-3 pr-1 text-right font-mono font-bold text-sm border-l border-border/20 ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                      className={`py-3 pl-3 pr-2 text-right font-mono font-bold text-sm border-l border-border/20 sticky right-0 z-[4] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                       style={{ background: rowBg }}
                     >
                       {p.total}
