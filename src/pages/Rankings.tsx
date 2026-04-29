@@ -358,7 +358,7 @@ const Rankings = () => {
                 {categories.find(c => c.key === activeTab)?.label}
               </h3>
             </div>
-            <div className="px-7 py-2">
+            <div className="px-3 sm:px-7 py-2">
               {renderTable((rankings as any)[activeTab])}
             </div>
           </div>
