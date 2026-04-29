@@ -151,6 +151,11 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
   });
 
   let birdies = 0, pars = 0, bogeys = 0, doublePlus = 0;
+  const parGroupStats: Record<3 | 4 | 5, { strokes: number; count: number }> = {
+    3: { strokes: 0, count: 0 },
+    4: { strokes: 0, count: 0 },
+    5: { strokes: 0, count: 0 },
+  };
   const n = roundsWithScorecard.length;
   for (const r of roundsWithScorecard) {
     const raw = r.scorecard as any;
@@ -164,8 +169,19 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
       else if (diff === 0) pars++;
       else if (diff === 1) bogeys++;
       else doublePlus++;
+
+      const p = par[i];
+      if (p === 3 || p === 4 || p === 5) {
+        parGroupStats[p as 3 | 4 | 5].strokes += scores[i];
+        parGroupStats[p as 3 | 4 | 5].count += 1;
+      }
     }
   }
+
+  const formatParAvg = (par: 3 | 4 | 5) => {
+    const g = parGroupStats[par];
+    return g.count > 0 ? (g.strokes / g.count).toFixed(2) : '—';
+  };
 
   const stats = [
     { label: 'Mitjana Stb.', value: avgStb, icon: TrendingUp },
@@ -174,6 +190,12 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
     { label: 'Pars/r.', value: n ? (pars / n).toFixed(1) : '—', icon: Target },
     { label: 'Bogeys/r.', value: n ? (bogeys / n).toFixed(1) : '—', icon: Square },
     { label: 'Doble+/r.', value: n ? (doublePlus / n).toFixed(1) : '—', icon: AlertTriangle },
+  ];
+
+  const parAverages = [
+    { label: 'Mitjana Pars 3', value: formatParAvg(3), count: parGroupStats[3].count, par: 3 },
+    { label: 'Mitjana Pars 4', value: formatParAvg(4), count: parGroupStats[4].count, par: 4 },
+    { label: 'Mitjana Pars 5', value: formatParAvg(5), count: parGroupStats[5].count, par: 5 },
   ];
 
   // Determine main category (by HCP) and subcategories
