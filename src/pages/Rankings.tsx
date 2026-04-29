@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap, buildPlayerLastHandicapMap } from '@/lib/playerCategoryHandicap';
-import { Trophy, ChevronRight, Users } from 'lucide-react';
+import { Trophy, ChevronRight, Users, ChevronDown, User } from 'lucide-react';
 
 type Result = PublicResult;
 
@@ -28,6 +28,7 @@ const Rankings = () => {
   const { t } = useTranslation();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('hcpLow');
+  const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
 
   const { data: results, isLoading } = useQuery({
     queryKey: publicCircuitDataQueryKey,
@@ -220,93 +221,167 @@ const Rankings = () => {
     };
 
     return (
-      <div className="relative">
-        <div className="overflow-x-auto scroll-smooth -mx-2 px-2 [scrollbar-width:thin]">
-          <table className="w-full text-sm border-separate border-spacing-0 min-w-[320px] sm:min-w-[420px]">
-            <thead>
-              <tr className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.12em] sm:tracking-[0.15em] uppercase">
-                <th className="text-left py-2.5 sm:py-3 pr-1 sm:pr-1.5 w-6 sm:w-8 border-b border-border/30 sticky left-0 z-[6]" style={{ background: cardSolid }}>Pos.</th>
-                <th className="text-left py-2.5 sm:py-3 pr-1.5 sm:pr-2 border-b border-border/30 sticky left-6 sm:left-8 z-[6]" style={{ background: cardSolid }}>
-                  {t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span>
-                </th>
-                {rounds?.map((r) => (
-                  <th key={r.id} className="text-right py-2.5 sm:py-3 px-1 sm:px-2 whitespace-nowrap border-b border-border/30 font-mono text-[9px] sm:text-[10px]" style={{ background: cardSolid }}>
-                    J{r.round_number}
-                  </th>
-                ))}
-                <th className="text-right py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 border-b border-border/30 border-l border-border/30 sticky right-0 z-[7] text-[9px] sm:text-[10px]" style={{ background: cardSolid, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}>{t('common.total')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {players.map((p: any, i: number) => {
-                const position = i + 1;
-                const isTop3 = position <= 3;
-                const rowBg = top3Bg(position);
+      <>
+        {/* ---------- MOBILE VIEW: lista compacta expandible ---------- */}
+        <div className="sm:hidden">
+          <ul className="divide-y divide-border/20">
+            {players.map((p: any, i: number) => {
+              const position = i + 1;
+              const isTop3 = position <= 3;
+              const rowBg = top3Bg(position);
+              const isExpanded = expandedPlayerId === p.id;
 
-                return (
-                  <tr
-                    key={p.id}
-                    className="border-b border-border/20 last:border-0 group"
+              return (
+                <li key={p.id} style={{ background: rowBg }}>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedPlayerId(isExpanded ? null : p.id)}
+                    className="w-full flex items-center gap-2 py-3 px-2 text-left"
+                    aria-expanded={isExpanded}
                   >
-                    <td
-                      className={`py-2.5 sm:py-3 pr-1 sm:pr-1.5 text-[11px] sm:text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
-                      style={{ background: rowBg }}
+                    <span
+                      className={`w-5 text-[12px] font-body font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
                     >
                       {position}
-                    </td>
-                    <td
-                      className="py-2.5 sm:py-3 pr-1.5 sm:pr-2 sticky left-6 sm:left-8 z-[4]"
-                      style={{ background: rowBg }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPlayerId(p.id)}
-                        className="flex items-center gap-1 sm:gap-2 hover:text-accent transition-colors text-left"
-                      >
-                        <div className="hidden sm:flex h-5 w-5 rounded-full bg-muted/40 items-center justify-center shrink-0">
-                          <Users className="h-2.5 w-2.5 text-muted-foreground/60" />
-                        </div>
-                        <span className="text-[10.5px] sm:text-[13px] font-body font-medium text-foreground leading-tight whitespace-nowrap">
-                          {p.name}
-                          {p.displayHandicap != null && (
-                            <span className="ml-1 text-[9px] sm:text-[10px] text-muted-foreground/60 font-mono">
-                              ({Number(p.displayHandicap).toFixed(1)})
-                            </span>
-                          )}
-                        </span>
-                      </button>
-                    </td>
-                    {rounds?.map((r) => {
-                      const score = p.roundScores.get(r.id);
-                      const val = score?.weighted ?? score?.points;
-                      return (
-                        <td
-                          key={r.id}
-                          className="py-2.5 sm:py-3 px-1 sm:px-2 text-right font-mono text-[10.5px] sm:text-xs"
-                          style={{ background: rowBg }}
-                        >
-                          {val != null ? val : <span className="text-muted-foreground/30">—</span>}
-                        </td>
-                      );
-                    })}
-                    <td
-                      className={`py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 text-right font-mono font-bold text-[11px] sm:text-sm border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
-                      style={{ background: rowBg, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[12px] font-body font-medium text-foreground leading-tight truncate">
+                        {p.name}
+                        {p.displayHandicap != null && (
+                          <span className="ml-1 text-[10px] text-muted-foreground/60 font-mono">
+                            ({Number(p.displayHandicap).toFixed(1)})
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                    <span
+                      className={`font-mono font-bold text-[13px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                     >
                       {p.total}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </span>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {isExpanded && (
+                    <div className="px-2 pb-3 pt-1 animate-fade-in">
+                      <div className="grid grid-cols-5 gap-1.5 mb-3">
+                        {rounds?.map((r) => {
+                          const score = p.roundScores.get(r.id);
+                          const val = score?.weighted ?? score?.points;
+                          return (
+                            <div
+                              key={r.id}
+                              className="flex flex-col items-center justify-center py-1.5 px-1 border border-border/30 bg-card/40"
+                            >
+                              <span className="text-[8.5px] font-body font-medium tracking-[0.1em] uppercase text-muted-foreground/60">
+                                J{r.round_number}
+                              </span>
+                              <span className="font-mono text-[11px] text-foreground tabular-nums">
+                                {val != null ? val : <span className="text-muted-foreground/30">—</span>}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPlayerId(p.id);
+                        }}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[10px] font-body font-medium tracking-[0.2em] uppercase text-accent border border-accent/30 hover:bg-accent/10 transition-colors"
+                      >
+                        <User className="h-3 w-3" strokeWidth={1.5} />
+                        Veure perfil del jugador
+                      </button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        {hasManyRounds && (
-          <p className="text-[9px] font-body text-muted-foreground/50 tracking-[0.2em] uppercase text-center mt-3 sm:hidden">
-            ← Desplaça per veure més jornades →
-          </p>
-        )}
-      </div>
+
+        {/* ---------- DESKTOP / TABLET VIEW: tabla completa ---------- */}
+        <div className="hidden sm:block relative">
+          <div className="overflow-x-auto scroll-smooth -mx-2 px-2 [scrollbar-width:thin]">
+            <table className="w-full text-sm border-separate border-spacing-0 min-w-[420px]">
+              <thead>
+                <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+                  <th className="text-left py-3 pr-1.5 w-8 border-b border-border/30 sticky left-0 z-[6]" style={{ background: cardSolid }}>Pos.</th>
+                  <th className="text-left py-3 pr-2 border-b border-border/30 sticky left-8 z-[6]" style={{ background: cardSolid }}>
+                    {t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span>
+                  </th>
+                  {rounds?.map((r) => (
+                    <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 font-mono text-[10px]" style={{ background: cardSolid }}>
+                      J{r.round_number}
+                    </th>
+                  ))}
+                  <th className="text-right py-3 pl-3 pr-2 border-b border-border/30 border-l border-border/30 sticky right-0 z-[7] text-[10px]" style={{ background: cardSolid, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}>{t('common.total')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.map((p: any, i: number) => {
+                  const position = i + 1;
+                  const isTop3 = position <= 3;
+                  const rowBg = top3Bg(position);
+
+                  return (
+                    <tr key={p.id} className="border-b border-border/20 last:border-0 group">
+                      <td
+                        className={`py-3 pr-1.5 text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
+                        style={{ background: rowBg }}
+                      >
+                        {position}
+                      </td>
+                      <td className="py-3 pr-2 sticky left-8 z-[4]" style={{ background: rowBg }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPlayerId(p.id)}
+                          className="flex items-center gap-2 hover:text-accent transition-colors text-left"
+                        >
+                          <div className="h-5 w-5 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+                            <Users className="h-2.5 w-2.5 text-muted-foreground/60" />
+                          </div>
+                          <span className="text-[13px] font-body font-medium text-foreground leading-tight whitespace-nowrap">
+                            {p.name}
+                            {p.displayHandicap != null && (
+                              <span className="ml-1 text-[10px] text-muted-foreground/60 font-mono">
+                                ({Number(p.displayHandicap).toFixed(1)})
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      </td>
+                      {rounds?.map((r) => {
+                        const score = p.roundScores.get(r.id);
+                        const val = score?.weighted ?? score?.points;
+                        return (
+                          <td
+                            key={r.id}
+                            className="py-3 px-2 text-right font-mono text-xs"
+                            style={{ background: rowBg }}
+                          >
+                            {val != null ? val : <span className="text-muted-foreground/30">—</span>}
+                          </td>
+                        );
+                      })}
+                      <td
+                        className={`py-3 pl-3 pr-2 text-right font-mono font-bold text-sm border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                        style={{ background: rowBg, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}
+                      >
+                        {p.total}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </>
     );
   };
 
