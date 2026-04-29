@@ -234,7 +234,7 @@ const Rankings = () => {
                     J{r.round_number}
                   </th>
                 ))}
-                <th className="text-right py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 border-b border-border/30 border-l border-border/20 sticky right-0 z-[6] text-[9px] sm:text-[10px]" style={{ background: cardSolid }}>{t('common.total')}</th>
+                <th className="text-right py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 border-b border-border/30 border-l border-border/30 sticky right-0 z-[7] text-[9px] sm:text-[10px]" style={{ background: cardSolid, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}>{t('common.total')}</th>
               </tr>
             </thead>
             <tbody>
@@ -290,8 +290,8 @@ const Rankings = () => {
                       );
                     })}
                     <td
-                      className={`py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 text-right font-mono font-bold text-[11px] sm:text-sm border-l border-border/20 sticky right-0 z-[4] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
-                      style={{ background: rowBg }}
+                      className={`py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 text-right font-mono font-bold text-[11px] sm:text-sm border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                      style={{ background: rowBg, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}
                     >
                       {p.total}
                     </td>
