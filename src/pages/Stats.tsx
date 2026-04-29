@@ -338,8 +338,8 @@ const Stats = () => {
     const easiestHole = easiestHoles[0] || { name: '—', value: 0, detail: '' };
 
     return {
-      stats: { bestRound, bestRoundScratch, bestAvg, topBirdie, hardestCourse, hardestHole, easiestHole, totalPlayers: players.length, totalResults: results.length, specialShots },
-      leaderboards: [top10BestRound, top10BestRoundScratch, top10Avg, specialShots, top10Birdies, hardestHoles, easiestHoles, top10Courses],
+      stats: { bestRound, bestRoundScratch, bestAvg, topBirdie, hardestCourse, hardestHole, easiestHole, par3Stats, par4Stats, par5Stats, totalPlayers: players.length, totalResults: results.length, specialShots },
+      leaderboards: [top10BestRound, top10BestRoundScratch, top10Avg, specialShots, top10Birdies, hardestHoles, easiestHoles, top10Courses, par3Stats.perCourse, par4Stats.perCourse, par5Stats.perCourse],
     };
   }, [results]);
 
@@ -353,6 +353,9 @@ const Stats = () => {
         { icon: CircleDot, label: t('stats.hardestHole', 'Forat més difícil'), value: `${stats.hardestHole.value}`, detail: `${stats.hardestHole.name} — ${stats.hardestHole.detail || ''}`, unit: 'cops' },
         { icon: CircleDot, label: t('stats.easiestHole', 'Forat més fàcil'), value: `${stats.easiestHole.value}`, detail: `${stats.easiestHole.name} — ${stats.easiestHole.detail || ''}`, unit: 'cops' },
         { icon: Mountain, label: t('stats.courseDifficulty', 'Camps per dificultat'), value: `${stats.hardestCourse.value} pts/avg`, detail: `${stats.hardestCourse.name}`, unit: 'pts' },
+        { icon: CircleDot, label: 'Mitjana Pars 3', value: stats.par3Stats.total > 0 ? `${stats.par3Stats.avg} cops` : '—', detail: stats.par3Stats.total > 0 ? `${stats.par3Stats.total} forats jugats · ${(stats.par3Stats.avg - 3 >= 0 ? '+' : '')}${(stats.par3Stats.avg - 3).toFixed(2)} sobre par` : 'Sense dades', unit: 'cops' },
+        { icon: CircleDot, label: 'Mitjana Pars 4', value: stats.par4Stats.total > 0 ? `${stats.par4Stats.avg} cops` : '—', detail: stats.par4Stats.total > 0 ? `${stats.par4Stats.total} forats jugats · ${(stats.par4Stats.avg - 4 >= 0 ? '+' : '')}${(stats.par4Stats.avg - 4).toFixed(2)} sobre par` : 'Sense dades', unit: 'cops' },
+        { icon: CircleDot, label: 'Mitjana Pars 5', value: stats.par5Stats.total > 0 ? `${stats.par5Stats.avg} cops` : '—', detail: stats.par5Stats.total > 0 ? `${stats.par5Stats.total} forats jugats · ${(stats.par5Stats.avg - 5 >= 0 ? '+' : '')}${(stats.par5Stats.avg - 5).toFixed(2)} sobre par` : 'Sense dades', unit: 'cops' },
       ]
     : [];
 
