@@ -28,6 +28,7 @@ const Rankings = () => {
   const { t } = useTranslation();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('hcpLow');
+  const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
 
   const { data: results, isLoading } = useQuery({
     queryKey: publicCircuitDataQueryKey,
