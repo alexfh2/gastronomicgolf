@@ -168,6 +168,7 @@ INSTRUCCIONS:
 - OBLIGATORI: inclou SEMPRE les 4 categories si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
 - Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
 - NO mencionIs resultats scratch ni cops totals
+- Si s'han proporcionat condicions meteorològiques, velocitat de greens o vent, integra-les amb naturalitat a la narració quan siguin rellevants (especialment si han estat dures: pluja, vent fort, greens molt ràpids, calor, etc.). Si són condicions normals, pots ometre-les o mencionar-les breument. No facis una secció separada de meteorologia.
 - Genera un títol atractiu
 - Un subtítol complementari
 - Un cos complet amb la narració per categories
