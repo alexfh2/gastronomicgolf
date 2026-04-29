@@ -206,68 +206,100 @@ const Rankings = () => {
   const renderTable = (players: any[] | undefined) => {
     if (!players?.length) return <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>;
 
-    return (
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-separate border-spacing-0">
-          <thead>
-            <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-              <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
-              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span></th>
-              {rounds?.map((r, ri) => (
-                <th key={r.id} className={`text-right py-3 px-1.5 whitespace-nowrap border-b border-border/30 ${ri % 2 === 0 ? 'bg-muted/5' : ''}`}>J{r.round_number}</th>
-              ))}
-              <th className="text-right py-3 border-b border-border/30 border-l border-border/20">{t('common.total')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((p: any, i: number) => {
-              const position = i + 1;
-              const isTop3 = position <= 3;
-              const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
+    const hasManyRounds = (rounds?.length || 0) > 3;
 
-              return (
-                <tr
-                  key={p.id}
-                  className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors relative"
-                  style={
-                    isTop3
-                      ? {
-                          background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 30%, transparent 70%)`,
-                        }
-                      : undefined
-                  }
-                >
-                  <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>
-                    {position}
-                  </td>
-                  <td className="py-3.5">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedPlayerId(p.id)}
-                      className="flex items-center gap-2 hover:text-accent transition-colors text-left"
+    return (
+      <div className="relative">
+        {/* Fade indicador de scroll lateral en móvil */}
+        {hasManyRounds && (
+          <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-card/80 to-transparent z-10 sm:hidden" />
+        )}
+        <div className="overflow-x-auto scroll-smooth -mx-2 px-2 [scrollbar-width:thin]">
+          <table className="w-full text-sm border-separate border-spacing-0 min-w-[420px]">
+            <thead>
+              <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+                <th className="text-left py-3 pr-1.5 w-8 border-b border-border/30 sticky left-0 bg-card/95 backdrop-blur-sm z-[5]">Pos.</th>
+                <th className="text-left py-3 pr-2 border-b border-border/30 sticky left-8 bg-card/95 backdrop-blur-sm z-[5]">
+                  {t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span>
+                </th>
+                {rounds?.map((r) => (
+                  <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 font-mono text-[10px]">
+                    J{r.round_number}
+                  </th>
+                ))}
+                <th className="text-right py-3 pl-3 pr-1 border-b border-border/30 border-l border-border/20">{t('common.total')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {players.map((p: any, i: number) => {
+                const position = i + 1;
+                const isTop3 = position <= 3;
+                const accentAlpha = position === 1 ? 0.14 : position === 2 ? 0.09 : position === 3 ? 0.05 : 0;
+                const rowBg = isTop3
+                  ? `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.5}) 50%, hsl(var(--accent) / ${accentAlpha * 0.2}) 100%)`
+                  : undefined;
+
+                return (
+                  <tr
+                    key={p.id}
+                    className="border-b border-border/20 last:border-0 hover:bg-muted/15 transition-colors group"
+                  >
+                    <td
+                      className={`py-3 pr-1.5 text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
+                      style={{ background: rowBg || 'hsl(var(--card) / 0.95)', backdropFilter: 'blur(4px)' }}
                     >
-                      <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                        <Users className="h-3 w-3 text-muted-foreground/60" />
-                      </div>
-                      <span className="text-sm font-body font-medium text-foreground">{p.name}</span>
-                      {p.displayHandicap != null && <span className="text-[10px] text-muted-foreground/60 font-mono">({Number(p.displayHandicap).toFixed(1)})</span>}
-                    </button>
-                  </td>
-                  {rounds?.map((r, ri) => {
-                    const score = p.roundScores.get(r.id);
-                    const val = score?.weighted ?? score?.points;
-                    return (
-                      <td key={r.id} className={`py-3.5 px-1.5 text-right font-mono text-xs ${ri % 2 === 0 ? 'bg-muted/5' : ''}`}>
-                        {val != null ? val : <span className="text-muted-foreground/30">—</span>}
-                      </td>
-                    );
-                  })}
-                  <td className={`py-3.5 text-right font-mono font-bold text-sm border-l border-border/20 ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{p.total}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                      {position}
+                    </td>
+                    <td
+                      className="py-3 pr-2 sticky left-8 z-[4]"
+                      style={{ background: rowBg || 'hsl(var(--card) / 0.95)', backdropFilter: 'blur(4px)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPlayerId(p.id)}
+                        className="flex items-center gap-2 hover:text-accent transition-colors text-left"
+                      >
+                        <div className="h-5 w-5 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+                          <Users className="h-2.5 w-2.5 text-muted-foreground/60" />
+                        </div>
+                        <span className="text-[13px] font-body font-medium text-foreground leading-tight">{p.name}</span>
+                        {p.displayHandicap != null && (
+                          <span className="text-[10px] text-muted-foreground/60 font-mono whitespace-nowrap">
+                            ({Number(p.displayHandicap).toFixed(1)})
+                          </span>
+                        )}
+                      </button>
+                    </td>
+                    {rounds?.map((r) => {
+                      const score = p.roundScores.get(r.id);
+                      const val = score?.weighted ?? score?.points;
+                      return (
+                        <td
+                          key={r.id}
+                          className="py-3 px-2 text-right font-mono text-xs"
+                          style={{ background: rowBg }}
+                        >
+                          {val != null ? val : <span className="text-muted-foreground/30">—</span>}
+                        </td>
+                      );
+                    })}
+                    <td
+                      className={`py-3 pl-3 pr-1 text-right font-mono font-bold text-sm border-l border-border/20 ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                      style={{ background: rowBg }}
+                    >
+                      {p.total}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        {hasManyRounds && (
+          <p className="text-[9px] font-body text-muted-foreground/50 tracking-[0.2em] uppercase text-center mt-3 sm:hidden">
+            ← Desplaça per veure més jornades →
+          </p>
+        )}
       </div>
     );
   };
@@ -326,7 +358,7 @@ const Rankings = () => {
                 {categories.find(c => c.key === activeTab)?.label}
               </h3>
             </div>
-            <div className="px-7 py-2">
+            <div className="px-3 sm:px-7 py-2">
               {renderTable((rankings as any)[activeTab])}
             </div>
           </div>
