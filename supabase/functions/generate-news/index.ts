@@ -136,6 +136,16 @@ DADES DE LA JORNADA:
 - Patrocinador: ${sponsor || 'cap'}
 ${round.is_master ? '- JORNADA MASTER (punts x1.25)' : ''}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
+${(() => {
+  const w = weather_conditions || {};
+  const lines: string[] = [];
+  if (w.friday) lines.push(`  · Divendres: ${w.friday}`);
+  if (w.saturday) lines.push(`  · Dissabte: ${w.saturday}`);
+  if (w.sunday) lines.push(`  · Diumenge: ${w.sunday}`);
+  if (w.green_speed) lines.push(`  · Velocitat dels greens: ${w.green_speed}`);
+  if (w.wind) lines.push(`  · Vent: ${w.wind}`);
+  return lines.length ? `- Condicions meteorològiques i del camp:\n${lines.join('\n')}` : '';
+})()}
 
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
