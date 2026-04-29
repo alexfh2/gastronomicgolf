@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap, buildPlayerLastHandicapMap } from '@/lib/playerCategoryHandicap';
-import { Trophy, ChevronRight, Users } from 'lucide-react';
+import { Trophy, ChevronRight, Users, ChevronDown, User } from 'lucide-react';
 
 type Result = PublicResult;
 
