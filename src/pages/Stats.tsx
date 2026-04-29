@@ -215,11 +215,16 @@ const Stats = () => {
     const players = Array.from(byPlayer.entries());
 
     const allRounds: LeaderboardEntry[] = [];
+    const allRoundsScratch: LeaderboardEntry[] = [];
     for (const r of results) {
       if (r.stableford_points != null) allRounds.push({ name: (r.players_public as any)?.name || '', value: r.stableford_points, detail: (r.rounds as any)?.name || '', playerId: r.player_id });
+      const scratchPts = computeScratchStableford(r.scorecard, (r.rounds as any)?.course_par);
+      if (scratchPts != null) allRoundsScratch.push({ name: (r.players_public as any)?.name || '', value: scratchPts, detail: (r.rounds as any)?.name || '', playerId: r.player_id });
     }
     allRounds.sort((a, b) => b.value - a.value);
+    allRoundsScratch.sort((a, b) => b.value - a.value);
     const top10BestRound = allRounds.slice(0, 10);
+    const top10BestRoundScratch = allRoundsScratch.slice(0, 10);
 
     const avgList: LeaderboardEntry[] = [];
     for (const [pid, player] of players) {
