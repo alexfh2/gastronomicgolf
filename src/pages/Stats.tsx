@@ -8,6 +8,7 @@ import { Trophy, TrendingUp, ChevronDown, Mountain, CircleDot, Bird, Star, Crown
 import { cn } from '@/lib/utils';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
+import { computeScratchStableford } from '@/lib/scratchStableford';
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
@@ -214,11 +215,16 @@ const Stats = () => {
     const players = Array.from(byPlayer.entries());
 
     const allRounds: LeaderboardEntry[] = [];
+    const allRoundsScratch: LeaderboardEntry[] = [];
     for (const r of results) {
       if (r.stableford_points != null) allRounds.push({ name: (r.players_public as any)?.name || '', value: r.stableford_points, detail: (r.rounds as any)?.name || '', playerId: r.player_id });
+      const scratchPts = computeScratchStableford(r.scorecard, (r.rounds as any)?.course_par);
+      if (scratchPts != null) allRoundsScratch.push({ name: (r.players_public as any)?.name || '', value: scratchPts, detail: (r.rounds as any)?.name || '', playerId: r.player_id });
     }
     allRounds.sort((a, b) => b.value - a.value);
+    allRoundsScratch.sort((a, b) => b.value - a.value);
     const top10BestRound = allRounds.slice(0, 10);
+    const top10BestRoundScratch = allRoundsScratch.slice(0, 10);
 
     const avgList: LeaderboardEntry[] = [];
     for (const [pid, player] of players) {
@@ -290,6 +296,7 @@ const Stats = () => {
       .map(hole => ({ name: hole.name, value: hole.avgStrokes, detail: `x${(hole.avgStrokes / hole.par).toFixed(2)} par · Par ${hole.par}${hole.hcp != null ? ` · HCP ${hole.hcp}` : ''}` }));
 
     const bestRound = top10BestRound[0] || { name: '—', value: 0, detail: '' };
+    const bestRoundScratch = top10BestRoundScratch[0] || { name: '—', value: 0, detail: '' };
     const bestAvg = top10Avg[0] || { name: '—', value: 0 };
     const topBirdie = top10Birdies[0] || { name: '—', value: 0 };
     const hardestCourse = top10Courses[0] || { name: '—', value: 0 };
@@ -297,14 +304,15 @@ const Stats = () => {
     const easiestHole = easiestHoles[0] || { name: '—', value: 0, detail: '' };
 
     return {
-      stats: { bestRound, bestAvg, topBirdie, hardestCourse, hardestHole, easiestHole, totalPlayers: players.length, totalResults: results.length, specialShots },
-      leaderboards: [top10BestRound, top10Avg, specialShots, top10Birdies, hardestHoles, easiestHoles, top10Courses],
+      stats: { bestRound, bestRoundScratch, bestAvg, topBirdie, hardestCourse, hardestHole, easiestHole, totalPlayers: players.length, totalResults: results.length, specialShots },
+      leaderboards: [top10BestRound, top10BestRoundScratch, top10Avg, specialShots, top10Birdies, hardestHoles, easiestHoles, top10Courses],
     };
   }, [results]);
 
   const statCards = stats
     ? [
-        { icon: Trophy, label: t('stats.bestRound'), value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
+        { icon: Trophy, label: `${t('stats.bestRound')} (amb hàndicap)`, value: `${stats.bestRound.value} pts`, detail: `${stats.bestRound.name} — ${stats.bestRound.detail}`, unit: 'pts' },
+        { icon: Trophy, label: `${t('stats.bestRound')} (scratch)`, value: `${stats.bestRoundScratch.value} pts`, detail: `${stats.bestRoundScratch.name} — ${stats.bestRoundScratch.detail}`, unit: 'pts' },
         { icon: TrendingUp, label: t('stats.avgStableford'), value: `${stats.bestAvg.value} pts`, detail: stats.bestAvg.name, unit: 'pts' },
         { icon: Star, label: 'Hole-in-One / Eagles / Albatros', value: stats.specialShots.length > 0 ? `${stats.specialShots.length}` : 'Cap encara', detail: stats.specialShots.length > 0 ? stats.specialShots[0].detail || '' : 'Encara no s\'ha aconseguit cap cop especial', unit: 'special' },
         { icon: Bird, label: t('stats.birdies', 'Birdies'), value: `${stats.topBirdie.value}`, detail: stats.topBirdie.name, unit: 'birdies' },
