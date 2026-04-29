@@ -369,6 +369,26 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                   </div>
                 ))}
               </div>
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                {parAverages.map((p) => {
+                  const numericVal = p.count > 0 ? Number(p.value) : null;
+                  const overPar = numericVal != null ? numericVal - p.par : null;
+                  return (
+                    <div key={p.label} className="border border-border/50 rounded-lg p-3 bg-secondary/30 text-center">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{p.label}</div>
+                      <div className="font-display font-extrabold text-xl text-foreground tabular-nums leading-tight">
+                        {p.count > 0 ? `${p.value}` : '—'}
+                        {p.count > 0 && <span className="text-[10px] text-muted-foreground font-body font-normal ml-1">cops</span>}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground/70 mt-0.5">
+                        {p.count > 0 ? (
+                          <>{p.count} forats · {overPar! >= 0 ? '+' : ''}{overPar!.toFixed(2)} sobre par</>
+                        ) : 'Sense dades'}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
