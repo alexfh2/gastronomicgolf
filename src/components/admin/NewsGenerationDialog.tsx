@@ -282,6 +282,92 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                 />
               </div>
 
+              {/* Meteorology / course conditions */}
+              {(() => {
+                const start = round.date ? new Date(round.date) : null;
+                const end = round.end_date ? new Date(round.end_date) : start;
+                const days = new Set<number>();
+                if (start && end) {
+                  const cur = new Date(start);
+                  while (cur <= end) {
+                    days.add(cur.getDay()); // 0=Sun, 5=Fri, 6=Sat
+                    cur.setDate(cur.getDate() + 1);
+                  }
+                }
+                const showFri = days.has(5);
+                const showSat = days.has(6);
+                const showSun = days.has(0);
+                const anyDay = showFri || showSat || showSun;
+                return (
+                  <div className="space-y-3 border border-border/50 rounded-md p-3 bg-muted/20">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Condicions meteorològiques (opcional)
+                    </p>
+                    {anyDay ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {showFri && (
+                          <div className="space-y-1">
+                            <Label className="text-xs">Divendres</Label>
+                            <Input
+                              value={weatherFri}
+                              onChange={(e) => setWeatherFri(e.target.value)}
+                              placeholder="p. ex. sol, 22°C"
+                            />
+                          </div>
+                        )}
+                        {showSat && (
+                          <div className="space-y-1">
+                            <Label className="text-xs">Dissabte</Label>
+                            <Input
+                              value={weatherSat}
+                              onChange={(e) => setWeatherSat(e.target.value)}
+                              placeholder="p. ex. núvol, pluja fluixa"
+                            />
+                          </div>
+                        )}
+                        {showSun && (
+                          <div className="space-y-1">
+                            <Label className="text-xs">Diumenge</Label>
+                            <Input
+                              value={weatherSun}
+                              onChange={(e) => setWeatherSun(e.target.value)}
+                              placeholder="p. ex. sol i calor"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Temps</Label>
+                        <Input
+                          value={weatherSat}
+                          onChange={(e) => setWeatherSat(e.target.value)}
+                          placeholder="p. ex. sol, 22°C"
+                        />
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Velocitat dels greens</Label>
+                        <Input
+                          value={greenSpeed}
+                          onChange={(e) => setGreenSpeed(e.target.value)}
+                          placeholder="p. ex. ràpids (11 stimp), mitjans..."
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Vent</Label>
+                        <Input
+                          value={windConditions}
+                          onChange={(e) => setWindConditions(e.target.value)}
+                          placeholder="p. ex. fort de tramuntana, suau..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="space-y-2">
                 <Label>Idioma</Label>
                 <div className="flex gap-2">
