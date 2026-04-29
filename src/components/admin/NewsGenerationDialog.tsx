@@ -42,6 +42,12 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [specialMention, setSpecialMention] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
+  // Weather conditions per day (optional)
+  const [weatherFri, setWeatherFri] = useState('');
+  const [weatherSat, setWeatherSat] = useState('');
+  const [weatherSun, setWeatherSun] = useState('');
+  const [greenSpeed, setGreenSpeed] = useState('');
+  const [windConditions, setWindConditions] = useState('');
   const [language, setLanguage] = useState<'ca' | 'es'>('ca');
   const [tone, setTone] = useState<'press' | 'whatsapp' | 'instagram'>('press');
   const [generatedNews, setGeneratedNews] = useState<GeneratedNews | null>(null);
