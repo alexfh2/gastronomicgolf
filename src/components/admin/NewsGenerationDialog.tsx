@@ -132,6 +132,13 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
         return { type: 'whatsapp' as const, message: data.message as string };
       }
       // Press
+      const weather_conditions = {
+        friday: weatherFri || null,
+        saturday: weatherSat || null,
+        sunday: weatherSun || null,
+        green_speed: greenSpeed || null,
+        wind: windConditions || null,
+      };
       const { data, error } = await supabase.functions.invoke('generate-news', {
         body: {
           round_id: round.id,
@@ -139,6 +146,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
           tone,
           sponsor: confirmSponsor ? round.sponsor : null,
           special_mention: specialMention || null,
+          weather_conditions,
         },
       });
       if (error) throw error;
