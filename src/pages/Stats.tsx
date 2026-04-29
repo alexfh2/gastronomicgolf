@@ -248,6 +248,11 @@ const Stats = () => {
     const sortedRoundNums = Array.from(roundNumbers).sort((a, b) => a - b);
 
     const courseAggregates = new Map<string, CourseAggregate>();
+    const parGroupTotals: Record<3 | 4 | 5, { strokes: number; count: number; perCourse: Map<string, { name: string; strokes: number; count: number }> }> = {
+      3: { strokes: 0, count: 0, perCourse: new Map() },
+      4: { strokes: 0, count: 0, perCourse: new Map() },
+      5: { strokes: 0, count: 0, perCourse: new Map() },
+    };
     for (const r of results) {
       const rawCourseName = (r.rounds as any)?.course || (r.rounds as any)?.club || '';
       if (!rawCourseName) continue;
@@ -268,9 +273,38 @@ const Stats = () => {
         holeAggregate.parCounts[String(pars[h])] = (holeAggregate.parCounts[String(pars[h])] || 0) + 1;
         if (hcps[h] > 0) holeAggregate.hcpCounts[String(hcps[h])] = (holeAggregate.hcpCounts[String(hcps[h])] || 0) + 1;
         courseAggregate.holes.set(h + 1, holeAggregate);
+
+        // Par 3/4/5 averages — only count holes that were actually played (exclude picked-up)
+        const parValue = pars[h];
+        if ((parValue === 3 || parValue === 4 || parValue === 5) && scores[h] > 0) {
+          const group = parGroupTotals[parValue as 3 | 4 | 5];
+          group.strokes += scores[h];
+          group.count += 1;
+          const pc = group.perCourse.get(courseKey) ?? { name: rawCourseName, strokes: 0, count: 0 };
+          pc.name = pickDisplayName(pc.name, rawCourseName);
+          pc.strokes += scores[h];
+          pc.count += 1;
+          group.perCourse.set(courseKey, pc);
+        }
       }
       courseAggregates.set(courseKey, courseAggregate);
     }
+
+    const buildParAverage = (par: 3 | 4 | 5): { avg: number; total: number; perCourse: LeaderboardEntry[] } => {
+      const g = parGroupTotals[par];
+      const avg = g.count > 0 ? Math.round((g.strokes / g.count) * 100) / 100 : 0;
+      const perCourse = Array.from(g.perCourse.values())
+        .filter(c => c.count > 0)
+        .map(c => {
+          const cAvg = Math.round((c.strokes / c.count) * 100) / 100;
+          return { name: c.name, value: cAvg, detail: `${c.count} forats jugats · ${(cAvg - par >= 0 ? '+' : '')}${(cAvg - par).toFixed(2)} sobre par` };
+        })
+        .sort((a, b) => b.value - a.value);
+      return { avg, total: g.count, perCourse };
+    };
+    const par3Stats = buildParAverage(3);
+    const par4Stats = buildParAverage(4);
+    const par5Stats = buildParAverage(5);
 
     const courseList: LeaderboardEntry[] = Array.from(courseAggregates.values())
       .filter(course => course.scores.length > 0)
