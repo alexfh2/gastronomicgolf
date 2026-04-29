@@ -222,19 +222,19 @@ const Rankings = () => {
     return (
       <div className="relative">
         <div className="overflow-x-auto scroll-smooth -mx-2 px-2 [scrollbar-width:thin]">
-          <table className="w-full text-sm border-separate border-spacing-0 min-w-[420px]">
+          <table className="w-full text-sm border-separate border-spacing-0 min-w-[320px] sm:min-w-[420px]">
             <thead>
-              <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
-                <th className="text-left py-3 pr-1.5 w-8 border-b border-border/30 sticky left-0 z-[6]" style={{ background: cardSolid }}>Pos.</th>
-                <th className="text-left py-3 pr-2 border-b border-border/30 sticky left-8 z-[6]" style={{ background: cardSolid }}>
+              <tr className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.12em] sm:tracking-[0.15em] uppercase">
+                <th className="text-left py-2.5 sm:py-3 pr-1 sm:pr-1.5 w-6 sm:w-8 border-b border-border/30 sticky left-0 z-[6]" style={{ background: cardSolid }}>Pos.</th>
+                <th className="text-left py-2.5 sm:py-3 pr-1.5 sm:pr-2 border-b border-border/30 sticky left-6 sm:left-8 z-[6]" style={{ background: cardSolid }}>
                   {t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span>
                 </th>
                 {rounds?.map((r) => (
-                  <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 font-mono text-[10px]" style={{ background: cardSolid }}>
+                  <th key={r.id} className="text-right py-2.5 sm:py-3 px-1 sm:px-2 whitespace-nowrap border-b border-border/30 font-mono text-[9px] sm:text-[10px]" style={{ background: cardSolid }}>
                     J{r.round_number}
                   </th>
                 ))}
-                <th className="text-right py-3 pl-3 pr-2 border-b border-border/30 border-l border-border/20 sticky right-0 z-[6]" style={{ background: cardSolid }}>{t('common.total')}</th>
+                <th className="text-right py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 border-b border-border/30 border-l border-border/20 sticky right-0 z-[6] text-[9px] sm:text-[10px]" style={{ background: cardSolid }}>{t('common.total')}</th>
               </tr>
             </thead>
             <tbody>
@@ -249,29 +249,31 @@ const Rankings = () => {
                     className="border-b border-border/20 last:border-0 group"
                   >
                     <td
-                      className={`py-3 pr-1.5 text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
+                      className={`py-2.5 sm:py-3 pr-1 sm:pr-1.5 text-[11px] sm:text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
                       style={{ background: rowBg }}
                     >
                       {position}
                     </td>
                     <td
-                      className="py-3 pr-2 sticky left-8 z-[4]"
+                      className="py-2.5 sm:py-3 pr-1.5 sm:pr-2 sticky left-6 sm:left-8 z-[4]"
                       style={{ background: rowBg }}
                     >
                       <button
                         type="button"
                         onClick={() => setSelectedPlayerId(p.id)}
-                        className="flex items-center gap-2 hover:text-accent transition-colors text-left"
+                        className="flex items-center gap-1 sm:gap-2 hover:text-accent transition-colors text-left"
                       >
-                        <div className="h-5 w-5 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+                        <div className="hidden sm:flex h-5 w-5 rounded-full bg-muted/40 items-center justify-center shrink-0">
                           <Users className="h-2.5 w-2.5 text-muted-foreground/60" />
                         </div>
-                        <span className="text-[13px] font-body font-medium text-foreground leading-tight">{p.name}</span>
-                        {p.displayHandicap != null && (
-                          <span className="text-[10px] text-muted-foreground/60 font-mono whitespace-nowrap">
-                            ({Number(p.displayHandicap).toFixed(1)})
-                          </span>
-                        )}
+                        <span className="text-[10.5px] sm:text-[13px] font-body font-medium text-foreground leading-tight whitespace-nowrap">
+                          {p.name}
+                          {p.displayHandicap != null && (
+                            <span className="ml-1 text-[9px] sm:text-[10px] text-muted-foreground/60 font-mono">
+                              ({Number(p.displayHandicap).toFixed(1)})
+                            </span>
+                          )}
+                        </span>
                       </button>
                     </td>
                     {rounds?.map((r) => {
@@ -280,7 +282,7 @@ const Rankings = () => {
                       return (
                         <td
                           key={r.id}
-                          className="py-3 px-2 text-right font-mono text-xs"
+                          className="py-2.5 sm:py-3 px-1 sm:px-2 text-right font-mono text-[10.5px] sm:text-xs"
                           style={{ background: rowBg }}
                         >
                           {val != null ? val : <span className="text-muted-foreground/30">—</span>}
@@ -288,7 +290,7 @@ const Rankings = () => {
                       );
                     })}
                     <td
-                      className={`py-3 pl-3 pr-2 text-right font-mono font-bold text-sm border-l border-border/20 sticky right-0 z-[4] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                      className={`py-2.5 sm:py-3 pl-1.5 sm:pl-3 pr-1.5 sm:pr-2 text-right font-mono font-bold text-[11px] sm:text-sm border-l border-border/20 sticky right-0 z-[4] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                       style={{ background: rowBg }}
                     >
                       {p.total}
