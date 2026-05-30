@@ -83,36 +83,44 @@ const Rounds = () => {
       if (!expandedRound) return { results: [], categoryHcpMap: new Map<string, number | null>() };
       const data = await fetchPublicCircuitData();
       const categoryHcpMap = buildPlayerCategoryHandicapMap(data.results as any);
+      const getHcp = (r: any) => r.handicap_at_round ?? r.players_public?.current_handicap ?? -Infinity;
+      const sortByPointsThenHcp = (a: any, b: any) => {
+        const diff = (b.stableford_points ?? 0) - (a.stableford_points ?? 0);
+        if (diff !== 0) return diff;
+        return getHcp(b) - getHcp(a);
+      };
       const results = data.results
         .filter((result) => result.round_id === expandedRound)
-        .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
-      return { results, categoryHcpMap };
+        .sort(sortByPointsThenHcp);
+      return { results, categoryHcpMap, sortByPointsThenHcp, getHcp };
     },
     enabled: !!expandedRound,
   });
 
   const roundResults = roundData?.results;
   const categoryHcpMap = roundData?.categoryHcpMap ?? new Map<string, number | null>();
+  const sortByPointsThenHcp = roundData?.sortByPointsThenHcp ?? ((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
 
   const categorizeResults = (results: typeof roundResults) => {
     if (!results) return {};
     const hcpLow = results.filter(r => {
       const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
       return hcp != null && hcp <= 15.0;
-    }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+    }).sort(sortByPointsThenHcp);
     const hcpHigh = results.filter(r => {
       const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? ((r as any).players_public)?.current_handicap;
       return hcp != null && hcp > 15.0;
-    }).sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+    }).sort(sortByPointsThenHcp);
     const female = results.filter(r => ((r as any).players_public)?.gender === 'F')
-      .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      .sort(sortByPointsThenHcp);
     const senior = results.filter(r => ((r as any).players_public)?.is_senior)
-      .sort((a, b) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      .sort(sortByPointsThenHcp);
     // Scratch: ranking por Stableford bruto (sin handicap), todos los jugadores.
     const scratch = results
       .map(r => ({ ...r, _scratchPts: computeScratchStableford(r.scorecard, (r as any).rounds?.course_par) }))
       .filter(r => r._scratchPts != null)
       .sort((a, b) => (b._scratchPts ?? 0) - (a._scratchPts ?? 0));
+
     return { hcpLow, hcpHigh, female, senior, scratch };
   };
 
