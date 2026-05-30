@@ -58,19 +58,60 @@ serve(async (req) => {
       .eq("id", round.season_id)
       .single();
 
-    // Categorize results
+    // Build fixed category HCP map (first played round per player, season-wide)
+    const { data: seasonRounds } = await supabase
+      .from("rounds")
+      .select("id, date, round_number, status")
+      .eq("season_id", round.season_id);
+    const consideredRoundIds = (seasonRounds || [])
+      .filter((r: any) => r.status === "published" || r.id === round_id)
+      .map((r: any) => r.id);
+    const roundMeta = new Map<string, any>((seasonRounds || []).map((r: any) => [r.id, r]));
+    const { data: allSeasonResults } = await supabase
+      .from("results")
+      .select("player_id, handicap_at_round, play_date, created_at, round_id, players(initial_handicap, current_handicap)")
+      .in("round_id", consideredRoundIds.length ? consideredRoundIds : [round_id]);
+    const sortKey = (r: any) => {
+      const meta = roundMeta.get(r.round_id) || {};
+      const d = r.play_date || meta.date || "";
+      const n = String(meta.round_number ?? 9999).padStart(4, "0");
+      const c = r.created_at || "";
+      return `${d || "9999-99-99"}|${n}|${c}`;
+    };
+    const firstByPlayer = new Map<string, any>();
+    for (const r of (allSeasonResults || [])) {
+      if (r.handicap_at_round == null) continue;
+      const prev = firstByPlayer.get(r.player_id);
+      if (!prev || sortKey(r) < sortKey(prev)) firstByPlayer.set(r.player_id, r);
+    }
+    const categoryHcpMap = new Map<string, number | null>();
+    for (const [pid, r] of firstByPlayer.entries()) categoryHcpMap.set(pid, r.handicap_at_round);
+    for (const r of (allSeasonResults || [])) {
+      if (categoryHcpMap.has(r.player_id)) continue;
+      const p: any = r.players;
+      categoryHcpMap.set(r.player_id, p?.initial_handicap ?? p?.current_handicap ?? null);
+    }
+    const getCatHcp = (r: any) =>
+      categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? r.players?.current_handicap ?? null;
+    const getHcp = (r: any) => r.handicap_at_round ?? r.players?.current_handicap ?? null;
+    // Stableford tiebreaker: lower HCP wins
+    const sortByPointsThenLowHcp = (a: any, b: any) => {
+      const diff = (b.stableford_points ?? 0) - (a.stableford_points ?? 0);
+      if (diff !== 0) return diff;
+      return (Number(getHcp(a)) || Infinity) - (Number(getHcp(b)) || Infinity);
+    };
     const hcpLow = results
-      .filter((r: any) => r.category === "hcp_low" || (r.handicap_at_round !== null && r.handicap_at_round <= 15))
-      .sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      .filter((r: any) => { const h = getCatHcp(r); return h != null && Number(h) <= 15.0; })
+      .sort(sortByPointsThenLowHcp);
     const hcpHigh = results
-      .filter((r: any) => r.category === "hcp_high" || (r.handicap_at_round !== null && r.handicap_at_round > 15))
-      .sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      .filter((r: any) => { const h = getCatHcp(r); return h != null && Number(h) > 15.0; })
+      .sort(sortByPointsThenLowHcp);
     const females = results
-      .filter((r: any) => r.is_female_prize || r.players?.gender === 'F')
-      .sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      .filter((r: any) => r.players?.gender === "F")
+      .sort(sortByPointsThenLowHcp);
     const seniors = results
-      .filter((r: any) => r.is_senior_prize || r.players?.is_senior === true)
-      .sort((a: any, b: any) => (b.stableford_points ?? 0) - (a.stableford_points ?? 0));
+      .filter((r: any) => r.players?.is_senior === true)
+      .sort(sortByPointsThenLowHcp);
 
     const langLabel = language === "ca" ? "català" : "castellà";
     const publishedUrl = "https://verdant-stats.lovable.app/rankings";
