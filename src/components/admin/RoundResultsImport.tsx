@@ -253,10 +253,13 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       setSource(detectedSource);
       await matchPlayers(parsed);
 
+      const hasAnyAge = parsed.some(r => r.age != null);
+      if (!hasAnyAge) setNeedsSeniorFile(true);
+
       const totalResults = responses.reduce((sum, r) => sum + (r.count || 0), 0);
       toast({
         title: `${parsed.length} resultats únics (${totalResults} total de ${validUrls.length} URL${validUrls.length > 1 ? 's' : ''})`,
-        description: `Font: ${detectedSource}. Revisa abans de guardar.`,
+        description: `Font: ${detectedSource}.${!hasAnyAge ? ' Cal pujar classificació sènior (≥65 anys).' : ''} Revisa abans de guardar.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
