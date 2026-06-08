@@ -144,6 +144,19 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       }));
 
       setNeedsSeniorFile(false);
+
+      // Log the senior classification upload for traceability
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('import_logs').insert({
+        round_id: round.id,
+        source: `Senior ${isPdf ? 'PDF' : 'Excel'}: ${file.name}`,
+        status: 'completed',
+        records_imported: matched,
+        records_skipped: seniorCount - matched,
+        warnings: [],
+        imported_by: user?.id ?? null,
+      });
+
       toast({
         title: `${matched} jugadors sènior identificats`,
         description: `${seniorCount} jugadors al fitxer sènior, ${matched} coincidències amb els resultats.`,
