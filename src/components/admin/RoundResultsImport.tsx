@@ -253,10 +253,13 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       setSource(detectedSource);
       await matchPlayers(parsed);
 
+      const hasAnyAge = parsed.some(r => r.age != null);
+      if (!hasAnyAge) setNeedsSeniorFile(true);
+
       const totalResults = responses.reduce((sum, r) => sum + (r.count || 0), 0);
       toast({
         title: `${parsed.length} resultats únics (${totalResults} total de ${validUrls.length} URL${validUrls.length > 1 ? 's' : ''})`,
-        description: `Font: ${detectedSource}. Revisa abans de guardar.`,
+        description: `Font: ${detectedSource}.${!hasAnyAge ? ' Cal pujar classificació sènior (≥65 anys).' : ''} Revisa abans de guardar.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
@@ -433,10 +436,10 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                   <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-amber-800">
-                      No s'ha detectat informació de sènior (ni Edat ni Niv)
+                      No s'ha detectat informació d'edat als resultats
                     </p>
                     <p className="text-xs text-amber-700">
-                      Puja la classificació sènior per identificar automàticament els jugadors sènior.
+                      La categoria sènior són jugadors de 65 anys o més. Puja la classificació sènior (Excel o PDF) per identificar-los correctament.
                     </p>
                   </div>
                 </div>
