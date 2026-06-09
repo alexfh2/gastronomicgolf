@@ -441,42 +441,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             </div>
           </div>
 
-          {/* Senior classification upload fallback */}
-          {needsSeniorFile && results.length > 0 && (
-            <Card className="border-amber-300 bg-amber-50/50">
-              <CardContent className="py-3 space-y-2">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-semibold text-amber-800">
-                      No s'ha detectat informació d'edat als resultats
-                    </p>
-                    <p className="text-xs text-amber-700">
-                      La categoria sènior són jugadors de 65 anys o més. Puja la classificació sènior (Excel o PDF) per identificar-los correctament.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    ref={seniorFileRef}
-                    type="file"
-                    accept=".xlsx,.xls,.pdf"
-                    onChange={handleSeniorFileUpload}
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => seniorFileRef.current?.click()}
-                    className="w-full"
-                  >
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
-                    Pujar classificació sènior
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         {/* URL tab */}
