@@ -487,6 +487,47 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         </TabsContent>
       </Tabs>
 
+      {/* Senior classification upload — always available after loading results */}
+      {results.length > 0 && (
+        <Card className={needsSeniorFile ? "border-amber-300 bg-amber-50/50" : "border-muted"}>
+          <CardContent className="py-3 space-y-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className={`h-4 w-4 mt-0.5 shrink-0 ${needsSeniorFile ? 'text-amber-600' : 'text-muted-foreground'}`} />
+              <div className="flex-1">
+                <p className={`text-xs font-semibold ${needsSeniorFile ? 'text-amber-800' : ''}`}>
+                  Classificació sènior (≥ 65 anys)
+                </p>
+                <p className={`text-xs ${needsSeniorFile ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                  {needsSeniorFile
+                    ? "No s'ha detectat edat als resultats. Puja la classificació sènior (Excel o PDF) per identificar els jugadors de 65+ anys."
+                    : "Si tens un fitxer addicional amb la llista oficial de jugadors sènior (65+), puja'l per ajustar el filtrat (opcional)."}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Identificats actualment: <span className="font-mono font-semibold">{results.filter(r => r._is_senior).length}</span> sènior
+                </p>
+              </div>
+            </div>
+            <input
+              ref={seniorFileRef}
+              type="file"
+              accept=".xlsx,.xls,.pdf"
+              onChange={handleSeniorFileUpload}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => seniorFileRef.current?.click()}
+              className="w-full"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Pujar classificació sènior (Excel o PDF)
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+
       {/* Warnings */}
       {warnings.length > 0 && (
         <Card className="border-yellow-300 bg-yellow-50">
