@@ -24,7 +24,7 @@ const Rounds = () => {
       const { data } = await supabase
         .from('rounds')
         .select('*')
-        .order('date', { ascending: true });
+        .order('date', { ascending: false });
       return data || [];
     },
   });
