@@ -239,6 +239,9 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     setLoading(true);
     setWarnings([]);
     setResults([]);
+    setSeniorFiles([]);
+    seniorLicensesRef.current = new Set();
+    seniorNamesRef.current = new Set();
 
     try {
       const responses = await Promise.all(
