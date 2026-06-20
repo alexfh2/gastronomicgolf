@@ -223,13 +223,23 @@ const Rounds = () => {
           <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
         ) : (
           <div className="space-y-2">
-            {rounds.map((round) => {
+            {rounds.map((round, index) => {
               const played = round.date < today || (round.end_date && round.end_date < today);
               const hasResults = round.status === 'published';
               const isExpanded = expandedRound === round.id;
+              const prevPlayed = index > 0 ? (rounds[index - 1].date < today || (rounds[index - 1].end_date && rounds[index - 1].end_date < today)) : false;
+              const showDivider = index > 0 && prevPlayed && !played;
 
               return (
-                <div key={round.id} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
+                <>
+                  {showDivider && (
+                    <div className="py-3 flex items-center gap-3">
+                      <div className="h-px flex-1 bg-border/30" />
+                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Pendents</span>
+                      <div className="h-px flex-1 bg-border/30" />
+                    </div>
+                  )}
+                  <div key={round.id} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
                   <button
                     onClick={() => hasResults ? setExpandedRound(isExpanded ? null : round.id) : null}
                     className={`w-full text-left px-5 py-4 ${!hasResults ? 'cursor-default' : 'hover:bg-muted/10'}`}
