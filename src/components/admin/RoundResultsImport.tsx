@@ -325,15 +325,22 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         for (const r of resp.results as ParsedResult[]) {
           const key = (r.license || r.name).toLowerCase();
           const existing = seen.get(key);
-          if (existing) {
-            if (r.stableford_points != null && existing.stableford_points != null) {
-              if (r.stableford_points > existing.stableford_points) seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
-            } else if (r.scratch_score != null && existing.scratch_score != null) {
-              if (r.scratch_score < existing.scratch_score) seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
-            }
-          } else {
+          if (!existing) {
             seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
+            continue;
           }
+          // Prefer the entry with higher stableford (multi-day → best round wins).
+          // Fall back to lower scratch. If existing is null/missing, replace with new.
+          const newStb = r.stableford_points;
+          const oldStb = existing.stableford_points;
+          const newScr = r.scratch_score;
+          const oldScr = existing.scratch_score;
+          let replace = false;
+          if (newStb != null && oldStb != null) replace = newStb > oldStb;
+          else if (newStb != null && oldStb == null) replace = true;
+          else if (newScr != null && oldScr != null) replace = newScr < oldScr;
+          else if (newScr != null && oldScr == null) replace = true;
+          if (replace) seen.set(key, { ...r, _selected: true, _url_index: resp.urlIdx });
         }
       }
 
