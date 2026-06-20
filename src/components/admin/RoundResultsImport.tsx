@@ -62,6 +62,68 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [seniorFiles, setSeniorFiles] = useState<string[]>([]);
   const seniorLicensesRef = useRef<Set<string>>(new Set());
   const seniorNamesRef = useRef<Set<string>>(new Set());
+  const [seniorMode, setSeniorMode] = useState<'file' | 'url'>('file');
+  const [seniorUrls, setSeniorUrls] = useState<string[]>(['']);
+  const [seniorUrlLoading, setSeniorUrlLoading] = useState(false);
+
+  const addSeniorUrl = () => setSeniorUrls(prev => [...prev, '']);
+  const removeSeniorUrl = (idx: number) => setSeniorUrls(prev => prev.filter((_, i) => i !== idx));
+  const updateSeniorUrl = (idx: number, value: string) =>
+    setSeniorUrls(prev => prev.map((u, i) => i === idx ? value : u));
+
+  const recomputeSeniorMatches = () => {
+    let matched = 0;
+    setResults(prev => prev.map(r => {
+      const matchByLic = r.license && seniorLicensesRef.current.has(r.license.trim().toUpperCase());
+      const matchByName = seniorNamesRef.current.has(r.name.trim().toUpperCase());
+      const isSenior = !!(matchByLic || matchByName);
+      if (isSenior) matched++;
+      return { ...r, _is_senior: isSenior };
+    }));
+    return matched;
+  };
+
+  const handleSeniorUrlsFetch = async () => {
+    const validUrls = seniorUrls.filter(u => u.trim());
+    if (validUrls.length === 0) return;
+    setSeniorUrlLoading(true);
+    try {
+      let total = 0;
+      const processedLabels: string[] = [];
+      for (const url of validUrls) {
+        const { data, error } = await supabase.functions.invoke('parse-results', {
+          body: { url: url.trim(), format },
+        });
+        if (error) throw new Error(error.message);
+        if (!data?.success) throw new Error(data?.error || 'Error parsing URL');
+        const rows = (data.results || []) as ParsedResult[];
+        for (const r of rows) {
+          if (r.license) seniorLicensesRef.current.add(r.license.trim().toUpperCase());
+          if (r.name) seniorNamesRef.current.add(r.name.trim().toUpperCase());
+        }
+        total += rows.length;
+        try {
+          const u = new URL(url.trim());
+          processedLabels.push(`${u.hostname}${u.pathname.slice(0, 30)}…`);
+        } catch {
+          processedLabels.push(url.trim().slice(0, 40));
+        }
+      }
+      const matched = recomputeSeniorMatches();
+      setSeniorFiles(prev => [...prev, ...processedLabels]);
+      setNeedsSeniorFile(false);
+      setSeniorUrls(['']);
+      toast({
+        title: `${matched} jugadors sènior identificats`,
+        description: `${validUrls.length} URL${validUrls.length > 1 ? 's' : ''} processada${validUrls.length > 1 ? 's' : ''}, ${total} entrades sènior acumulades.`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: 'Error llegint URLs sènior', description: message, variant: 'destructive' });
+    } finally {
+      setSeniorUrlLoading(false);
+    }
+  };
 
   useEffect(() => {
     supabase.from('results').select('id', { count: 'exact', head: true })
