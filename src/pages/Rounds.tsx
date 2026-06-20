@@ -18,18 +18,22 @@ const Rounds = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('hcpLow');
 
-  const { data: rounds, isLoading } = useQuery({
+  const { data: allRounds, isLoading } = useQuery({
     queryKey: ['public-rounds-all'],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
         .select('*')
-        .order('date', { ascending: false });
+        .order('date', { ascending: true });
       return data || [];
     },
   });
 
+  // Split into played (descending) and upcoming (ascending)
   const today = new Date().toISOString().split('T')[0];
+  const playedRounds = (allRounds || []).filter((r) => r.date < today || (r.end_date && r.end_date < today)).sort((a, b) => b.date.localeCompare(a.date));
+  const upcomingRounds = (allRounds || []).filter((r) => !(r.date < today || (r.end_date && r.end_date < today)));
+  const rounds = [...playedRounds, ...upcomingRounds];
 
   const buildIcsContent = (round: any) => {
     const startDate = round.date.replace(/-/g, '');
@@ -227,15 +231,14 @@ const Rounds = () => {
               const played = round.date < today || (round.end_date && round.end_date < today);
               const hasResults = round.status === 'published';
               const isExpanded = expandedRound === round.id;
-              const prevPlayed = index > 0 ? (rounds[index - 1].date < today || (rounds[index - 1].end_date && rounds[index - 1].end_date < today)) : false;
-              const showDivider = index > 0 && prevPlayed && !played;
+              const showDivider = playedRounds.length > 0 && upcomingRounds.length > 0 && index === playedRounds.length;
 
               return (
                 <>
                   {showDivider && (
-                    <div className="py-3 flex items-center gap-3">
+                    <div className="py-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-border/30" />
-                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Pendents</span>
+                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Properes jornades</span>
                       <div className="h-px flex-1 bg-border/30" />
                     </div>
                   )}
