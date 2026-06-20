@@ -92,77 +92,81 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     return matched;
   };
 
-  // --- Senior file cross-reference (Excel or PDF) ---
+  // --- Senior file cross-reference (Excel or PDF) — supports multiple files / multi-day ---
   const handleSeniorFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     try {
-      const isPdf = file.name.toLowerCase().endsWith('.pdf');
-      let seniorLicenses = new Set<string>();
-      let seniorNames = new Set<string>();
-      let seniorCount = 0;
+      let totalSeniorCount = 0;
+      const processedNames: string[] = [];
 
-      if (isPdf) {
-        // Send PDF to edge function to extract senior names
-        const base64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const result = reader.result as string;
-            resolve(result.split(',')[1]);
-          };
-          reader.readAsDataURL(file);
-        });
+      for (const file of files) {
+        const isPdf = file.name.toLowerCase().endsWith('.pdf');
+        let seniorCount = 0;
 
-        const { data, error } = await supabase.functions.invoke('parse-senior-pdf', {
-          body: { pdf_base64: base64 },
-        });
-        if (error) throw new Error(error.message);
+        if (isPdf) {
+          const base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve(result.split(',')[1]);
+            };
+            reader.readAsDataURL(file);
+          });
 
-        const players: { name: string; license: string }[] = data?.players || [];
-        seniorCount = players.length;
-        for (const p of players) {
-          if (p.license) seniorLicenses.add(p.license.trim().toUpperCase());
-          if (p.name) seniorNames.add(p.name.trim().toUpperCase());
+          const { data, error } = await supabase.functions.invoke('parse-senior-pdf', {
+            body: { pdf_base64: base64 },
+          });
+          if (error) throw new Error(error.message);
+
+          const players: { name: string; license: string }[] = data?.players || [];
+          seniorCount = players.length;
+          for (const p of players) {
+            if (p.license) seniorLicensesRef.current.add(p.license.trim().toUpperCase());
+            if (p.name) seniorNamesRef.current.add(p.name.trim().toUpperCase());
+          }
+        } else {
+          const buffer = await file.arrayBuffer();
+          const { results: seniorRows } = parseExcelResults(buffer);
+          seniorCount = seniorRows.length;
+          for (const sr of seniorRows) {
+            if (sr.license) seniorLicensesRef.current.add(sr.license.trim().toUpperCase());
+            if (sr.name) seniorNamesRef.current.add(sr.name.trim().toUpperCase());
+          }
         }
-      } else {
-        // Excel
-        const buffer = await file.arrayBuffer();
-        const { results: seniorRows } = parseExcelResults(buffer);
-        seniorCount = seniorRows.length;
-        for (const sr of seniorRows) {
-          if (sr.license) seniorLicenses.add(sr.license.trim().toUpperCase());
-          if (sr.name) seniorNames.add(sr.name.trim().toUpperCase());
-        }
+
+        totalSeniorCount += seniorCount;
+        processedNames.push(file.name);
       }
 
-      // Cross-reference with main results
+      // Cross-reference accumulated senior sets with main results
       let matched = 0;
       setResults(prev => prev.map(r => {
-        const matchByLic = r.license && seniorLicenses.has(r.license.trim().toUpperCase());
-        const matchByName = seniorNames.has(r.name.trim().toUpperCase());
+        const matchByLic = r.license && seniorLicensesRef.current.has(r.license.trim().toUpperCase());
+        const matchByName = seniorNamesRef.current.has(r.name.trim().toUpperCase());
         const isSenior = !!(matchByLic || matchByName);
         if (isSenior) matched++;
         return { ...r, _is_senior: isSenior };
       }));
 
+      setSeniorFiles(prev => [...prev, ...processedNames]);
       setNeedsSeniorFile(false);
 
-      // Log the senior classification upload for traceability
       const { data: { user } } = await supabase.auth.getUser();
       await supabase.from('import_logs').insert({
         round_id: round.id,
-        source: `Senior ${isPdf ? 'PDF' : 'Excel'}: ${file.name}`,
+        source: `Senior files: ${processedNames.join(', ')}`,
         status: 'completed',
         records_imported: matched,
-        records_skipped: seniorCount - matched,
+        records_skipped: Math.max(0, totalSeniorCount - matched),
         warnings: [],
         imported_by: user?.id ?? null,
       });
 
       toast({
         title: `${matched} jugadors sènior identificats`,
-        description: `${seniorCount} jugadors al fitxer sènior, ${matched} coincidències amb els resultats.`,
+        description: `${files.length} fitxer${files.length > 1 ? 's' : ''} processat${files.length > 1 ? 's' : ''}, ${totalSeniorCount} entrades sènior acumulades.`,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconegut';
