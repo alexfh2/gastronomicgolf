@@ -231,15 +231,14 @@ const Rounds = () => {
               const played = round.date < today || (round.end_date && round.end_date < today);
               const hasResults = round.status === 'published';
               const isExpanded = expandedRound === round.id;
-              const prevPlayed = index > 0 ? (rounds[index - 1].date < today || (rounds[index - 1].end_date && rounds[index - 1].end_date < today)) : false;
-              const showDivider = index > 0 && prevPlayed && !played;
+              const showDivider = playedRounds.length > 0 && upcomingRounds.length > 0 && index === playedRounds.length;
 
               return (
                 <>
                   {showDivider && (
-                    <div className="py-3 flex items-center gap-3">
+                    <div className="py-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-border/30" />
-                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Pendents</span>
+                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Properes jornades</span>
                       <div className="h-px flex-1 bg-border/30" />
                     </div>
                   )}
