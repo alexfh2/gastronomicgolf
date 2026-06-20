@@ -102,16 +102,16 @@ async function parseGolfDirecto(url: string, format?: string): Promise<GolfDirec
     })
   );
 
-  // Determine which category to fetch for results (SCRATCH by default)
-  let categoryId = requestedCategoryId;
-  if (!categoryId) {
-    const scratch = allCategories.find((c) => c.name.toUpperCase().includes("SCRATCH"));
-    categoryId = scratch?.id || allCategories[0]?.id;
-  }
+  // Always prefer SCRATCH category — it contains ALL players for that day/round.
+  // The URL's own category parameter (e.g. "Handicap Baix") would only return that
+  // subset, which is what caused multi-URL imports to miss players from other categories.
+  const scratchCat = allCategories.find((c) => c.name.toUpperCase().includes("SCRATCH"));
+  let categoryId = scratchCat?.id || requestedCategoryId || allCategories[0]?.id;
 
   if (!categoryId) {
     throw new Error("No s'han trobat categories al torneig de GolfDirecto");
   }
+  console.log(`[parse-results] GolfDirecto game=${gameId} → fetching category="${allCategories.find(c=>c.id===categoryId)?.name}" (${categoryId}) from ${allCategories.length} available`);
 
   // Find SENIOR and FEMENINA category IDs to detect membership
   const seniorCatId = allCategories.find((c) => c.name.toUpperCase().includes("SENIOR"))?.id;
