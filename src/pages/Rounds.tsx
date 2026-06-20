@@ -18,18 +18,22 @@ const Rounds = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('hcpLow');
 
-  const { data: rounds, isLoading } = useQuery({
+  const { data: allRounds, isLoading } = useQuery({
     queryKey: ['public-rounds-all'],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
         .select('*')
-        .order('date', { ascending: false });
+        .order('date', { ascending: true });
       return data || [];
     },
   });
 
+  // Split into played (descending) and upcoming (ascending)
   const today = new Date().toISOString().split('T')[0];
+  const playedRounds = (allRounds || []).filter((r) => r.date < today || (r.end_date && r.end_date < today)).sort((a, b) => b.date.localeCompare(a.date));
+  const upcomingRounds = (allRounds || []).filter((r) => !(r.date < today || (r.end_date && r.end_date < today)));
+  const rounds = [...playedRounds, ...upcomingRounds];
 
   const buildIcsContent = (round: any) => {
     const startDate = round.date.replace(/-/g, '');
