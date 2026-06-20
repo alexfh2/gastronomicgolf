@@ -518,6 +518,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
               ref={seniorFileRef}
               type="file"
               accept=".xlsx,.xls,.pdf"
+              multiple
               onChange={handleSeniorFileUpload}
               className="hidden"
             />
@@ -528,8 +529,17 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
               className="w-full"
             >
               <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Pujar classificació sènior (Excel o PDF)
+              {seniorFiles.length > 0 ? 'Afegir més fitxers sènior' : 'Pujar classificació sènior (Excel o PDF)'}
             </Button>
+            {seniorFiles.length > 0 && (
+              <div className="text-[11px] text-muted-foreground space-y-0.5 pt-1">
+                <p className="font-semibold">Fitxers acumulats ({seniorFiles.length}):</p>
+                <ul className="list-disc list-inside">
+                  {seniorFiles.map((f, i) => <li key={i} className="font-mono truncate">{f}</li>)}
+                </ul>
+                <p className="italic">Pots pujar múltiples fitxers (un per dia) — les llistes s'acumulen.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
