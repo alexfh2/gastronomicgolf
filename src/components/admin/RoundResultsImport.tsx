@@ -59,6 +59,9 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [existingCount, setExistingCount] = useState<number | null>(null);
   const [needsSeniorFile, setNeedsSeniorFile] = useState(false);
   const seniorFileRef = useRef<HTMLInputElement>(null);
+  const [seniorFiles, setSeniorFiles] = useState<string[]>([]);
+  const seniorLicensesRef = useRef<Set<string>>(new Set());
+  const seniorNamesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     supabase.from('results').select('id', { count: 'exact', head: true })
