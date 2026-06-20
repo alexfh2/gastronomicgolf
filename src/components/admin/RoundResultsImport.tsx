@@ -185,6 +185,9 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     setWarnings([]);
     setResults([]);
     setNeedsSeniorFile(false);
+    setSeniorFiles([]);
+    seniorLicensesRef.current = new Set();
+    seniorNamesRef.current = new Set();
 
     try {
       const buffer = await file.arrayBuffer();
