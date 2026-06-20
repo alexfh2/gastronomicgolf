@@ -62,6 +62,68 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
   const [seniorFiles, setSeniorFiles] = useState<string[]>([]);
   const seniorLicensesRef = useRef<Set<string>>(new Set());
   const seniorNamesRef = useRef<Set<string>>(new Set());
+  const [seniorMode, setSeniorMode] = useState<'file' | 'url'>('file');
+  const [seniorUrls, setSeniorUrls] = useState<string[]>(['']);
+  const [seniorUrlLoading, setSeniorUrlLoading] = useState(false);
+
+  const addSeniorUrl = () => setSeniorUrls(prev => [...prev, '']);
+  const removeSeniorUrl = (idx: number) => setSeniorUrls(prev => prev.filter((_, i) => i !== idx));
+  const updateSeniorUrl = (idx: number, value: string) =>
+    setSeniorUrls(prev => prev.map((u, i) => i === idx ? value : u));
+
+  const recomputeSeniorMatches = () => {
+    let matched = 0;
+    setResults(prev => prev.map(r => {
+      const matchByLic = r.license && seniorLicensesRef.current.has(r.license.trim().toUpperCase());
+      const matchByName = seniorNamesRef.current.has(r.name.trim().toUpperCase());
+      const isSenior = !!(matchByLic || matchByName);
+      if (isSenior) matched++;
+      return { ...r, _is_senior: isSenior };
+    }));
+    return matched;
+  };
+
+  const handleSeniorUrlsFetch = async () => {
+    const validUrls = seniorUrls.filter(u => u.trim());
+    if (validUrls.length === 0) return;
+    setSeniorUrlLoading(true);
+    try {
+      let total = 0;
+      const processedLabels: string[] = [];
+      for (const url of validUrls) {
+        const { data, error } = await supabase.functions.invoke('parse-results', {
+          body: { url: url.trim(), format },
+        });
+        if (error) throw new Error(error.message);
+        if (!data?.success) throw new Error(data?.error || 'Error parsing URL');
+        const rows = (data.results || []) as ParsedResult[];
+        for (const r of rows) {
+          if (r.license) seniorLicensesRef.current.add(r.license.trim().toUpperCase());
+          if (r.name) seniorNamesRef.current.add(r.name.trim().toUpperCase());
+        }
+        total += rows.length;
+        try {
+          const u = new URL(url.trim());
+          processedLabels.push(`${u.hostname}${u.pathname.slice(0, 30)}…`);
+        } catch {
+          processedLabels.push(url.trim().slice(0, 40));
+        }
+      }
+      const matched = recomputeSeniorMatches();
+      setSeniorFiles(prev => [...prev, ...processedLabels]);
+      setNeedsSeniorFile(false);
+      setSeniorUrls(['']);
+      toast({
+        title: `${matched} jugadors sènior identificats`,
+        description: `${validUrls.length} URL${validUrls.length > 1 ? 's' : ''} processada${validUrls.length > 1 ? 's' : ''}, ${total} entrades sènior acumulades.`,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconegut';
+      toast({ title: 'Error llegint URLs sènior', description: message, variant: 'destructive' });
+    } finally {
+      setSeniorUrlLoading(false);
+    }
+  };
 
   useEffect(() => {
     supabase.from('results').select('id', { count: 'exact', head: true })
@@ -503,7 +565,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       {/* Senior classification upload — always available after loading results */}
       {results.length > 0 && (
         <Card className={needsSeniorFile ? "border-amber-300 bg-amber-50/50" : "border-muted"}>
-          <CardContent className="py-3 space-y-2">
+          <CardContent className="py-3 space-y-3">
             <div className="flex items-start gap-2">
               <AlertTriangle className={`h-4 w-4 mt-0.5 shrink-0 ${needsSeniorFile ? 'text-amber-600' : 'text-muted-foreground'}`} />
               <div className="flex-1">
@@ -512,38 +574,88 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                 </p>
                 <p className={`text-xs ${needsSeniorFile ? 'text-amber-700' : 'text-muted-foreground'}`}>
                   {needsSeniorFile
-                    ? "No s'ha detectat edat als resultats. Puja la classificació sènior (Excel o PDF) per identificar els jugadors de 65+ anys."
-                    : "Si tens un fitxer addicional amb la llista oficial de jugadors sènior (65+), puja'l per ajustar el filtrat (opcional)."}
+                    ? "No s'ha detectat edat als resultats. Puja la classificació sènior (Excel/PDF o URL) per identificar els jugadors de 65+ anys."
+                    : "Si tens la llista oficial de jugadors sènior (65+), puja-la per ajustar el filtrat (opcional)."}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Identificats actualment: <span className="font-mono font-semibold">{results.filter(r => r._is_senior).length}</span> sènior
                 </p>
               </div>
             </div>
-            <input
-              ref={seniorFileRef}
-              type="file"
-              accept=".xlsx,.xls,.pdf"
-              multiple
-              onChange={handleSeniorFileUpload}
-              className="hidden"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => seniorFileRef.current?.click()}
-              className="w-full"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              {seniorFiles.length > 0 ? 'Afegir més fitxers sènior' : 'Pujar classificació sènior (Excel o PDF)'}
-            </Button>
+
+            <Tabs value={seniorMode} onValueChange={(v) => setSeniorMode(v as 'file' | 'url')}>
+              <TabsList className="w-full h-8">
+                <TabsTrigger value="file" className="flex-1 text-xs gap-1 h-6">
+                  <FileSpreadsheet className="h-3 w-3" /> Excel / PDF
+                </TabsTrigger>
+                <TabsTrigger value="url" className="flex-1 text-xs gap-1 h-6">
+                  <Search className="h-3 w-3" /> URL
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="file" className="mt-2 space-y-2">
+                <input
+                  ref={seniorFileRef}
+                  type="file"
+                  accept=".xlsx,.xls,.pdf"
+                  multiple
+                  onChange={handleSeniorFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => seniorFileRef.current?.click()}
+                  className="w-full"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  {seniorFiles.length > 0 ? 'Afegir més fitxers sènior' : 'Pujar classificació sènior (Excel o PDF)'}
+                </Button>
+              </TabsContent>
+
+              <TabsContent value="url" className="mt-2 space-y-2">
+                <p className="text-[11px] text-muted-foreground">
+                  Afegeix una URL de la classificació sènior per cada dia. Els jugadors s'acumularan.
+                </p>
+                {seniorUrls.map((url, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <Input
+                      value={url}
+                      onChange={(e) => updateSeniorUrl(idx, e.target.value)}
+                      placeholder={`URL sènior dia ${idx + 1}`}
+                      className="flex-1 h-8 text-xs"
+                    />
+                    {seniorUrls.length > 1 && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeSeniorUrl(idx)}>
+                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={addSeniorUrl}>
+                    <Plus className="h-3 w-3 mr-1" /> Afegir URL
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSeniorUrlsFetch}
+                    disabled={seniorUrlLoading || seniorUrls.every(u => !u.trim())}
+                    className="ml-auto"
+                  >
+                    <Search className="h-3.5 w-3.5 mr-1" />
+                    {seniorUrlLoading ? 'Llegint...' : 'Llegir URLs sènior'}
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+
             {seniorFiles.length > 0 && (
-              <div className="text-[11px] text-muted-foreground space-y-0.5 pt-1">
-                <p className="font-semibold">Fitxers acumulats ({seniorFiles.length}):</p>
+              <div className="text-[11px] text-muted-foreground space-y-0.5 pt-1 border-t">
+                <p className="font-semibold">Fonts acumulades ({seniorFiles.length}):</p>
                 <ul className="list-disc list-inside">
                   {seniorFiles.map((f, i) => <li key={i} className="font-mono truncate">{f}</li>)}
                 </ul>
-                <p className="italic">Pots pujar múltiples fitxers (un per dia) — les llistes s'acumulen.</p>
+                <p className="italic">Pots combinar fitxers i URLs (una per dia) — totes les llistes s'acumulen.</p>
               </div>
             )}
           </CardContent>
