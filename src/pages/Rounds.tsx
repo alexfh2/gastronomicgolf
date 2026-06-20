@@ -338,6 +338,7 @@ const Rounds = () => {
                     </div>
                   )}
                 </div>
+                </>
               );
             })}
           </div>
