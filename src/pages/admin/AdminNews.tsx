@@ -200,6 +200,14 @@ const AdminNews = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {editArticle && (
+        <NewsEditDialog
+          article={editArticle}
+          open={!!editArticle}
+          onClose={() => setEditArticle(null)}
+        />
+      )}
     </div>
   );
 };
