@@ -66,16 +66,29 @@ const Index = () => {
       if (playerCat.get(r.player_id) !== cat) continue;
       const displayHcp = lastHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
       const pts = r.stableford_points ?? 0;
-      const existing = agg.get(r.player_id);
-      if (existing) {
-        existing.totalPoints += pts;
-        existing.rounds += 1;
-      } else {
-        agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, handicap: displayHcp, playerId: r.player_id, category: cat });
-      }
+    const agg2 = new Map<string, { name: string; scores: number[]; handicap: number | null; playerId: string; category: string | null }>();
+    for (const r of topResults) {
+      const p = (r as any).players_public;
+      if (!p) continue;
+      if (playerCat.get(r.player_id) !== cat) continue;
+      const displayHcp = lastHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
+      const isMaster = (r as any).rounds?.is_master || false;
+      const coef = (r as any).rounds?.master_coefficient || 1;
+      const weighted = Math.round((r.stableford_points ?? 0) * (isMaster ? coef : 1));
+      const existing = agg2.get(r.player_id);
+      if (existing) existing.scores.push(weighted);
+      else agg2.set(r.player_id, { name: p.name, scores: [weighted], handicap: displayHcp, playerId: r.player_id, category: cat });
     }
-    return Array.from(agg.values()).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5);
+    return Array.from(agg2.values())
+      .map(a => ({
+        ...a,
+        totalPoints: [...a.scores].sort((x, y) => y - x).slice(0, bestN).reduce((s, x) => s + x, 0),
+        rounds: a.scores.length,
+      }))
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .slice(0, 5);
   };
+
   const rankingLow = buildRanking('hcp_low');
   const rankingHigh = buildRanking('hcp_high');
 
