@@ -295,6 +295,7 @@ const NewsEditDialog = ({ article, open, onClose }: NewsEditDialogProps) => {
           <Tabs defaultValue="edit" className="mt-2">
             <TabsList>
               <TabsTrigger value="edit">Editar</TabsTrigger>
+              <TabsTrigger value="photos">Fotografies</TabsTrigger>
               <TabsTrigger value="preview">Vista prèvia</TabsTrigger>
             </TabsList>
 
