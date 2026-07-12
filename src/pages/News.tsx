@@ -154,6 +154,7 @@ const News = () => {
                   <AccordionItem
                     key={article.id}
                     value={article.id}
+                    id={`article-${article.id}`}
                     className="border-border/30 px-5"
                   >
                     <AccordionTrigger className="hover:no-underline py-4">
