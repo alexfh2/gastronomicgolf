@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/accordion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Calendar, Newspaper } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 type PhotoMeta = {
