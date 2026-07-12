@@ -18,6 +18,8 @@ const Rounds = () => {
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('hcpLow');
+  const [searchParams] = useSearchParams();
+  const roundRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: allRounds, isLoading } = useQuery({
     queryKey: ['public-rounds-all'],
