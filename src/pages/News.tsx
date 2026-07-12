@@ -135,7 +135,7 @@ const News = () => {
           </div>
         ) : (
           <div className="border border-border/50 bg-card/30">
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full" value={openArticle} onValueChange={setOpenArticle}>
               {news.map((article) => {
                 const photos = getPhotosForRound(article.round_id);
                 const headerPhoto = photos.find((p) => p.orientation === 'horizontal') ?? null;
