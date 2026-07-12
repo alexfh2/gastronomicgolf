@@ -4,7 +4,7 @@ import sponsorsLineLight from '@/assets/sponsors/sponsors-line-light.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp, Newspaper } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
