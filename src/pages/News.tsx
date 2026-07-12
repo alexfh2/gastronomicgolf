@@ -100,8 +100,8 @@ const News = () => {
     if (!target) return;
     setOpenArticle(target.id);
     setTimeout(() => {
-      articleRefs.current[target.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+      document.getElementById(`article-${target.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
   }, [articleParam, news]);
 
 
