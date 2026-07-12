@@ -28,6 +28,16 @@ const Index = () => {
     },
   });
 
+  const { data: season } = useQuery({
+    queryKey: ['home-season-rules'],
+    queryFn: async () => {
+      const { data } = await supabase.from('seasons').select('rules_config').eq('active', true).single();
+      return data;
+    },
+  });
+  const bestN = (season?.rules_config as any)?.best_n_scores || 8;
+
+
   const { data: topResults } = useQuery({
     queryKey: [...publicCircuitDataQueryKey, 'home-top-results'],
     queryFn: fetchPublicCircuitData,
