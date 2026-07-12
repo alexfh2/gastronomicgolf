@@ -93,6 +93,17 @@ const News = () => {
       cancelled = true;
     };
   }, [rawPhotos]);
+  const articleParam = searchParams.get('article');
+  useEffect(() => {
+    if (!articleParam || !news?.length) return;
+    const target = news.find((a) => a.id === articleParam);
+    if (!target) return;
+    setOpenArticle(target.id);
+    setTimeout(() => {
+      articleRefs.current[target.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }, [articleParam, news]);
+
 
   const getPhotosForRound = (roundId: string) =>
     photosMeta.filter((p) => p.round_id === roundId);
