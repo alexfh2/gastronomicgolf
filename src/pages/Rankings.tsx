@@ -276,6 +276,7 @@ const Rankings = () => {
                         {rounds?.map((r) => {
                           const score = p.roundScores.get(r.id);
                           const val = score?.weighted ?? score?.points;
+                          const isDropped = val != null && p.countedRoundIds && !p.countedRoundIds.has(r.id);
                           return (
                             <div
                               key={r.id}
@@ -284,12 +285,20 @@ const Rankings = () => {
                               <span className="text-[8.5px] font-body font-medium tracking-[0.1em] uppercase text-muted-foreground/60">
                                 J{r.round_number}
                               </span>
-                              <span className="font-mono text-[11px] text-foreground tabular-nums">
-                                {val != null ? val : <span className="text-muted-foreground/30">—</span>}
-                              </span>
+                              {val != null ? (
+                                <span
+                                  className={`font-mono text-[11px] tabular-nums ${isDropped ? 'line-through opacity-60 text-red-400/70' : 'text-foreground'}`}
+                                  title={isDropped ? 'No computa entre les 8 millors proves' : undefined}
+                                >
+                                  {val}
+                                </span>
+                              ) : (
+                                <span className="font-mono text-[11px] tabular-nums text-muted-foreground/30">—</span>
+                              )}
                             </div>
                           );
                         })}
+
                       </div>
                       <button
                         type="button"
