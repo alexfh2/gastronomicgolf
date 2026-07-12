@@ -28,6 +28,20 @@ const Index = () => {
     },
   });
 
+  const { data: latestNews } = useQuery({
+    queryKey: ['home-latest-news'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('news_drafts')
+        .select('id, title, published_at, rounds(name)')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const { data: season } = useQuery({
     queryKey: ['home-season-rules'],
     queryFn: async () => {
@@ -36,6 +50,9 @@ const Index = () => {
     },
   });
   const bestN = (season?.rules_config as any)?.best_n_scores || 8;
+
+  // Last published round: rounds are already fetched & filtered by status = 'published', sorted ascending by date.
+  const lastRound = rounds && rounds.length > 0 ? [...rounds].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
 
 
   const { data: topResults } = useQuery({
