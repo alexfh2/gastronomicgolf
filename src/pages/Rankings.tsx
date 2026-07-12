@@ -184,6 +184,7 @@ const Rankings = () => {
       }
       const sorted = [...p.scratchScores].sort((a, b) => b.points - a.points).slice(0, bestN);
       const total = sorted.reduce((sum, s) => sum + s.points, 0);
+      const countedRoundIds = new Set(sorted.map(s => s.roundId));
       return {
         id,
         name: p.name,
@@ -194,8 +195,10 @@ const Rankings = () => {
         total,
         roundsPlayed: p.scratchScores.length,
         roundScores,
+        countedRoundIds,
       };
     });
+
     scratch.sort((a, b) => b.total - a.total);
 
     return { hcpLow, hcpHigh, female, senior, scratch };
