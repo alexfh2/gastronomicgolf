@@ -121,6 +121,7 @@ const Rankings = () => {
         allWeighted.sort((a, b) => b.weighted - a.weighted);
         const bestScores = allWeighted.slice(0, bestN);
         const total = bestScores.reduce((sum, s) => sum + s.weighted, 0);
+        const countedRoundIds = new Set(bestScores.map(s => s.roundId));
 
         return {
           id,
@@ -132,9 +133,11 @@ const Rankings = () => {
           total,
           roundsPlayed: p.scores.length,
           roundScores,
+          countedRoundIds,
         };
       });
     };
+
 
     const hcpLow = buildRanking(p => p.handicap != null && p.handicap <= 15.0);
     hcpLow.sort((a, b) => b.total - a.total);
@@ -181,6 +184,7 @@ const Rankings = () => {
       }
       const sorted = [...p.scratchScores].sort((a, b) => b.points - a.points).slice(0, bestN);
       const total = sorted.reduce((sum, s) => sum + s.points, 0);
+      const countedRoundIds = new Set(sorted.map(s => s.roundId));
       return {
         id,
         name: p.name,
@@ -191,8 +195,10 @@ const Rankings = () => {
         total,
         roundsPlayed: p.scratchScores.length,
         roundScores,
+        countedRoundIds,
       };
     });
+
     scratch.sort((a, b) => b.total - a.total);
 
     return { hcpLow, hcpHigh, female, senior, scratch };
@@ -270,6 +276,7 @@ const Rankings = () => {
                         {rounds?.map((r) => {
                           const score = p.roundScores.get(r.id);
                           const val = score?.weighted ?? score?.points;
+                          const isDropped = val != null && p.countedRoundIds && !p.countedRoundIds.has(r.id);
                           return (
                             <div
                               key={r.id}
@@ -278,12 +285,20 @@ const Rankings = () => {
                               <span className="text-[8.5px] font-body font-medium tracking-[0.1em] uppercase text-muted-foreground/60">
                                 J{r.round_number}
                               </span>
-                              <span className="font-mono text-[11px] text-foreground tabular-nums">
-                                {val != null ? val : <span className="text-muted-foreground/30">—</span>}
-                              </span>
+                              {val != null ? (
+                                <span
+                                  className={`font-mono text-[11px] tabular-nums ${isDropped ? 'line-through opacity-60 text-red-400/70' : 'text-foreground'}`}
+                                  title={isDropped ? 'No computa entre les 8 millors proves' : undefined}
+                                >
+                                  {val}
+                                </span>
+                              ) : (
+                                <span className="font-mono text-[11px] tabular-nums text-muted-foreground/30">—</span>
+                              )}
                             </div>
                           );
                         })}
+
                       </div>
                       <button
                         type="button"
@@ -358,16 +373,19 @@ const Rankings = () => {
                       {rounds?.map((r) => {
                         const score = p.roundScores.get(r.id);
                         const val = score?.weighted ?? score?.points;
+                        const isDropped = val != null && p.countedRoundIds && !p.countedRoundIds.has(r.id);
                         return (
                           <td
                             key={r.id}
-                            className="py-3 px-2 text-right font-mono text-xs"
+                            className={`py-3 px-2 text-right font-mono text-xs ${isDropped ? 'line-through opacity-60 text-red-400/70' : ''}`}
                             style={{ background: rowBg }}
+                            title={isDropped ? 'No computa entre les 8 millors proves' : undefined}
                           >
-                            {val != null ? val : <span className="text-muted-foreground/30">—</span>}
+                            {val != null ? val : <span className="text-muted-foreground/30 no-underline">—</span>}
                           </td>
                         );
                       })}
+
                       <td
                         className={`py-3 pl-3 pr-2 text-right font-mono font-bold text-sm border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                         style={{ background: rowBg, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}
