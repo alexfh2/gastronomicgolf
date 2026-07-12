@@ -257,7 +257,7 @@ const Rounds = () => {
                       <div className="h-px flex-1 bg-border/30" />
                     </div>
                   )}
-                  <div key={round.id} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
+                  <div key={round.id} ref={(el) => { roundRefs.current[round.id] = el; }} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
                   <button
                     onClick={() => hasResults ? setExpandedRound(isExpanded ? null : round.id) : null}
                     className={`w-full text-left px-5 py-4 ${!hasResults ? 'cursor-default' : 'hover:bg-muted/10'}`}
