@@ -38,6 +38,18 @@ const Rounds = () => {
   const upcomingRounds = (allRounds || []).filter((r) => !(r.date < today || (r.end_date && r.end_date < today)));
   const rounds = [...playedRounds, ...upcomingRounds];
 
+  const roundParam = searchParams.get('round');
+  useEffect(() => {
+    if (!roundParam || !allRounds?.length) return;
+    const target = allRounds.find((r) => r.id === roundParam && r.status === 'published');
+    if (!target) return;
+    setExpandedRound(target.id);
+    setTimeout(() => {
+      roundRefs.current[target.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }, [roundParam, allRounds]);
+
+
   const buildIcsContent = (round: any) => {
     const startDate = round.date.replace(/-/g, '');
     const endRaw = round.end_date || round.date;
