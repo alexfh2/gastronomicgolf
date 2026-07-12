@@ -121,6 +121,7 @@ const Rankings = () => {
         allWeighted.sort((a, b) => b.weighted - a.weighted);
         const bestScores = allWeighted.slice(0, bestN);
         const total = bestScores.reduce((sum, s) => sum + s.weighted, 0);
+        const countedRoundIds = new Set(bestScores.map(s => s.roundId));
 
         return {
           id,
@@ -132,9 +133,11 @@ const Rankings = () => {
           total,
           roundsPlayed: p.scores.length,
           roundScores,
+          countedRoundIds,
         };
       });
     };
+
 
     const hcpLow = buildRanking(p => p.handicap != null && p.handicap <= 15.0);
     hcpLow.sort((a, b) => b.total - a.total);
