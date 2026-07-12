@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Undo2, Trash2, Calendar } from 'lucide-react';
+import { Send, Undo2, Trash2, Calendar, Pencil } from 'lucide-react';
+import NewsEditDialog from '@/components/admin/NewsEditDialog';
+import type { Tables } from '@/integrations/supabase/types';
 import {
   AlertDialog,
   AlertDialogAction,
