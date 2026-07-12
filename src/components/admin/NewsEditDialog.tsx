@@ -356,6 +356,144 @@ const NewsEditDialog = ({ article, open, onClose }: NewsEditDialogProps) => {
               </div>
             </TabsContent>
 
+            <TabsContent value="photos" className="space-y-4 pt-4">
+              <p className="text-xs text-muted-foreground italic">
+                Les fotografies són compartides per totes les versions de la notícia
+                d'aquesta jornada.
+              </p>
+
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_MIME.join(',')}
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadMutation.isPending}
+                >
+                  {uploadMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                  )}
+                  Afegir imatges
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  JPG, PNG o WEBP · màx {MAX_FILE_SIZE_MB}MB
+                </span>
+              </div>
+
+              {(!photos || photos.length === 0) && (
+                <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border/60 rounded">
+                  No hi ha fotografies per aquesta jornada.
+                </p>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {photos?.map((photo, idx) => {
+                  const captionValue = captions[photo.id] ?? '';
+                  const captionDirty = captionValue !== (photo.caption ?? '');
+                  const isDeleting =
+                    deleteMutation.isPending && deletePhotoId === photo.id;
+                  return (
+                    <div
+                      key={photo.id}
+                      className="border border-border/60 rounded overflow-hidden bg-card"
+                    >
+                      <a
+                        href={photo.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block bg-muted aspect-video overflow-hidden"
+                      >
+                        <img
+                          src={photo.url}
+                          alt={photo.caption ?? ''}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </a>
+                      <div className="p-2 space-y-2">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            disabled={idx === 0 || moveMutation.isPending}
+                            onClick={() => moveMutation.mutate({ index: idx, dir: -1 })}
+                            title="Moure enrere"
+                          >
+                            <ArrowLeft className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            disabled={
+                              idx === (photos?.length ?? 0) - 1 || moveMutation.isPending
+                            }
+                            onClick={() => moveMutation.mutate({ index: idx, dir: 1 })}
+                            title="Moure endavant"
+                          >
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Button>
+                          <span className="text-[11px] text-muted-foreground ml-1">
+                            #{idx + 1}
+                          </span>
+                          <div className="ml-auto flex items-center gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => setDeletePhotoId(photo.id)}
+                              disabled={isDeleting}
+                              title="Eliminar"
+                            >
+                              {isDeleting ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Input
+                            value={captionValue}
+                            onChange={(e) =>
+                              setCaptions((prev) => ({
+                                ...prev,
+                                [photo.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Peu de foto"
+                            className="h-8 text-xs"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 shrink-0"
+                            disabled={!captionDirty || captionMutation.isPending}
+                            onClick={() => captionMutation.mutate(photo)}
+                            title="Guardar peu de foto"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
             <TabsContent value="preview" className="pt-4">
               <article className="prose prose-sm max-w-none">
                 <h2 className="font-display text-2xl font-semibold text-foreground mb-1">
