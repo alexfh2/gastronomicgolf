@@ -35,7 +35,7 @@ const ACCEPTED_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ACCEPTED_EXT = ['jpg', 'jpeg', 'png', 'webp'];
 const MAX_FILE_SIZE_MB = 10;
 
-type NewsDraft = Tables<'news_drafts'>;
+
 
 interface NewsEditDialogProps {
   article: NewsDraft;
