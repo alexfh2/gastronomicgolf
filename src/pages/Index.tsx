@@ -350,6 +350,46 @@ function StatCard({ label, value, sub, icon }: { label: string; value: string | 
   );
 }
 
+function HeroAccessCard({
+  to,
+  icon,
+  eyebrow,
+  title,
+  meta,
+  action,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  eyebrow: string;
+  title: string;
+  meta?: string;
+  action: string;
+}) {
+  return (
+    <Link to={to} className="group">
+      <div
+        className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+        style={{
+          background:
+            'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
+          boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <span className="text-accent/80 shrink-0">{icon}</span>
+        <div className="min-w-0 flex-1">
+          <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-0.5">{eyebrow}</p>
+          <p className="font-body text-[13px] font-semibold text-foreground truncate leading-tight">{title}</p>
+          {meta && <p className="text-[10px] text-muted-foreground/70 truncate mt-0.5">{meta}</p>}
+          <p className="text-[10px] text-accent/70 font-body tracking-wider uppercase mt-1 hidden sm:block">{action}</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+      </div>
+    </Link>
+  );
+}
+
 function RankingRow({
   position,
   name,
