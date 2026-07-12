@@ -560,6 +560,32 @@ const NewsEditDialog = ({ article, open, onClose }: NewsEditDialogProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog
+        open={!!deletePhotoId}
+        onOpenChange={(o) => !o && setDeletePhotoId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar fotografia?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Aquesta acció eliminarà només aquesta imatge de la jornada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const p = photos?.find((x) => x.id === deletePhotoId);
+                if (p) deleteMutation.mutate(p);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
