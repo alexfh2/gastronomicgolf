@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Undo2, Trash2, Calendar } from 'lucide-react';
+import { Send, Undo2, Trash2, Calendar, Pencil } from 'lucide-react';
+import NewsEditDialog from '@/components/admin/NewsEditDialog';
+import type { Tables } from '@/integrations/supabase/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +24,7 @@ const AdminNews = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editArticle, setEditArticle] = useState<Tables<'news_drafts'> | null>(null);
 
   const { data: news, isLoading } = useQuery({
     queryKey: ['admin-news'],
@@ -132,6 +135,14 @@ const AdminNews = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditArticle(article as Tables<'news_drafts'>)}
+                            title="Editar"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
                           {article.status === 'draft' ? (
                             <Button
                               size="sm"
@@ -189,6 +200,14 @@ const AdminNews = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {editArticle && (
+        <NewsEditDialog
+          article={editArticle}
+          open={!!editArticle}
+          onClose={() => setEditArticle(null)}
+        />
+      )}
     </div>
   );
 };
