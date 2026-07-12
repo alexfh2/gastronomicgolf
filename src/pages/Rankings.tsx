@@ -373,16 +373,19 @@ const Rankings = () => {
                       {rounds?.map((r) => {
                         const score = p.roundScores.get(r.id);
                         const val = score?.weighted ?? score?.points;
+                        const isDropped = val != null && p.countedRoundIds && !p.countedRoundIds.has(r.id);
                         return (
                           <td
                             key={r.id}
-                            className="py-3 px-2 text-right font-mono text-xs"
+                            className={`py-3 px-2 text-right font-mono text-xs ${isDropped ? 'line-through opacity-60 text-red-400/70' : ''}`}
                             style={{ background: rowBg }}
+                            title={isDropped ? 'No computa entre les 8 millors proves' : undefined}
                           >
-                            {val != null ? val : <span className="text-muted-foreground/30">—</span>}
+                            {val != null ? val : <span className="text-muted-foreground/30 no-underline">—</span>}
                           </td>
                         );
                       })}
+
                       <td
                         className={`py-3 pl-3 pr-2 text-right font-mono font-bold text-sm border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                         style={{ background: rowBg, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}
