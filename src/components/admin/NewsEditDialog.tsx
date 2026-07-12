@@ -104,6 +104,170 @@ const NewsEditDialog = ({ article, open, onClose }: NewsEditDialogProps) => {
     },
   });
 
+  // ---------- Photos management ----------
+  const roundId = article.round_id;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deletePhotoId, setDeletePhotoId] = useState<string | null>(null);
+  const [captions, setCaptions] = useState<Record<string, string>>({});
+
+  const { data: photos } = useQuery({
+    queryKey: ['news-photos-admin', roundId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('photos')
+        .select('*')
+        .eq('round_id', roundId)
+        .eq('type', 'news')
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Photo[];
+    },
+    enabled: open,
+  });
+
+  useEffect(() => {
+    if (photos) {
+      setCaptions((prev) => {
+        const next: Record<string, string> = {};
+        photos.forEach((p) => {
+          next[p.id] = prev[p.id] ?? p.caption ?? '';
+        });
+        return next;
+      });
+    }
+  }, [photos]);
+
+  const invalidatePhotos = () => {
+    queryClient.invalidateQueries({ queryKey: ['news-photos-admin', roundId] });
+    queryClient.invalidateQueries({ queryKey: ['news-photos'] });
+    queryClient.invalidateQueries({ queryKey: ['public-news'] });
+  };
+
+  // Extract storage path from a public URL like
+  // {SUPABASE}/storage/v1/object/public/photos/news/{round}/{uuid}.ext
+  const getStoragePath = (url: string): string | null => {
+    const marker = '/storage/v1/object/public/photos/';
+    const i = url.indexOf(marker);
+    if (i < 0) return null;
+    const path = url.substring(i + marker.length);
+    return path || null;
+  };
+
+  const normalizeOrder = async (list: Photo[]) => {
+    // Update rows whose sort_order changed
+    const updates = list
+      .map((p, idx) => ({ id: p.id, next: idx, prev: p.sort_order ?? 0 }))
+      .filter((u) => u.next !== u.prev);
+    for (const u of updates) {
+      const { error } = await supabase
+        .from('photos')
+        .update({ sort_order: u.next })
+        .eq('id', u.id);
+      if (error) throw error;
+    }
+  };
+
+  const uploadMutation = useMutation({
+    mutationFn: async (files: File[]) => {
+      const currentCount = photos?.length ?? 0;
+      let sortIdx = currentCount;
+      for (const file of files) {
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        if (!ACCEPTED_EXT.includes(ext) || !ACCEPTED_MIME.includes(file.type)) {
+          throw new Error(`Format no acceptat: ${file.name}`);
+        }
+        if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+          throw new Error(`${file.name} supera ${MAX_FILE_SIZE_MB}MB`);
+        }
+        const path = `news/${roundId}/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from('photos').upload(path, file);
+        if (upErr) throw upErr;
+        const { data: urlData } = supabase.storage.from('photos').getPublicUrl(path);
+        const { error: insErr } = await supabase.from('photos').insert({
+          round_id: roundId,
+          type: 'news',
+          category: 'news',
+          url: urlData.publicUrl,
+          sort_order: sortIdx,
+        });
+        if (insErr) throw insErr;
+        sortIdx += 1;
+      }
+    },
+    onSuccess: () => {
+      invalidatePhotos();
+      toast({ title: 'Fotografies afegides' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error pujant', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (photo: Photo) => {
+      const { error } = await supabase.from('photos').delete().eq('id', photo.id);
+      if (error) throw error;
+      const path = getStoragePath(photo.url);
+      if (path) {
+        // Best-effort: only remove exact object
+        await supabase.storage.from('photos').remove([path]);
+      }
+      // Re-normalize order
+      const remaining = (photos ?? []).filter((p) => p.id !== photo.id);
+      await normalizeOrder(remaining);
+    },
+    onSuccess: () => {
+      invalidatePhotos();
+      setDeletePhotoId(null);
+      toast({ title: 'Fotografia eliminada' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error eliminant', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const moveMutation = useMutation({
+    mutationFn: async ({ index, dir }: { index: number; dir: -1 | 1 }) => {
+      if (!photos) return;
+      const target = index + dir;
+      if (target < 0 || target >= photos.length) return;
+      const reordered = [...photos];
+      const [item] = reordered.splice(index, 1);
+      reordered.splice(target, 0, item);
+      await normalizeOrder(reordered);
+    },
+    onSuccess: () => invalidatePhotos(),
+    onError: (err: Error) => {
+      toast({ title: 'Error reordenant', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const captionMutation = useMutation({
+    mutationFn: async (photo: Photo) => {
+      const value = (captions[photo.id] ?? '').trim();
+      const { error } = await supabase
+        .from('photos')
+        .update({ caption: value || null })
+        .eq('id', photo.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidatePhotos();
+      toast({ title: 'Peu de foto guardat' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (files.length > 0) uploadMutation.mutate(files);
+  };
+
+
+
   const handleClose = () => {
     if (isDirty && !saveMutation.isPending) {
       setConfirmDiscardOpen(true);
