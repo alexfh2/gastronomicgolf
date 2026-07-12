@@ -135,6 +135,14 @@ const AdminNews = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditArticle(article as Tables<'news_drafts'>)}
+                            title="Editar"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
                           {article.status === 'draft' ? (
                             <Button
                               size="sm"
