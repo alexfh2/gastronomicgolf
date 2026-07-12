@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,8 +25,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ImagePlus, Trash2, ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+
+type NewsDraft = Tables<'news_drafts'>;
+type Photo = Tables<'photos'>;
+
+const ACCEPTED_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPTED_EXT = ['jpg', 'jpeg', 'png', 'webp'];
+const MAX_FILE_SIZE_MB = 10;
 
 type NewsDraft = Tables<'news_drafts'>;
 
