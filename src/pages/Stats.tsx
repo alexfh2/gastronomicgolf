@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 import { computeScratchStableford } from '@/lib/scratchStableford';
+import { supabase } from '@/integrations/supabase/client';
+
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
