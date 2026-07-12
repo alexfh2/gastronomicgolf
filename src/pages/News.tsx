@@ -26,7 +26,6 @@ const News = () => {
   const [lightbox, setLightbox] = useState<{ url: string; caption?: string | null } | null>(null);
   const [searchParams] = useSearchParams();
   const [openArticle, setOpenArticle] = useState<string | undefined>(undefined);
-  const articleRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: news, isLoading } = useQuery({
     queryKey: ['public-news'],
