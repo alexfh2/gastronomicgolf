@@ -10,6 +10,7 @@ import {
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Calendar, Newspaper } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 type PhotoMeta = {
   id: string;
@@ -23,6 +24,8 @@ type PhotoMeta = {
 const News = () => {
   const { t } = useTranslation();
   const [lightbox, setLightbox] = useState<{ url: string; caption?: string | null } | null>(null);
+  const [searchParams] = useSearchParams();
+  const [openArticle, setOpenArticle] = useState<string | undefined>(undefined);
 
   const { data: news, isLoading } = useQuery({
     queryKey: ['public-news'],
@@ -89,6 +92,17 @@ const News = () => {
       cancelled = true;
     };
   }, [rawPhotos]);
+  const articleParam = searchParams.get('article');
+  useEffect(() => {
+    if (!articleParam || !news?.length) return;
+    const target = news.find((a) => a.id === articleParam);
+    if (!target) return;
+    setOpenArticle(target.id);
+    setTimeout(() => {
+      document.getElementById(`article-${target.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }, [articleParam, news]);
+
 
   const getPhotosForRound = (roundId: string) =>
     photosMeta.filter((p) => p.round_id === roundId);
@@ -120,7 +134,7 @@ const News = () => {
           </div>
         ) : (
           <div className="border border-border/50 bg-card/30">
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full" value={openArticle} onValueChange={setOpenArticle}>
               {news.map((article) => {
                 const photos = getPhotosForRound(article.round_id);
                 const headerPhoto = photos.find((p) => p.orientation === 'horizontal') ?? null;
@@ -139,6 +153,7 @@ const News = () => {
                   <AccordionItem
                     key={article.id}
                     value={article.id}
+                    id={`article-${article.id}`}
                     className="border-border/30 px-5"
                   >
                     <AccordionTrigger className="hover:no-underline py-4">

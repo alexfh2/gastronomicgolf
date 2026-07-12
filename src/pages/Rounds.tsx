@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +18,8 @@ const Rounds = () => {
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [activeResultTab, setActiveResultTab] = useState('hcpLow');
+  const [searchParams] = useSearchParams();
+  const roundRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: allRounds, isLoading } = useQuery({
     queryKey: ['public-rounds-all'],
@@ -34,6 +37,18 @@ const Rounds = () => {
   const playedRounds = (allRounds || []).filter((r) => r.date < today || (r.end_date && r.end_date < today)).sort((a, b) => b.date.localeCompare(a.date));
   const upcomingRounds = (allRounds || []).filter((r) => !(r.date < today || (r.end_date && r.end_date < today)));
   const rounds = [...playedRounds, ...upcomingRounds];
+
+  const roundParam = searchParams.get('round');
+  useEffect(() => {
+    if (!roundParam || !allRounds?.length) return;
+    const target = allRounds.find((r) => r.id === roundParam && r.status === 'published');
+    if (!target) return;
+    setExpandedRound(target.id);
+    setTimeout(() => {
+      roundRefs.current[target.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }, [roundParam, allRounds]);
+
 
   const buildIcsContent = (round: any) => {
     const startDate = round.date.replace(/-/g, '');
@@ -242,7 +257,7 @@ const Rounds = () => {
                       <div className="h-px flex-1 bg-border/30" />
                     </div>
                   )}
-                  <div key={round.id} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
+                  <div key={round.id} ref={(el) => { roundRefs.current[round.id] = el; }} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
                   <button
                     onClick={() => hasResults ? setExpandedRound(isExpanded ? null : round.id) : null}
                     className={`w-full text-left px-5 py-4 ${!hasResults ? 'cursor-default' : 'hover:bg-muted/10'}`}

@@ -4,7 +4,7 @@ import sponsorsLineLight from '@/assets/sponsors/sponsors-line-light.png';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp } from 'lucide-react';
+import { Trophy, BarChart3, Calendar, ChevronRight, Users, TrendingUp, Newspaper } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,20 @@ const Index = () => {
     },
   });
 
+  const { data: latestNews } = useQuery({
+    queryKey: ['home-latest-news'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('news_drafts')
+        .select('id, title, published_at, rounds(name)')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const { data: season } = useQuery({
     queryKey: ['home-season-rules'],
     queryFn: async () => {
@@ -36,6 +50,9 @@ const Index = () => {
     },
   });
   const bestN = (season?.rules_config as any)?.best_n_scores || 8;
+
+  // Last published round: rounds are already fetched & filtered by status = 'published', sorted ascending by date.
+  const lastRound = rounds && rounds.length > 0 ? [...rounds].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
 
 
   const { data: topResults } = useQuery({
@@ -122,6 +139,42 @@ const Index = () => {
           <p className="font-body text-sm text-muted-foreground/70 tracking-wide">
             Classificació i seguiment del circuit
           </p>
+
+          {(lastRound || latestNews) && (
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+              {lastRound && (
+                <HeroAccessCard
+                  to={`/jornades?round=${lastRound.id}`}
+                  icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
+                  eyebrow="Última jornada"
+                  title={lastRound.name}
+                  meta={[
+                    lastRound.round_number ? `J${lastRound.round_number}` : null,
+                    lastRound.date
+                      ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                      : null,
+                    (lastRound as any).course || lastRound.club,
+                  ].filter(Boolean).join(' · ')}
+                  action="Veure resultats"
+                />
+              )}
+              {latestNews && (
+                <HeroAccessCard
+                  to={`/noticies?article=${latestNews.id}`}
+                  icon={<Newspaper className="h-4 w-4" strokeWidth={1.5} />}
+                  eyebrow="Última notícia"
+                  title={latestNews.title}
+                  meta={[
+                    (latestNews.rounds as any)?.name,
+                    latestNews.published_at
+                      ? new Date(latestNews.published_at).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                      : null,
+                  ].filter(Boolean).join(' · ')}
+                  action="Llegir notícia"
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {/* ——— SPONSORS overlay (positioned over the lower part of the hero) ——— */}
@@ -294,6 +347,46 @@ function StatCard({ label, value, sub, icon }: { label: string; value: string | 
         {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
       </div>
     </div>
+  );
+}
+
+function HeroAccessCard({
+  to,
+  icon,
+  eyebrow,
+  title,
+  meta,
+  action,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  eyebrow: string;
+  title: string;
+  meta?: string;
+  action: string;
+}) {
+  return (
+    <Link to={to} className="group">
+      <div
+        className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+        style={{
+          background:
+            'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
+          boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <span className="text-accent/80 shrink-0">{icon}</span>
+        <div className="min-w-0 flex-1">
+          <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-0.5">{eyebrow}</p>
+          <p className="font-body text-[13px] font-semibold text-foreground truncate leading-tight">{title}</p>
+          {meta && <p className="text-[10px] text-muted-foreground/70 truncate mt-0.5">{meta}</p>}
+          <p className="text-[10px] text-accent/70 font-body tracking-wider uppercase mt-1 hidden sm:block">{action}</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+      </div>
+    </Link>
   );
 }
 
