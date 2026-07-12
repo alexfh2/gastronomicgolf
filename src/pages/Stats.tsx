@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 import { computeScratchStableford } from '@/lib/scratchStableford';
+import { supabase } from '@/integrations/supabase/client';
+
 
 type LeaderboardEntry = { name: string; value: number; detail?: string; playerId?: string };
 type HoleAggregate = { totalOverPar: number; count: number; parCounts: Record<string, number>; hcpCounts: Record<string, number> };
@@ -152,27 +154,43 @@ const Stats = () => {
     select: (data) => data.results.filter((result) => result.stableford_points != null),
   });
 
+  const { data: seasonRules } = useQuery({
+    queryKey: ['stats-season-rules'],
+    queryFn: async () => {
+      const { data } = await supabase.from('seasons').select('rules_config').eq('active', true).single();
+      return data;
+    },
+  });
+  const bestN = (seasonRules?.rules_config as any)?.best_n_scores || 8;
+
   const categoryLeaders = useMemo(() => {
     if (!categoryData?.length) return { hcpLow: [], hcpHigh: [], female: [], senior: [] };
     const categoryHcpMap = buildPlayerCategoryHandicapMap(categoryData as any);
-    const agg = new Map<string, { name: string; totalPoints: number; rounds: number; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
+    const agg = new Map<string, { name: string; scores: number[]; gender: string | null; is_senior: boolean; handicap: number | null; playerId: string }>();
     for (const r of categoryData) {
       const p = r.players_public as any;
       if (!p) continue;
       const hcp = categoryHcpMap.get(r.player_id) ?? r.handicap_at_round ?? p.current_handicap;
-      const pts = r.stableford_points ?? 0;
+      const isMaster = (r as any).rounds?.is_master || false;
+      const coef = (r as any).rounds?.master_coefficient || 1;
+      const weighted = Math.round((r.stableford_points ?? 0) * (isMaster ? coef : 1));
       const existing = agg.get(r.player_id);
-      if (existing) { existing.totalPoints += pts; existing.rounds += 1; }
-      else { agg.set(r.player_id, { name: p.name, totalPoints: pts, rounds: 1, gender: p.gender, is_senior: p.is_senior, handicap: hcp, playerId: r.player_id }); }
+      if (existing) existing.scores.push(weighted);
+      else agg.set(r.player_id, { name: p.name, scores: [weighted], gender: p.gender, is_senior: p.is_senior, handicap: hcp, playerId: r.player_id });
     }
-    const all = Array.from(agg.values());
+    const all = Array.from(agg.values()).map(a => ({
+      ...a,
+      totalPoints: [...a.scores].sort((x, y) => y - x).slice(0, bestN).reduce((s, x) => s + x, 0),
+      rounds: a.scores.length,
+    }));
     return {
       hcpLow: all.filter(p => p.handicap != null && p.handicap <= 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
       hcpHigh: all.filter(p => p.handicap != null && p.handicap > 15).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
       female: all.filter(p => p.gender === 'F').sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
       senior: all.filter(p => p.is_senior).sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
     };
-  }, [categoryData]);
+  }, [categoryData, bestN]);
+
 
   const leaderCategories = [
     { key: 'hcpLow' as const, label: 'HCP Baix' },
