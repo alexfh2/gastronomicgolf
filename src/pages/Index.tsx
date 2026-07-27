@@ -242,13 +242,13 @@ const Index = () => {
                 )}
                 <div className="min-w-0 flex-1 flex items-center gap-3 pl-5 pr-4 py-4 sm:pl-7 sm:pr-5 sm:py-[18px]">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1 leading-[1.4]">
+                    <p className="font-body text-[12px] font-semibold tracking-[0.14em] uppercase text-accent mb-1 leading-[1.4]">
                       Última notícia
                     </p>
                     <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3] line-clamp-2 max-w-[46ch]">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[13px] text-muted-foreground leading-[1.45] truncate mt-1 tnum">
+                    <p className="text-[13px] text-text-secondary leading-[1.45] truncate mt-1 tnum">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -447,9 +447,9 @@ function HeroAccessCard({
         {/* icon optically aligned with the title line, not with the whole box */}
         <span className="text-accent shrink-0 self-start mt-[19px]">{icon}</span>
         <div className="min-w-0">
-          <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
+          <p className="font-body text-[12px] font-semibold tracking-[0.14em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
           <p className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground truncate leading-[1.3]">{title}</p>
-          {meta && <p className="text-[13px] text-muted-foreground truncate mt-1 leading-[1.45] tnum">{meta}</p>}
+          {meta && <p className="text-[13px] text-text-secondary truncate mt-1 leading-[1.45] tnum">{meta}</p>}
           <p className="text-[13px] text-accent font-body font-semibold tracking-[0.08em] uppercase mt-1.5 hidden sm:block leading-[1.4]">{action}</p>
         </div>
         <ChevronRight className="h-3.5 w-3.5 text-text-tertiary shrink-0 self-center group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.75} />
