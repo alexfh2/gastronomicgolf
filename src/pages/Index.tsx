@@ -452,27 +452,20 @@ function HeroAccessCard({
   action: string;
 }) {
   return (
-    <Link to={to} className="group block h-full">
-      <div
-        className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-3.5 h-full min-h-[86px] sm:min-h-[104px]"
-        style={{
-          background:
-            'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
-          boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
-          backdropFilter: 'blur(4px)',
-        }}
-      >
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span className="text-accent/80 shrink-0">{icon}</span>
+    <Link to={to} className="group block h-full rounded-sm">
+      <div className="surface-card relative overflow-hidden px-5 py-5 sm:px-6 sm:py-5 flex items-center gap-3.5 h-full min-h-[92px] sm:min-h-[108px]">
+        <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200" />
+        <span className="text-accent shrink-0">{icon}</span>
         <div className="min-w-0 flex-1">
-          <p className="font-body text-[10px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">{eyebrow}</p>
-          <p className="font-body text-[15px] sm:text-[15px] font-semibold text-foreground truncate leading-snug">{title}</p>
-          {meta && <p className="text-[11px] text-muted-foreground/70 truncate mt-1">{meta}</p>}
-          <p className="text-[11px] text-accent/70 font-body tracking-wider uppercase mt-1.5 hidden sm:block">{action}</p>
+          <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
+          <p className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground truncate leading-[1.3]">{title}</p>
+          {meta && <p className="text-[13px] text-muted-foreground truncate mt-1 leading-[1.45]">{meta}</p>}
+          <p className="text-[13px] text-accent font-body font-semibold tracking-[0.08em] uppercase mt-1.5 hidden sm:block leading-[1.4]">{action}</p>
         </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="h-4 w-4 text-text-tertiary shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" />
       </div>
     </Link>
+
 
   );
 }
