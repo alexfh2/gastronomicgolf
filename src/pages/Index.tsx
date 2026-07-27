@@ -125,10 +125,10 @@ const Index = () => {
   const totalPoints = topResults ? topResults.reduce((s, r) => s + (r.stableford_points ?? 0), 0) : 0;
 
   const quickLinks = [
-    { icon: Trophy, label: t('home.viewRankings'), desc: 'Consulta la classificació general i per categories', path: '/ranquings' },
     { icon: BarChart3, label: t('home.viewStats'), desc: 'Descobreix dades, gràfics i comparatives del circuit', path: '/estadistiques' },
     { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i esdeveniments', path: '/jornades' },
   ];
+
 
   return (
     <div className="animate-fade-in">
