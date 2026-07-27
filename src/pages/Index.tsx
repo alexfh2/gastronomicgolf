@@ -230,9 +230,9 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {quickLinks.map((link) => (
-              <Link key={link.path} to={link.path} className="group">
+              <Link key={link.path} to={link.path} className="group block h-full">
                 <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 min-h-[120px]"
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[120px]"
                   style={{
                     background:
                       'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
