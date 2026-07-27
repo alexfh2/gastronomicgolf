@@ -287,9 +287,9 @@ const Index = () => {
       <section className="container pt-10 pb-10 sm:pt-4 sm:pb-8">
         <div className="max-w-4xl mx-auto">
 
-          <div className="flex items-center gap-4 mb-6 sm:mb-4">
+          <div className="flex items-center gap-4 mb-4 sm:mb-2.5">
             <div className="h-px flex-1 bg-border" />
-            <h2 className="font-body text-[12px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-[1.4]">
+            <h2 className="font-body text-[12px] font-semibold tracking-[0.16em] uppercase text-text-secondary leading-[1.4]">
               Patrocinadors
             </h2>
             <div className="h-px flex-1 bg-border" />
@@ -298,15 +298,16 @@ const Index = () => {
             src={sponsorsLineLight}
             alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
             loading="lazy"
-            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
+            className="block dark:hidden mx-auto w-full sm:w-[79%] h-auto object-contain opacity-95 hover:opacity-100 transition-opacity duration-200"
           />
           <img
             src={sponsorsLine}
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
+            className="hidden dark:block mx-auto w-full sm:w-[79%] h-auto object-contain opacity-100 contrast-[1.06] transition-opacity duration-200"
           />
+
 
         </div>
       </section>
