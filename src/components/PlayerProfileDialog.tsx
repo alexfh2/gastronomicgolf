@@ -323,37 +323,45 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
           {/* Statistics */}
           {n > 0 && (
-            <div>
+            <div className="min-w-0">
               <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('stats.title')}</h4>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 bg-secondary/20 rounded-lg p-3 border border-border/40">
+              <div className="grid grid-cols-2 min-[390px]:grid-cols-3 sm:grid-cols-6 gap-x-2 gap-y-4 sm:gap-3 bg-secondary/20 rounded-lg p-3 border border-border/40">
                 {stats.map((s) => (
-                  <div key={s.label} className="text-center">
+                  <div key={s.label} className="text-center min-w-0">
                     <s.icon className="h-4 w-4 mx-auto text-accent/70 mb-1" strokeWidth={1.5} />
                     <div className="font-display font-extrabold text-base text-foreground tabular-nums">{s.value}</div>
-                    <div className="text-[10px] text-muted-foreground leading-tight font-bold">{s.label}</div>
+                    <div className="text-[11px] sm:text-[10px] text-muted-foreground leading-tight font-bold">{s.label}</div>
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-3 gap-3 mt-3">
-                {parAverages.map((p) => {
-                  const numericVal = p.count > 0 ? Number(p.value) : null;
-                  const overPar = numericVal != null ? numericVal - p.par : null;
-                  return (
-                    <div key={p.label} className="border border-border/50 rounded-lg p-3 bg-secondary/30 text-center">
-                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{p.label}</div>
-                      <div className="font-display font-extrabold text-xl text-foreground tabular-nums leading-tight">
-                        {p.count > 0 ? `${p.value}` : '—'}
-                        {p.count > 0 && <span className="text-[10px] text-muted-foreground font-body font-normal ml-1">cops</span>}
+              <div className="relative mt-3">
+                <div className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-1 min-[375px]:mx-0 min-[375px]:px-0 min-[375px]:pb-0 min-[375px]:grid min-[375px]:grid-cols-3 min-[375px]:gap-3 min-[375px]:overflow-visible">
+                  {parAverages.map((p) => {
+                    const numericVal = p.count > 0 ? Number(p.value) : null;
+                    const overPar = numericVal != null ? numericVal - p.par : null;
+                    return (
+                      <div
+                        key={p.label}
+                        className="shrink-0 basis-[88%] snap-start min-w-0 min-[375px]:basis-auto min-[375px]:shrink border border-border/50 rounded-md p-2.5 sm:p-3 bg-secondary/30 text-center"
+                      >
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 leading-tight">{p.label}</div>
+                        <div className="font-display font-extrabold text-lg sm:text-xl text-foreground tabular-nums leading-tight">
+                          {p.count > 0 ? `${p.value}` : '—'}
+                          {p.count > 0 && <span className="text-[10px] text-muted-foreground font-body font-normal ml-1">cops</span>}
+                        </div>
+                        <div className="text-[11px] sm:text-[10px] text-muted-foreground/70 mt-0.5 leading-tight">
+                          {p.count > 0 ? (
+                            <>{p.count} forats · {overPar! >= 0 ? '+' : ''}{overPar!.toFixed(2)} sobre par</>
+                          ) : 'Sense dades'}
+                        </div>
                       </div>
-                      <div className="text-[10px] text-muted-foreground/70 mt-0.5">
-                        {p.count > 0 ? (
-                          <>{p.count} forats · {overPar! >= 0 ? '+' : ''}{overPar!.toFixed(2)} sobre par</>
-                        ) : 'Sense dades'}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                {/* Indicador sutil de desplaçament (només < 375px) */}
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-card to-transparent min-[375px]:hidden" />
               </div>
+
             </div>
           )}
 
