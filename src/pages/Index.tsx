@@ -406,16 +406,14 @@ function CategoryTab({ value, children }: { value: string; children: React.React
 function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
   return (
     <div className="surface-card group relative overflow-hidden p-7 flex flex-col justify-between flex-1">
-
-      {/* gold top accent */}
-      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
-      {/* subtle radial highlight on hover */}
-      <span aria-hidden className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      {/* accent top rule */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-accent/70" />
 
       <div className="relative flex items-center justify-between mb-6 gap-3">
-        <span className="font-body text-[13px] md:text-sm font-semibold tracking-[0.18em] uppercase text-foreground/85">{label}</span>
-        <span className="text-accent/60 transition-colors group-hover:text-accent/90 shrink-0">{icon}</span>
+        <span className="font-body text-[14px] font-semibold tracking-[0.1em] uppercase text-foreground leading-[1.3]">{label}</span>
+        <span className="text-accent transition-colors duration-200 shrink-0">{icon}</span>
       </div>
+
       <div className="relative">
         <span className="font-display text-4xl font-semibold text-foreground tracking-tight">{value}</span>
         {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
