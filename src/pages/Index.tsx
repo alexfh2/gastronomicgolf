@@ -378,15 +378,35 @@ const Index = () => {
   );
 };
 
+/**
+ * Category tab — editorial underline marker instead of a generic pill button.
+ * Active state combines: soft accent surface + heavier text + 2px bottom marker
+ * (never colour alone). Focus ring is distinct from the active state.
+ */
+function CategoryTab({ value, children }: { value: string; children: React.ReactNode }) {
+  return (
+    <TabsTrigger
+      value={value}
+      className="relative rounded-none border-0 bg-transparent shadow-none min-h-[44px] px-3 sm:px-4 pt-2.5 pb-3
+        font-body text-[14px] font-medium tracking-[0.08em] uppercase leading-[1.3]
+        text-muted-foreground transition-colors duration-200
+        hover:bg-surface-hover/60 hover:text-foreground
+        data-[state=active]:bg-accent/10 data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:shadow-none
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+    >
+      {children}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-accent opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100 [[data-state=active]>&]:opacity-100"
+      />
+    </TabsTrigger>
+  );
+}
+
 function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
   return (
-    <div className="group relative overflow-hidden border border-border/50 p-7 flex flex-col justify-between flex-1 transition-all duration-500 hover:border-accent/30"
-      style={{
-        background:
-          'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 85% 15%, hsl(var(--accent) / 0.1), transparent 55%)',
-        boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
-      }}
-    >
+    <div className="surface-card group relative overflow-hidden p-7 flex flex-col justify-between flex-1">
+
       {/* gold top accent */}
       <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
       {/* subtle radial highlight on hover */}
