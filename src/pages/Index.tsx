@@ -33,7 +33,7 @@ const Index = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('news_drafts')
-        .select('id, title, published_at, rounds(name)')
+        .select('id, title, published_at, round_id, rounds(name)')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(1)
@@ -41,6 +41,23 @@ const Index = () => {
       return data;
     },
   });
+
+  const { data: latestNewsPhoto } = useQuery({
+    queryKey: ['home-latest-news-photo', latestNews?.round_id],
+    enabled: !!latestNews?.round_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('photos')
+        .select('url, caption')
+        .eq('type', 'news')
+        .eq('round_id', latestNews!.round_id!)
+        .order('sort_order')
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
 
   const { data: season } = useQuery({
     queryKey: ['home-season-rules'],
