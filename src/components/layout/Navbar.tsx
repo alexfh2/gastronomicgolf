@@ -38,7 +38,7 @@ const Navbar = () => {
           <img
             src={logo}
             alt="Gastronòmic Golf"
-            className="h-8 sm:h-9 lg:h-10 w-auto opacity-90 dark:brightness-0 dark:invert"
+            className="h-7 sm:h-9 lg:h-10 w-auto opacity-90 dark:brightness-0 dark:invert"
           />
         </Link>
 
@@ -66,7 +66,7 @@ const Navbar = () => {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0 -mr-2 sm:mr-0">
 
           <LanguageSwitcher />
           <ThemeToggle isHome={isHome} />
