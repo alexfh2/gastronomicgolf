@@ -10,6 +10,7 @@ import { User, TrendingUp, Trophy, Bird, Target, Square, AlertTriangle } from 'l
 import { format } from 'date-fns';
 import { ca, es } from 'date-fns/locale';
 import ScorecardVisual from '@/components/ScorecardVisual';
+import HcpEvolutionChart from '@/components/HcpEvolutionChart';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 
