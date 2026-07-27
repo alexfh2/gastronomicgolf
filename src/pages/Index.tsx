@@ -250,10 +250,14 @@ const Index = () => {
               </Link>
             ))}
           </div>
+          </div>
         </div>
+      </section>
 
-        {/* ——— SPONSORS ——— */}
-        <div className="max-w-4xl mx-auto mt-10 sm:mt-12">
+      {/* ——— SPONSORS ——— */}
+      <section className="container pt-8 pb-4">
+        <div className="max-w-4xl mx-auto">
+
           <div className="flex items-center gap-4 mb-5">
             <div className="h-px flex-1 bg-border/40" />
             <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
