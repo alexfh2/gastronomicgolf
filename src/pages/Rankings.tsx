@@ -207,7 +207,6 @@ const Rankings = () => {
   const categories = [
     { key: 'hcpLow', label: 'HCP Baix (≤15.0)' },
     { key: 'hcpHigh', label: 'HCP Alt (>15.0)' },
-    { key: 'scratch', label: 'Scratch' },
   ];
 
   const renderTable = (players: any[] | undefined) => {
