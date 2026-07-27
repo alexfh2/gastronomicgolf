@@ -418,7 +418,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                             <button
                               type="button"
                               onClick={() => setScratchMode((m) => ({ ...m, [r.id]: false }))}
-                              className={`px-3 py-1.5 text-xs font-medium transition-all ${
+                              className={`flex-1 sm:flex-none px-3 py-2 sm:py-1.5 min-h-[40px] text-xs font-medium transition-all ${
                                 !scratchMode[r.id]
                                   ? 'bg-accent text-accent-foreground shadow-inner'
                                   : 'bg-card text-muted-foreground hover:bg-accent/10 hover:text-foreground'
