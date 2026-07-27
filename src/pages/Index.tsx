@@ -232,7 +232,7 @@ const Index = () => {
             {quickLinks.map((link) => (
               <Link key={link.path} to={link.path} className="group">
                 <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4"
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 min-h-[120px]"
                   style={{
                     background:
                       'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
