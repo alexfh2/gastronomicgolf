@@ -226,11 +226,11 @@ const Index = () => {
           <div className="h-px flex-1 bg-border/60" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
-          {quickLinks.map((link) => (
-            <Link key={link.path} to={link.path} className="group">
+        <div className="max-w-4xl mx-auto space-y-3">
+          {latestNews && (
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block">
               <div
-                className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4"
+                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4"
                 style={{
                   background:
                     'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
@@ -238,16 +238,65 @@ const Index = () => {
                 }}
               >
                 <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <link.icon className="h-6 w-6 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-body text-base sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
-                  <p className="hidden sm:block text-[11px] text-muted-foreground leading-snug truncate mt-0.5">{link.desc}</p>
+                {latestNewsPhoto?.url ? (
+                  <img
+                    src={latestNewsPhoto.url}
+                    alt={latestNewsPhoto.caption || latestNews.title}
+                    loading="lazy"
+                    className="w-28 sm:w-44 shrink-0 object-cover"
+                  />
+                ) : (
+                  <div className="w-28 sm:w-44 shrink-0 flex items-center justify-center bg-muted/20">
+                    <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1 flex items-center gap-4 py-4 pr-4 sm:py-5">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">
+                      Última notícia
+                    </p>
+                    <h3 className="font-body text-base sm:text-lg font-semibold text-foreground tracking-wide leading-snug line-clamp-2">
+                      {latestNews.title}
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground leading-snug truncate mt-1">
+                      {[
+                        (latestNews.rounds as any)?.name,
+                        latestNews.published_at
+                          ? new Date(latestNews.published_at).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                          : null,
+                      ].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
               </div>
             </Link>
-          ))}
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {quickLinks.map((link) => (
+              <Link key={link.path} to={link.path} className="group">
+                <div
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
+                    boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+                  }}
+                >
+                  <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <link.icon className="h-6 w-6 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-body text-base sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
+                    <p className="hidden sm:block text-[11px] text-muted-foreground leading-snug truncate mt-0.5">{link.desc}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
+
       </section>
 
       {/* ——— RANKING + STATS ——— */}
