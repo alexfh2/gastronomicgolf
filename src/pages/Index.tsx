@@ -222,17 +222,9 @@ const Index = () => {
             </div>
 
           {latestNews && (
-            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
-              <div
-                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch h-full min-h-[112px] sm:min-h-[104px]"
-                style={{
-                  background:
-                    'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
-                  boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
-                  backdropFilter: 'blur(4px)',
-                }}
-              >
-                <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full rounded-sm">
+              <div className="surface-card relative overflow-hidden flex items-stretch h-full min-h-[116px] sm:min-h-[108px]">
+                <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200 z-10" />
                 {latestNewsPhoto?.url ? (
                   <div className="w-[104px] sm:w-[132px] shrink-0 overflow-hidden">
                     <img
@@ -243,19 +235,19 @@ const Index = () => {
                     />
                   </div>
                 ) : (
-                  <div className="w-[104px] sm:w-[132px] shrink-0 flex items-center justify-center bg-muted/20">
-                    <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
+                  <div className="w-[104px] sm:w-[132px] shrink-0 flex items-center justify-center bg-surface-secondary">
+                    <Newspaper className="h-6 w-6 text-accent" strokeWidth={1.5} />
                   </div>
                 )}
                 <div className="min-w-0 flex-1 flex items-center gap-3 sm:gap-4 px-4 py-4 sm:px-6 sm:py-4">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[10px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1.5">
+                    <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1.5 leading-[1.4]">
                       Última notícia
                     </p>
-                    <h3 className="font-body text-[15px] sm:text-[17px] font-semibold text-foreground tracking-wide leading-snug line-clamp-2">
+                    <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3] line-clamp-2">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[11px] sm:text-[12px] text-muted-foreground/70 leading-snug truncate mt-1.5">
+                    <p className="text-[13px] text-muted-foreground leading-[1.45] truncate mt-1.5">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -264,7 +256,7 @@ const Index = () => {
                       ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-text-tertiary shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" />
                 </div>
               </div>
             </Link>
@@ -272,27 +264,20 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
             {quickLinks.map((link) => (
-              <Link key={link.path} to={link.path} className="group block h-full">
-                <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[86px] sm:min-h-[96px]"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
-                    boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
-                    backdropFilter: 'blur(4px)',
-                  }}
-                >
-                  <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <link.icon className="h-5 w-5 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
+              <Link key={link.path} to={link.path} className="group block h-full rounded-sm">
+                <div className="surface-card relative overflow-hidden px-5 py-5 sm:px-6 sm:py-5 flex items-center gap-4 h-full min-h-[92px] sm:min-h-[100px]">
+                  <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200" />
+                  <link.icon className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0" strokeWidth={1.5} />
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-body text-[15px] sm:text-[15px] font-semibold text-foreground tracking-wide">{link.label}</h3>
-                    <p className="text-[11px] sm:text-[12px] text-muted-foreground/70 leading-snug truncate mt-1">{link.desc}</p>
+                    <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3]">{link.label}</h3>
+                    <p className="text-[13px] text-muted-foreground leading-[1.45] truncate mt-1">{link.desc}</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-text-tertiary ml-auto shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" />
                 </div>
               </Link>
             ))}
           </div>
+
           </div>
         </div>
       </section>
