@@ -32,15 +32,16 @@ const Navbar = () => {
           : 'bg-background/95 backdrop-blur border-b border-border/40'
       }`}
     >
-      <div className="container flex h-18 items-center justify-between py-4">
+      <div className="container flex h-14 sm:h-16 lg:h-[72px] items-center justify-between gap-3">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <img
             src={logo}
             alt="Gastronòmic Golf"
-            className="h-10 w-auto opacity-90 dark:brightness-0 dark:invert"
+            className="h-7 sm:h-9 lg:h-10 w-auto opacity-90 dark:brightness-0 dark:invert"
           />
         </Link>
+
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-0.5">
@@ -65,7 +66,8 @@ const Navbar = () => {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0 -mr-2 sm:mr-0">
+
           <LanguageSwitcher />
           <ThemeToggle isHome={isHome} />
 
