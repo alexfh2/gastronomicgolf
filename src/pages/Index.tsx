@@ -153,51 +153,35 @@ const Index = () => {
           <p className="font-brand text-xl lg:text-2xl text-accent/70 font-light tracking-wide mb-3">
             circuit de golf
           </p>
-          <p className="font-body text-sm text-muted-foreground/70 tracking-wide">
-            Classificació i seguiment del circuit
-          </p>
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
-            {lastRound && (
+          <div className="mt-6 max-w-2xl space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {lastRound && (
+                <HeroAccessCard
+                  to={`/jornades?round=${lastRound.id}`}
+                  icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
+                  eyebrow="Última jornada"
+                  title={lastRound.name}
+                  meta={[
+                    lastRound.round_number ? `J${lastRound.round_number}` : null,
+                    lastRound.date
+                      ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                      : null,
+                    (lastRound as any).course || lastRound.club,
+                  ].filter(Boolean).join(' · ')}
+                  action="Veure resultats"
+                />
+              )}
               <HeroAccessCard
-                to={`/jornades?round=${lastRound.id}`}
+                to="/ranquings"
                 icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
-                eyebrow="Última jornada"
-                title={lastRound.name}
-                meta={[
-                  lastRound.round_number ? `J${lastRound.round_number}` : null,
-                  lastRound.date
-                    ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
-                    : null,
-                  (lastRound as any).course || lastRound.club,
-                ].filter(Boolean).join(' · ')}
-                action="Veure resultats"
+                eyebrow="Classificació general"
+                title="Hàndicap baix i hàndicap alt"
+                meta="Classificació acumulada del circuit"
+                action="Veure classificació"
               />
-            )}
-            <HeroAccessCard
-              to="/ranquings"
-              icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
-              eyebrow="Classificació general"
-              title="Hàndicap baix i hàndicap alt"
-              meta="Classificació acumulada del circuit"
-              action="Veure classificació"
-            />
-          </div>
-        </div>
-      </section>
+            </div>
 
-
-      {/* ——— QUICK ACCESS ——— */}
-      <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="h-px flex-1 bg-border/60" />
-          <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
-            {t('home.quickAccess')}
-          </h2>
-          <div className="h-px flex-1 bg-border/60" />
-        </div>
-
-        <div className="max-w-4xl mx-auto space-y-3">
           {latestNews && (
             <Link to={`/noticies?article=${latestNews.id}`} className="group block">
               <div
@@ -266,10 +250,14 @@ const Index = () => {
               </Link>
             ))}
           </div>
+          </div>
         </div>
+      </section>
 
-        {/* ——— SPONSORS ——— */}
-        <div className="max-w-4xl mx-auto mt-10 sm:mt-12">
+      {/* ——— SPONSORS ——— */}
+      <section className="container pt-8 pb-4">
+        <div className="max-w-4xl mx-auto">
+
           <div className="flex items-center gap-4 mb-5">
             <div className="h-px flex-1 bg-border/40" />
             <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
