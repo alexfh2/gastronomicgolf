@@ -157,42 +157,34 @@ const Index = () => {
             Classificació i seguiment del circuit
           </p>
 
-          {(lastRound || latestNews) && (
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
-              {lastRound && (
-                <HeroAccessCard
-                  to={`/jornades?round=${lastRound.id}`}
-                  icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
-                  eyebrow="Última jornada"
-                  title={lastRound.name}
-                  meta={[
-                    lastRound.round_number ? `J${lastRound.round_number}` : null,
-                    lastRound.date
-                      ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
-                      : null,
-                    (lastRound as any).course || lastRound.club,
-                  ].filter(Boolean).join(' · ')}
-                  action="Veure resultats"
-                />
-              )}
-              {latestNews && (
-                <HeroAccessCard
-                  to={`/noticies?article=${latestNews.id}`}
-                  icon={<Newspaper className="h-4 w-4" strokeWidth={1.5} />}
-                  eyebrow="Última notícia"
-                  title={latestNews.title}
-                  meta={[
-                    (latestNews.rounds as any)?.name,
-                    latestNews.published_at
-                      ? new Date(latestNews.published_at).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
-                      : null,
-                  ].filter(Boolean).join(' · ')}
-                  action="Llegir notícia"
-                />
-              )}
-            </div>
-          )}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+            {lastRound && (
+              <HeroAccessCard
+                to={`/jornades?round=${lastRound.id}`}
+                icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
+                eyebrow="Última jornada"
+                title={lastRound.name}
+                meta={[
+                  lastRound.round_number ? `J${lastRound.round_number}` : null,
+                  lastRound.date
+                    ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                    : null,
+                  (lastRound as any).course || lastRound.club,
+                ].filter(Boolean).join(' · ')}
+                action="Veure resultats"
+              />
+            )}
+            <HeroAccessCard
+              to="/ranquings"
+              icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
+              eyebrow="Classificació general"
+              title="Hàndicap baix i hàndicap alt"
+              meta="Classificació acumulada del circuit"
+              action="Veure classificació"
+            />
+          </div>
         </div>
+
 
         {/* ——— SPONSORS overlay (positioned over the lower part of the hero) ——— */}
         <div className="absolute inset-x-0 bottom-0 z-10">
