@@ -446,7 +446,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                           </span>
                         </div>
                         {scorecard && scorecard.length > 0 ? (
-                          <div className="overflow-x-auto max-w-[calc(100vw-4rem)]">
+                          <div className="min-w-0 sm:overflow-x-auto">
                             <ScorecardVisual
                               scores={scorecard}
                               par={coursePar}
