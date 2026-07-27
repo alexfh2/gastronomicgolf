@@ -51,6 +51,7 @@ const getStbStyle = (pts: number | null): string => {
 };
 
 const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, handicapWomen, playerHandicap, playerGender }) => {
+  const [mobileHalf, setMobileHalf] = useState<0 | 1>(0);
   // Pick female-specific stroke index distribution when applicable
   const effectiveHandicap = (playerGender === 'F' && Array.isArray(handicapWomen) && handicapWomen.length === 18)
     ? handicapWomen
