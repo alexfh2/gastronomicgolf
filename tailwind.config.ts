@@ -66,6 +66,30 @@ export default {
           DEFAULT: "hsl(var(--gold))",
           foreground: "hsl(var(--gold-foreground))",
         },
+        /* Semantic theme tokens */
+        surface: {
+          DEFAULT: "hsl(var(--surface-primary))",
+          primary: "hsl(var(--surface-primary))",
+          secondary: "hsl(var(--surface-secondary))",
+          hover: "hsl(var(--surface-hover))",
+        },
+        text: {
+          primary: "hsl(var(--text-primary))",
+          secondary: "hsl(var(--text-secondary))",
+          tertiary: "hsl(var(--text-tertiary))",
+        },
+        subtle: "hsl(var(--border-subtle))",
+        "border-subtle": "hsl(var(--border-subtle))",
+        "border-active": "hsl(var(--border-active))",
+        "accent-soft": "hsl(var(--accent-soft))",
+        "focus-ring": "hsl(var(--focus-ring))",
+      },
+      boxShadow: {
+        subtle: "var(--shadow-subtle)",
+      },
+      transitionDuration: {
+        "180": "180ms",
+        "220": "220ms",
       },
       borderRadius: {
         lg: "var(--radius)",
