@@ -392,17 +392,25 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
                   return (
                     <AccordionItem key={r.id} value={r.id} className="border border-border/50 rounded-md overflow-hidden bg-card">
-                      <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-secondary/50 text-foreground">
+                      <AccordionTrigger className="px-3 py-2 min-h-[44px] hover:no-underline hover:bg-secondary/50 text-foreground">
                         <div className="flex items-center gap-2 text-left flex-1 min-w-0">
                           <Badge variant="outline" className="text-[10px] font-mono shrink-0 px-1.5 py-0 border-accent/30">J{round?.round_number}</Badge>
-                          <span className="font-medium text-sm truncate text-foreground">{round?.name}</span>
-                          {round?.is_master && <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-accent/20 text-accent border-0 shrink-0">M</Badge>}
-                          <span className="text-xs text-muted-foreground ml-auto mr-2 shrink-0">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="font-medium text-sm text-foreground break-words line-clamp-2 sm:truncate">{round?.name}</span>
+                              {round?.is_master && <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-accent/20 text-accent border-0 shrink-0">M</Badge>}
+                            </div>
+                            <span className="block sm:hidden text-[11px] text-muted-foreground mt-0.5">
+                              {round?.date ? format(new Date(round.date), 'dd MMM', { locale }) : ''}
+                            </span>
+                          </div>
+                          <span className="hidden sm:block text-xs text-muted-foreground mr-2 shrink-0">
                             {round?.date ? format(new Date(round.date), 'dd MMM', { locale }) : ''}
                           </span>
                           <span className="font-mono font-bold text-sm text-foreground mr-1 shrink-0">{r.stableford_points ?? '—'}</span>
                         </div>
                       </AccordionTrigger>
+
                       <AccordionContent className="px-3 pb-3 bg-secondary/20">
                         <div className="flex items-center gap-3 mb-3 text-xs flex-wrap">
                           <div className="inline-flex rounded-md border border-accent/30 overflow-hidden shadow-sm" role="group" aria-label="Modo de puntuación">
