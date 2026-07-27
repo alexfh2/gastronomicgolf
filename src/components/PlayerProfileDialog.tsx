@@ -412,8 +412,9 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
                       </AccordionTrigger>
 
                       <AccordionContent className="px-3 pb-3 bg-secondary/20">
-                        <div className="flex items-center gap-3 mb-3 text-xs flex-wrap">
-                          <div className="inline-flex rounded-md border border-accent/30 overflow-hidden shadow-sm" role="group" aria-label="Modo de puntuación">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 text-xs flex-wrap min-w-0">
+                          <div className="flex w-full sm:inline-flex sm:w-auto rounded-md border border-accent/30 overflow-hidden shadow-sm" role="group" aria-label="Modo de puntuación">
+
                             <button
                               type="button"
                               onClick={() => setScratchMode((m) => ({ ...m, [r.id]: false }))}
