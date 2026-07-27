@@ -218,10 +218,11 @@ export function parseExcelResults(buffer: ArrayBuffer): ExcelParseOutput {
     const posRaw = getNum(cols.pos);
     const position = posRaw ? Math.floor(posRaw) : posCounter;
 
-    // Parse hole scores
+    // Parse hole scores (0 = bola aixecada → null)
     const scores: (number | null)[] = [];
     for (const hc of cols.holeColumns) {
-      scores.push(getNum(hc));
+      const v = getNum(hc);
+      scores.push(v === 0 ? null : v);
     }
 
     const hasLiftedBall = scores.length > 0 && scores.some(s => s === null);
