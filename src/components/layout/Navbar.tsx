@@ -66,7 +66,8 @@ const Navbar = () => {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
+
           <LanguageSwitcher />
           <ThemeToggle isHome={isHome} />
 
