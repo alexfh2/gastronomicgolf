@@ -125,8 +125,8 @@ const Index = () => {
   const totalPoints = topResults ? topResults.reduce((s, r) => s + (r.stableford_points ?? 0), 0) : 0;
 
   const quickLinks = [
+    { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Properes jornades i resultats anteriors', path: '/jornades' },
     { icon: BarChart3, label: t('home.viewStats'), desc: 'Descobreix dades, gràfics i comparatives del circuit', path: '/estadistiques' },
-    { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i els resultats anteriors', path: '/jornades' },
   ];
 
 
