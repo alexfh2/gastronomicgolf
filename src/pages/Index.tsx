@@ -33,7 +33,7 @@ const Index = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('news_drafts')
-        .select('id, title, published_at, rounds(name)')
+        .select('id, title, published_at, round_id, rounds(name)')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
         .limit(1)
@@ -41,6 +41,23 @@ const Index = () => {
       return data;
     },
   });
+
+  const { data: latestNewsPhoto } = useQuery({
+    queryKey: ['home-latest-news-photo', latestNews?.round_id],
+    enabled: !!latestNews?.round_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('photos')
+        .select('url, caption')
+        .eq('type', 'news')
+        .eq('round_id', latestNews!.round_id!)
+        .order('sort_order')
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
 
   const { data: season } = useQuery({
     queryKey: ['home-season-rules'],
@@ -108,10 +125,10 @@ const Index = () => {
   const totalPoints = topResults ? topResults.reduce((s, r) => s + (r.stableford_points ?? 0), 0) : 0;
 
   const quickLinks = [
-    { icon: Trophy, label: t('home.viewRankings'), desc: 'Consulta la classificació general i per categories', path: '/ranquings' },
     { icon: BarChart3, label: t('home.viewStats'), desc: 'Descobreix dades, gràfics i comparatives del circuit', path: '/estadistiques' },
     { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i esdeveniments', path: '/jornades' },
   ];
+
 
   return (
     <div className="animate-fade-in">
@@ -140,42 +157,34 @@ const Index = () => {
             Classificació i seguiment del circuit
           </p>
 
-          {(lastRound || latestNews) && (
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
-              {lastRound && (
-                <HeroAccessCard
-                  to={`/jornades?round=${lastRound.id}`}
-                  icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
-                  eyebrow="Última jornada"
-                  title={lastRound.name}
-                  meta={[
-                    lastRound.round_number ? `J${lastRound.round_number}` : null,
-                    lastRound.date
-                      ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
-                      : null,
-                    (lastRound as any).course || lastRound.club,
-                  ].filter(Boolean).join(' · ')}
-                  action="Veure resultats"
-                />
-              )}
-              {latestNews && (
-                <HeroAccessCard
-                  to={`/noticies?article=${latestNews.id}`}
-                  icon={<Newspaper className="h-4 w-4" strokeWidth={1.5} />}
-                  eyebrow="Última notícia"
-                  title={latestNews.title}
-                  meta={[
-                    (latestNews.rounds as any)?.name,
-                    latestNews.published_at
-                      ? new Date(latestNews.published_at).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
-                      : null,
-                  ].filter(Boolean).join(' · ')}
-                  action="Llegir notícia"
-                />
-              )}
-            </div>
-          )}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+            {lastRound && (
+              <HeroAccessCard
+                to={`/jornades?round=${lastRound.id}`}
+                icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
+                eyebrow="Última jornada"
+                title={lastRound.name}
+                meta={[
+                  lastRound.round_number ? `J${lastRound.round_number}` : null,
+                  lastRound.date
+                    ? new Date(lastRound.date).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                    : null,
+                  (lastRound as any).course || lastRound.club,
+                ].filter(Boolean).join(' · ')}
+                action="Veure resultats"
+              />
+            )}
+            <HeroAccessCard
+              to="/ranquings"
+              icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
+              eyebrow="Classificació general"
+              title="Hàndicap baix i hàndicap alt"
+              meta="Classificació acumulada del circuit"
+              action="Veure classificació"
+            />
+          </div>
         </div>
+
 
         {/* ——— SPONSORS overlay (positioned over the lower part of the hero) ——— */}
         <div className="absolute inset-x-0 bottom-0 z-10">
@@ -217,11 +226,11 @@ const Index = () => {
           <div className="h-px flex-1 bg-border/60" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto">
-          {quickLinks.map((link) => (
-            <Link key={link.path} to={link.path} className="group">
+        <div className="max-w-4xl mx-auto space-y-3">
+          {latestNews && (
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block">
               <div
-                className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4"
+                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4"
                 style={{
                   background:
                     'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
@@ -229,16 +238,65 @@ const Index = () => {
                 }}
               >
                 <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <link.icon className="h-6 w-6 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-body text-base sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
-                  <p className="hidden sm:block text-[11px] text-muted-foreground leading-snug truncate mt-0.5">{link.desc}</p>
+                {latestNewsPhoto?.url ? (
+                  <img
+                    src={latestNewsPhoto.url}
+                    alt={latestNewsPhoto.caption || latestNews.title}
+                    loading="lazy"
+                    className="w-28 sm:w-44 shrink-0 object-cover"
+                  />
+                ) : (
+                  <div className="w-28 sm:w-44 shrink-0 flex items-center justify-center bg-muted/20">
+                    <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1 flex items-center gap-4 py-4 pr-4 sm:py-5">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">
+                      Última notícia
+                    </p>
+                    <h3 className="font-body text-base sm:text-lg font-semibold text-foreground tracking-wide leading-snug line-clamp-2">
+                      {latestNews.title}
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground leading-snug truncate mt-1">
+                      {[
+                        (latestNews.rounds as any)?.name,
+                        latestNews.published_at
+                          ? new Date(latestNews.published_at).toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'short' })
+                          : null,
+                      ].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
               </div>
             </Link>
-          ))}
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {quickLinks.map((link) => (
+              <Link key={link.path} to={link.path} className="group">
+                <div
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
+                    boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+                  }}
+                >
+                  <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <link.icon className="h-6 w-6 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-body text-base sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
+                    <p className="hidden sm:block text-[11px] text-muted-foreground leading-snug truncate mt-0.5">{link.desc}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
+
       </section>
 
       {/* ——— RANKING + STATS ——— */}
