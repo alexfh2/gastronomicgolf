@@ -126,7 +126,7 @@ const Index = () => {
 
   const quickLinks = [
     { icon: BarChart3, label: t('home.viewStats'), desc: 'Descobreix dades, gràfics i comparatives del circuit', path: '/estadistiques' },
-    { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i esdeveniments', path: '/jornades' },
+    { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i els resultats anteriors', path: '/jornades' },
   ];
 
 
@@ -184,37 +184,8 @@ const Index = () => {
             />
           </div>
         </div>
-
-
-        {/* ——— SPONSORS overlay (positioned over the lower part of the hero) ——— */}
-        <div className="absolute inset-x-0 bottom-0 z-10">
-          {/* translucent panel that blends with the image */}
-          <div className="bg-gradient-to-t from-background/85 via-background/55 to-transparent backdrop-blur-[2px] pt-10 pb-5">
-            <div className="container">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="h-px flex-1 bg-border/30" />
-                <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
-                  Patrocinadors
-                </h2>
-                <div className="h-px flex-1 bg-border/30" />
-              </div>
-              <img
-                src={sponsorsLineLight}
-                alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
-                loading="lazy"
-                className="block dark:hidden mx-auto w-[85%] sm:w-[75%] h-auto object-contain opacity-65 hover:opacity-95 transition-opacity duration-500"
-              />
-              <img
-                src={sponsorsLine}
-                alt=""
-                aria-hidden="true"
-                loading="lazy"
-                className="hidden dark:block mx-auto w-[85%] sm:w-[75%] h-auto object-contain opacity-65 hover:opacity-95 transition-opacity duration-500"
-              />
-            </div>
-          </div>
-        </div>
       </section>
+
 
       {/* ——— QUICK ACCESS ——— */}
       <section className="container pt-6 pb-4">
@@ -297,7 +268,31 @@ const Index = () => {
           </div>
         </div>
 
+        {/* ——— SPONSORS ——— */}
+        <div className="max-w-4xl mx-auto mt-10 sm:mt-12">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-px flex-1 bg-border/40" />
+            <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
+              Patrocinadors
+            </h2>
+            <div className="h-px flex-1 bg-border/40" />
+          </div>
+          <img
+            src={sponsorsLineLight}
+            alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
+            loading="lazy"
+            className="block dark:hidden mx-auto w-full sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+          />
+          <img
+            src={sponsorsLine}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="hidden dark:block mx-auto w-full sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+          />
+        </div>
       </section>
+
 
       {/* ——— RANKING + STATS ——— */}
       <section className="container pb-14">
