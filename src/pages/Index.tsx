@@ -126,7 +126,7 @@ const Index = () => {
 
   const quickLinks = [
     { icon: BarChart3, label: t('home.viewStats'), desc: 'Descobreix dades, gràfics i comparatives del circuit', path: '/estadistiques' },
-    { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i esdeveniments', path: '/jornades' },
+    { icon: Calendar, label: t('home.calendar', 'Tornejos'), desc: 'Consulta les properes jornades i els resultats anteriors', path: '/jornades' },
   ];
 
 
