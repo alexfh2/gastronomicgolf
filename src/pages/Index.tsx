@@ -133,7 +133,7 @@ const Index = () => {
   return (
     <div className="animate-fade-in overflow-x-hidden">
       {/* ——— HERO ——— */}
-      <section className="relative overflow-hidden flex items-center pt-20 pb-10 sm:pt-24 sm:pb-14 lg:min-h-[80vh] lg:py-0">
+      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-28 sm:pb-16 lg:min-h-[86vh] lg:pt-44 lg:pb-28">
         {/* Background image — subtler and pushed right on mobile */}
         <div className="absolute inset-0">
           <img
@@ -148,18 +148,21 @@ const Index = () => {
 
         {/* Hero text */}
         <div className="relative z-10 container">
-          <p className="font-body text-[10px] sm:text-[11px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-4 sm:mb-5">
-            {t('common.season')} 2026
-          </p>
-          <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-7xl font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
-            Gastronòmic <span className="font-extrabold">GOLF</span>
-          </h1>
-          <p className="font-brand text-lg sm:text-xl lg:text-2xl text-accent/70 font-light tracking-wide mt-3 sm:mt-4">
-            circuit de golf
-          </p>
+          {/* Bloc textual del hero — només desktop/tablet */}
+          <div className="hidden sm:block">
+            <p className="font-body text-[10px] sm:text-[11px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-4 sm:mb-5">
+              {t('common.season')} 2026
+            </p>
+            <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-7xl font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
+              Gastronòmic <span className="font-extrabold">GOLF</span>
+            </h1>
+            <p className="font-brand text-lg sm:text-xl lg:text-2xl text-accent/70 font-light tracking-wide mt-3 sm:mt-4">
+              circuit de golf
+            </p>
+          </div>
 
-          <div className="mt-10 sm:mt-12 lg:mt-14 max-w-2xl space-y-3.5 sm:space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+          <div className="mt-0 sm:mt-12 lg:mt-14 max-w-2xl space-y-4 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
               {lastRound && (
                 <HeroAccessCard
                   to={`/jornades?round=${lastRound.id}`}
