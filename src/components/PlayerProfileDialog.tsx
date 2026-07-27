@@ -250,7 +250,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
           {mainCategory && (
             <div>
               <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('rankings.position')}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {/* Main category */}
                 <div className="border border-border/50 rounded-lg p-4 bg-secondary/30">
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-medium">
