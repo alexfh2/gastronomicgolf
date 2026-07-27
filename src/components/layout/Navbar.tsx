@@ -51,19 +51,22 @@ const Navbar = () => {
               <Link
                 key={item.key}
                 to={item.path}
-                className={`px-4 py-2 text-[14px] font-body font-semibold uppercase tracking-[0.15em] transition-colors ${
+                aria-current={isActive ? 'page' : undefined}
+                className={`relative px-4 py-2.5 text-[15px] font-body font-semibold uppercase tracking-[0.08em] leading-[1.3] rounded-sm transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
                   isActive
-                    ? 'text-accent border border-accent/40 rounded-sm'
-                    : isHome
-                    ? 'text-foreground/60 hover:text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'text-foreground bg-accent/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover/60'
                 }`}
               >
                 {t(`nav.${item.key}`)}
+                {isActive && (
+                  <span aria-hidden className="absolute inset-x-3 -bottom-px h-[2px] bg-accent" />
+                )}
               </Link>
             );
           })}
         </nav>
+
 
         {/* Right side */}
         <div className="flex items-center gap-0.5 sm:gap-2 shrink-0 -mr-2 sm:mr-0">
