@@ -183,9 +183,9 @@ const Index = () => {
             </div>
 
           {latestNews && (
-            <Link to={`/noticies?article=${latestNews.id}`} className="group block">
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
               <div
-                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4 min-h-[120px]"
+                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4 h-full min-h-[120px]"
                 style={{
                   background:
                     'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
