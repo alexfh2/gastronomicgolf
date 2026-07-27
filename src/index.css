@@ -248,4 +248,24 @@
     border: 1px solid hsl(var(--border-subtle));
     box-shadow: var(--shadow-subtle);
   }
+
+  /* Secondary editorial access — a rule, not a card: no fill, no shadow */
+  .surface-quiet {
+    background-color: transparent;
+    border: 0;
+    border-top: 1px solid hsl(var(--border-subtle));
+    box-shadow: none;
+    transition: background-color 180ms ease, border-color 180ms ease;
+  }
+
+  .surface-quiet:hover {
+    background-color: hsl(var(--surface-hover) / 0.4);
+    border-top-color: hsl(var(--border-active) / 0.6);
+  }
+
+  /* Tabular figures for data, rankings and metadata */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
 }
