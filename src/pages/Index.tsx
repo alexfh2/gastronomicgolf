@@ -182,15 +182,16 @@ const Index = () => {
         <div className="relative z-10 container">
           {/* Bloc textual del hero — només desktop/tablet */}
           <div className="hidden sm:block">
-            <p className="font-body text-[10px] sm:text-[12px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-3 sm:mb-3">
+            <p className="font-body text-[12px] font-semibold tracking-[0.22em] uppercase text-accent mb-3 leading-[1.4]">
               {t('common.season')} 2026
             </p>
             <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-[3.4rem] font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
               Gastronòmic <span className="font-extrabold">GOLF</span>
             </h1>
-            <p className="font-brand text-lg sm:text-xl lg:text-[1.4rem] text-accent/70 font-light tracking-wide mt-2 sm:mt-2">
+            <p className="font-brand text-lg sm:text-xl lg:text-[1.4rem] text-accent font-normal tracking-wide mt-2">
               circuit de golf
             </p>
+
           </div>
 
           <div className="mt-0 sm:mt-7 lg:mt-7 max-w-2xl space-y-4 sm:space-y-3.5">
@@ -222,17 +223,9 @@ const Index = () => {
             </div>
 
           {latestNews && (
-            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
-              <div
-                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch h-full min-h-[112px] sm:min-h-[104px]"
-                style={{
-                  background:
-                    'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
-                  boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
-                  backdropFilter: 'blur(4px)',
-                }}
-              >
-                <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full rounded-sm">
+              <div className="surface-card relative overflow-hidden flex items-stretch h-full min-h-[116px] sm:min-h-[108px]">
+                <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200 z-10" />
                 {latestNewsPhoto?.url ? (
                   <div className="w-[104px] sm:w-[132px] shrink-0 overflow-hidden">
                     <img
@@ -243,19 +236,19 @@ const Index = () => {
                     />
                   </div>
                 ) : (
-                  <div className="w-[104px] sm:w-[132px] shrink-0 flex items-center justify-center bg-muted/20">
-                    <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
+                  <div className="w-[104px] sm:w-[132px] shrink-0 flex items-center justify-center bg-surface-secondary">
+                    <Newspaper className="h-6 w-6 text-accent" strokeWidth={1.5} />
                   </div>
                 )}
                 <div className="min-w-0 flex-1 flex items-center gap-3 sm:gap-4 px-4 py-4 sm:px-6 sm:py-4">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[10px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1.5">
+                    <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1.5 leading-[1.4]">
                       Última notícia
                     </p>
-                    <h3 className="font-body text-[15px] sm:text-[17px] font-semibold text-foreground tracking-wide leading-snug line-clamp-2">
+                    <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3] line-clamp-2">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[11px] sm:text-[12px] text-muted-foreground/70 leading-snug truncate mt-1.5">
+                    <p className="text-[13px] text-muted-foreground leading-[1.45] truncate mt-1.5">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -264,7 +257,7 @@ const Index = () => {
                       ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-text-tertiary shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" />
                 </div>
               </div>
             </Link>
@@ -272,27 +265,20 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
             {quickLinks.map((link) => (
-              <Link key={link.path} to={link.path} className="group block h-full">
-                <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[86px] sm:min-h-[96px]"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
-                    boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
-                    backdropFilter: 'blur(4px)',
-                  }}
-                >
-                  <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <link.icon className="h-5 w-5 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
+              <Link key={link.path} to={link.path} className="group block h-full rounded-sm">
+                <div className="surface-card relative overflow-hidden px-5 py-5 sm:px-6 sm:py-5 flex items-center gap-4 h-full min-h-[92px] sm:min-h-[100px]">
+                  <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200" />
+                  <link.icon className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0" strokeWidth={1.5} />
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-body text-[15px] sm:text-[15px] font-semibold text-foreground tracking-wide">{link.label}</h3>
-                    <p className="text-[11px] sm:text-[12px] text-muted-foreground/70 leading-snug truncate mt-1">{link.desc}</p>
+                    <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3]">{link.label}</h3>
+                    <p className="text-[13px] text-muted-foreground leading-[1.45] truncate mt-1">{link.desc}</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-text-tertiary ml-auto shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" />
                 </div>
               </Link>
             ))}
           </div>
+
           </div>
         </div>
       </section>
@@ -302,25 +288,26 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
 
           <div className="flex items-center gap-4 mb-6 sm:mb-4">
-            <div className="h-px flex-1 bg-border/40" />
-            <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
+            <div className="h-px flex-1 bg-border" />
+            <h2 className="font-body text-[12px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-[1.4]">
               Patrocinadors
             </h2>
-            <div className="h-px flex-1 bg-border/40" />
+            <div className="h-px flex-1 bg-border" />
           </div>
           <img
             src={sponsorsLineLight}
             alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
             loading="lazy"
-            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
           />
           <img
             src={sponsorsLine}
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
           />
+
         </div>
       </section>
 
@@ -331,40 +318,23 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
 
           {/* General Ranking */}
-          <div
-            className="lg:col-span-2 relative overflow-hidden border border-border/50"
-            style={{
-              background:
-                'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 90% 0%, hsl(var(--accent) / 0.07), transparent 40%)',
-              boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
-            }}
-          >
-            <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
+          <div className="surface-panel lg:col-span-2 relative overflow-hidden">
             <Tabs defaultValue="low" className="w-full">
-              <div className="flex items-center justify-between gap-3 px-4 sm:px-7 py-4 border-b border-border/40 flex-wrap">
-                <TabsList className="bg-muted/30 border border-border/40 h-auto p-1">
-                  <TabsTrigger
-                    value="low"
-                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
-                  >
-                    HCP Inferior
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="high"
-                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
-                  >
-                    HCP Superior
-                  </TabsTrigger>
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-7 pt-2 border-b border-border flex-wrap">
+                <TabsList className="bg-transparent border-0 p-0 h-auto gap-1 rounded-none">
+                  <CategoryTab value="low">HCP Inferior</CategoryTab>
+                  <CategoryTab value="high">HCP Superior</CategoryTab>
                 </TabsList>
                 <Link
                   to="/ranquings"
-                  className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
+                  className="flex items-center gap-1 text-[13px] text-accent font-body font-semibold tracking-[0.06em] uppercase hover:text-border-active transition-colors duration-200 py-3"
                 >
                   <span className="hidden sm:inline">Veure rànquing complet</span>
                   <span className="sm:hidden">Veure tot</span>
-                  <ChevronRight className="h-3 w-3" />
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
+
 
               {(['low', 'high'] as const).map((key) => {
                 const list = key === 'low' ? rankingLow : rankingHigh;
@@ -410,24 +380,42 @@ const Index = () => {
   );
 };
 
+/**
+ * Category tab — editorial underline marker instead of a generic pill button.
+ * Active state combines: soft accent surface + heavier text + 2px bottom marker
+ * (never colour alone). Focus ring is distinct from the active state.
+ */
+function CategoryTab({ value, children }: { value: string; children: React.ReactNode }) {
+  return (
+    <TabsTrigger
+      value={value}
+      className="relative rounded-none border-0 bg-transparent shadow-none min-h-[44px] px-3 sm:px-4 pt-2.5 pb-3
+        font-body text-[14px] font-medium tracking-[0.08em] uppercase leading-[1.3]
+        text-muted-foreground transition-colors duration-200
+        hover:bg-surface-hover/60 hover:text-foreground
+        data-[state=active]:bg-accent/10 data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:shadow-none
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+    >
+      {children}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-accent opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100 [[data-state=active]>&]:opacity-100"
+      />
+    </TabsTrigger>
+  );
+}
+
 function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
   return (
-    <div className="group relative overflow-hidden border border-border/50 p-7 flex flex-col justify-between flex-1 transition-all duration-500 hover:border-accent/30"
-      style={{
-        background:
-          'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 85% 15%, hsl(var(--accent) / 0.1), transparent 55%)',
-        boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
-      }}
-    >
-      {/* gold top accent */}
-      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
-      {/* subtle radial highlight on hover */}
-      <span aria-hidden className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+    <div className="surface-card group relative overflow-hidden p-7 flex flex-col justify-between flex-1">
+      {/* accent top rule */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-accent/70" />
 
       <div className="relative flex items-center justify-between mb-6 gap-3">
-        <span className="font-body text-[13px] md:text-sm font-semibold tracking-[0.18em] uppercase text-foreground/85">{label}</span>
-        <span className="text-accent/60 transition-colors group-hover:text-accent/90 shrink-0">{icon}</span>
+        <span className="font-body text-[14px] font-semibold tracking-[0.1em] uppercase text-foreground leading-[1.3]">{label}</span>
+        <span className="text-accent transition-colors duration-200 shrink-0">{icon}</span>
       </div>
+
       <div className="relative">
         <span className="font-display text-4xl font-semibold text-foreground tracking-tight">{value}</span>
         {sub && <span className="ml-2 text-sm text-muted-foreground font-body">{sub}</span>}
@@ -452,27 +440,20 @@ function HeroAccessCard({
   action: string;
 }) {
   return (
-    <Link to={to} className="group block h-full">
-      <div
-        className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-3.5 h-full min-h-[86px] sm:min-h-[104px]"
-        style={{
-          background:
-            'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
-          boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
-          backdropFilter: 'blur(4px)',
-        }}
-      >
-        <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span className="text-accent/80 shrink-0">{icon}</span>
+    <Link to={to} className="group block h-full rounded-sm">
+      <div className="surface-card relative overflow-hidden px-5 py-5 sm:px-6 sm:py-5 flex items-center gap-3.5 h-full min-h-[92px] sm:min-h-[108px]">
+        <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200" />
+        <span className="text-accent shrink-0">{icon}</span>
         <div className="min-w-0 flex-1">
-          <p className="font-body text-[10px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">{eyebrow}</p>
-          <p className="font-body text-[15px] sm:text-[15px] font-semibold text-foreground truncate leading-snug">{title}</p>
-          {meta && <p className="text-[11px] text-muted-foreground/70 truncate mt-1">{meta}</p>}
-          <p className="text-[11px] text-accent/70 font-body tracking-wider uppercase mt-1.5 hidden sm:block">{action}</p>
+          <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
+          <p className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground truncate leading-[1.3]">{title}</p>
+          {meta && <p className="text-[13px] text-muted-foreground truncate mt-1 leading-[1.45]">{meta}</p>}
+          <p className="text-[13px] text-accent font-body font-semibold tracking-[0.08em] uppercase mt-1.5 hidden sm:block leading-[1.4]">{action}</p>
         </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="h-4 w-4 text-text-tertiary shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" />
       </div>
     </Link>
+
 
   );
 }
@@ -493,34 +474,24 @@ function RankingRow({
   onClick: () => void;
 }) {
   const isTop3 = position <= 3;
-  // Use accent (green) intensity instead of medal colours.
-  const accentAlpha = position === 1 ? 0.22 : position === 2 ? 0.14 : position === 3 ? 0.08 : 0;
+  // Accent tint intensity (works in both themes); rank is also marked by the left rule.
+  const accentAlpha = position === 1 ? 0.14 : position === 2 ? 0.09 : position === 3 ? 0.05 : 0;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center py-3.5 border-b border-border/15 hover:bg-muted/15 transition-all overflow-hidden group"
-      style={
-        isTop3
-          ? {
-              background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 35%, transparent 75%)`,
-            }
-          : undefined
-      }
+      className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center min-h-[44px] py-3.5 border-b border-border hover:bg-surface-hover/60 transition-colors duration-200 overflow-hidden group"
+      style={isTop3 ? { backgroundColor: `hsl(var(--accent) / ${accentAlpha})` } : undefined}
     >
       {isTop3 && (
-        <span
-          aria-hidden
-          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
-          style={{ background: `linear-gradient(180deg, hsl(var(--accent) / ${Math.min(1, accentAlpha * 4)}) 0%, hsl(var(--accent) / ${accentAlpha}) 100%)` }}
-        />
+        <span aria-hidden className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-accent" />
       )}
 
       <div className="flex items-center justify-center">
         <span
-          className={`text-sm font-body font-semibold w-7 text-center ${
-            isTop3 ? 'text-accent' : 'text-muted-foreground/70'
+          className={`text-[14px] font-body font-bold w-7 text-center ${
+            isTop3 ? 'text-accent' : 'text-muted-foreground'
           }`}
         >
           {position}
@@ -528,26 +499,27 @@ function RankingRow({
       </div>
 
       <div className="flex items-center gap-2.5 min-w-0">
-        <span className={`text-sm sm:text-[15px] font-body font-medium truncate ${isTop3 ? 'text-foreground' : 'text-foreground/90'}`}>
+        <span className={`text-[15px] font-body truncate text-foreground ${isTop3 ? 'font-semibold' : 'font-medium'}`}>
           {name}
           {handicap != null && (
-            <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+            <span className="ml-1.5 text-[13px] text-muted-foreground font-normal">
               ({Number(handicap).toFixed(1)})
             </span>
           )}
         </span>
       </div>
 
-      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">{rounds}</span>
+      <span className="hidden sm:inline text-[13px] text-muted-foreground text-right font-mono">{rounds}</span>
       <span
         className={`text-base sm:text-lg text-right font-mono font-bold ${isTop3 ? 'text-accent' : 'text-foreground'}`}
       >
         {points.toLocaleString()}
       </span>
-      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">
+      <span className="hidden sm:inline text-[13px] text-muted-foreground text-right font-mono">
         {rounds > 0 ? (points / rounds).toFixed(1) : '—'}
       </span>
     </button>
+
   );
 }
 

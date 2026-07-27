@@ -25,7 +25,19 @@
   <meta name="twitter:title" content="Gastronòmic Golf — Circuit de Golf 2026">
   <meta property="og:description" content="Classificació oficial i seguiment del circuit privat Gastronòmic Golf. Rànquings, jornades, estadístiques i notícies.">
   <meta name="twitter:description" content="Classificació oficial i seguiment del circuit privat Gastronòmic Golf. Rànquings, jornades, estadístiques i notícies.">
+  <script>
+    // Apply the stored theme before first paint to avoid a day/night flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        document.documentElement.classList.add(t === 'light' ? 'light' : 'dark');
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
+
 
   <body>
     <div id="root"></div>
