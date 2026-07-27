@@ -316,40 +316,23 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
 
           {/* General Ranking */}
-          <div
-            className="lg:col-span-2 relative overflow-hidden border border-border/50"
-            style={{
-              background:
-                'linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.25) 100%), radial-gradient(circle at 90% 0%, hsl(var(--accent) / 0.07), transparent 40%)',
-              boxShadow: '0 20px 50px -25px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(var(--foreground) / 0.04)',
-            }}
-          >
-            <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-accent/70 via-accent/30 to-transparent" />
+          <div className="surface-panel lg:col-span-2 relative overflow-hidden">
             <Tabs defaultValue="low" className="w-full">
-              <div className="flex items-center justify-between gap-3 px-4 sm:px-7 py-4 border-b border-border/40 flex-wrap">
-                <TabsList className="bg-muted/30 border border-border/40 h-auto p-1">
-                  <TabsTrigger
-                    value="low"
-                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
-                  >
-                    HCP Inferior
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="high"
-                    className="text-[11px] font-body font-medium tracking-[0.18em] uppercase px-3 sm:px-4 py-1.5 data-[state=active]:bg-accent/15 data-[state=active]:text-accent"
-                  >
-                    HCP Superior
-                  </TabsTrigger>
+              <div className="flex items-center justify-between gap-3 px-4 sm:px-7 pt-2 border-b border-border flex-wrap">
+                <TabsList className="bg-transparent border-0 p-0 h-auto gap-1 rounded-none">
+                  <CategoryTab value="low">HCP Inferior</CategoryTab>
+                  <CategoryTab value="high">HCP Superior</CategoryTab>
                 </TabsList>
                 <Link
                   to="/ranquings"
-                  className="flex items-center gap-1 text-[11px] text-accent/80 font-body font-medium tracking-wider uppercase hover:text-accent transition-colors"
+                  className="flex items-center gap-1 text-[13px] text-accent font-body font-semibold tracking-[0.06em] uppercase hover:text-border-active transition-colors duration-200 py-3"
                 >
                   <span className="hidden sm:inline">Veure rànquing complet</span>
                   <span className="sm:hidden">Veure tot</span>
-                  <ChevronRight className="h-3 w-3" />
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
+
 
               {(['low', 'high'] as const).map((key) => {
                 const list = key === 'low' ? rankingLow : rankingHigh;
