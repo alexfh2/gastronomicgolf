@@ -407,9 +407,9 @@ function HeroAccessCard({
   action: string;
 }) {
   return (
-    <Link to={to} className="group">
+    <Link to={to} className="group block h-full">
       <div
-        className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+        className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3 h-full min-h-[120px]"
         style={{
           background:
             'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
