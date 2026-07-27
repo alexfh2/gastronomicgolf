@@ -238,7 +238,7 @@ const Index = () => {
             </Link>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
             {quickLinks.map((link) => (
               <Link key={link.path} to={link.path} className="group block h-full">
                 <div
