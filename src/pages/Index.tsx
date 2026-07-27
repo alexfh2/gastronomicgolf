@@ -479,27 +479,17 @@ function RankingRow({
     <button
       type="button"
       onClick={onClick}
-      className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center py-3.5 border-b border-border/15 hover:bg-muted/15 transition-all overflow-hidden group"
-      style={
-        isTop3
-          ? {
-              background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 35%, transparent 75%)`,
-            }
-          : undefined
-      }
+      className="relative w-full text-left grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_4rem_5rem_5rem] gap-3 items-center min-h-[44px] py-3.5 border-b border-border hover:bg-surface-hover/60 transition-colors duration-200 overflow-hidden group"
+      style={isTop3 ? { backgroundColor: `hsl(var(--accent) / ${accentAlpha})` } : undefined}
     >
       {isTop3 && (
-        <span
-          aria-hidden
-          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-r"
-          style={{ background: `linear-gradient(180deg, hsl(var(--accent) / ${Math.min(1, accentAlpha * 4)}) 0%, hsl(var(--accent) / ${accentAlpha}) 100%)` }}
-        />
+        <span aria-hidden className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-accent" />
       )}
 
       <div className="flex items-center justify-center">
         <span
-          className={`text-sm font-body font-semibold w-7 text-center ${
-            isTop3 ? 'text-accent' : 'text-muted-foreground/70'
+          className={`text-[14px] font-body font-bold w-7 text-center ${
+            isTop3 ? 'text-accent' : 'text-muted-foreground'
           }`}
         >
           {position}
@@ -507,26 +497,27 @@ function RankingRow({
       </div>
 
       <div className="flex items-center gap-2.5 min-w-0">
-        <span className={`text-sm sm:text-[15px] font-body font-medium truncate ${isTop3 ? 'text-foreground' : 'text-foreground/90'}`}>
+        <span className={`text-[15px] font-body truncate text-foreground ${isTop3 ? 'font-semibold' : 'font-medium'}`}>
           {name}
           {handicap != null && (
-            <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+            <span className="ml-1.5 text-[13px] text-muted-foreground font-normal">
               ({Number(handicap).toFixed(1)})
             </span>
           )}
         </span>
       </div>
 
-      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">{rounds}</span>
+      <span className="hidden sm:inline text-[13px] text-muted-foreground text-right font-mono">{rounds}</span>
       <span
         className={`text-base sm:text-lg text-right font-mono font-bold ${isTop3 ? 'text-accent' : 'text-foreground'}`}
       >
         {points.toLocaleString()}
       </span>
-      <span className="hidden sm:inline text-xs text-muted-foreground/70 text-right font-mono">
+      <span className="hidden sm:inline text-[13px] text-muted-foreground text-right font-mono">
         {rounds > 0 ? (points / rounds).toFixed(1) : '—'}
       </span>
     </button>
+
   );
 }
 
