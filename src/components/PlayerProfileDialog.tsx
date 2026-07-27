@@ -309,54 +309,16 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
               }));
             if (hcpData.length < 2) return null;
 
-            const values = hcpData.map(d => d.hcp);
-            const min = Math.min(...values);
-            const max = Math.max(...values);
-            const range = max - min || 1;
-            const chartH = 60;
-            const chartW = Math.max(200, hcpData.length * 60);
-            const padX = 30;
-            const padY = 22;
-            const usableW = chartW - padX * 2;
-            const usableH = chartH - padY * 2;
-
-            const points = hcpData.map((d, i) => ({
-              x: padX + (i / (hcpData.length - 1)) * usableW,
-              y: padY + (1 - (d.hcp - min) / range) * usableH,
-              hcp: d.hcp,
-              label: d.label,
-            }));
-
-            const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
-
             return (
-              <div>
+              <div className="min-w-0">
                 <h4 className="font-display font-semibold text-sm mb-3 text-foreground">{t('players.hcpEvolution')}</h4>
-                <div className="bg-secondary/20 rounded-lg p-3 border border-border/40 overflow-x-auto">
-                  <svg width={chartW} height={chartH + 20} className="text-accent">
-                    <polyline
-                      points={polyline}
-                      fill="none"
-                      stroke="hsl(var(--accent))"
-                      strokeWidth="2"
-                      strokeLinejoin="round"
-                    />
-                    {points.map((p, i) => (
-                      <g key={i}>
-                        <circle cx={p.x} cy={p.y} r="4" fill="hsl(var(--accent))" />
-                        <text x={p.x} y={p.y - 8} textAnchor="middle" className="fill-foreground text-[10px] font-mono font-semibold">
-                          {p.hcp}
-                        </text>
-                        <text x={p.x} y={chartH + 14} textAnchor="middle" className="fill-muted-foreground text-[9px]">
-                          {p.label}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
+                <div className="bg-secondary/20 rounded-lg p-3 border border-border/40 min-w-0">
+                  <HcpEvolutionChart data={hcpData} />
                 </div>
               </div>
             );
           })()}
+
 
           {/* Statistics */}
           {n > 0 && (
