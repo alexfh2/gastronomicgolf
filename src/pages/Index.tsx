@@ -183,13 +183,13 @@ const Index = () => {
           {/* Bloc textual del hero — només desktop/tablet */}
           <div className="hidden sm:block">
             <p className="font-body text-[12px] font-semibold tracking-[0.22em] uppercase text-accent mb-3 leading-[1.4]">
-              {t('common.season')} 2026
+              {"\n"}
             </p>
             <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-[3.4rem] font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
               Gastronòmic <span className="font-extrabold">GOLF</span>
             </h1>
             <p className="font-brand text-lg sm:text-xl lg:text-[1.4rem] text-accent font-normal tracking-wide mt-2">
-              circuit de golf
+              {t('common.season')} 2026
             </p>
 
           </div>
