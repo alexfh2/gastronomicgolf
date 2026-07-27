@@ -153,9 +153,6 @@ const Index = () => {
           <p className="font-brand text-xl lg:text-2xl text-accent/70 font-light tracking-wide mb-3">
             circuit de golf
           </p>
-          <p className="font-body text-sm text-muted-foreground/70 tracking-wide">
-            Classificació i seguiment del circuit
-          </p>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
             {lastRound && (
