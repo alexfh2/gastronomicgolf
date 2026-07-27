@@ -56,14 +56,30 @@ interface ColumnMap {
   hpu: number | null;
   total: number | null;
   scratch: number | null;
-  holeColumns: number[]; // indices for holes 1-18
+  holeColumns: number[]; // indices for holes 1-18 (gross strokes)
+  stablefordHoleColumns: number[]; // per-hole stableford points (if present)
+}
+
+/** Header patterns for per-hole columns. Returns hole number + kind, or null. */
+function matchHoleHeader(raw: string): { num: number; kind: 'gross' | 'points' | 'plain' } | null {
+  const s = raw.trim();
+  // Gross strokes: "Bruto 1", "Brut 1", "Gross 1", "Golpes 1"
+  let m = s.match(/^(?:bruto?s?|gross|golpes|cops)\s*\.?\s*(\d{1,2})$/i);
+  if (m) return { num: parseInt(m[1], 10), kind: 'gross' };
+  // Stableford points per hole: "Res. 1", "Resultado 1", "Pts 1", "Punts 1"
+  m = s.match(/^(?:res|resultado|resultat|pts?|punts?|puntos?)\s*\.?\s*(\d{1,2})$/i);
+  if (m) return { num: parseInt(m[1], 10), kind: 'points' };
+  // Plain hole number: "1", "01", "H1", "Hoyo 1", "Hole 1"
+  m = s.match(/^(?:h(?:oyo|ole)?\s*)?(\d{1,2})$/i);
+  if (m) return { num: parseInt(m[1], 10), kind: 'plain' };
+  return null;
 }
 
 function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range): ColumnMap {
   const map: ColumnMap = {
     pos: null, name: null, license: null, hex: null, nvh: null, niv: null,
     age: null, gender: null, category: null, hpu: null, total: null,
-    scratch: null, holeColumns: [],
+    scratch: null, holeColumns: [], stablefordHoleColumns: [],
   };
 
   const headers: { col: number; raw: string; normalized: string }[] = [];
@@ -76,14 +92,17 @@ function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range)
     headers.push({ col: c, raw, normalized });
   }
 
+  const gross: { col: number; num: number }[] = [];
+  const points: { col: number; num: number }[] = [];
+  const plain: { col: number; num: number }[] = [];
+
   // Match semantic fields
   for (const h of headers) {
-    // Check if it's a hole number (1-18)
-    // Matches: "1", "01", "H1", "h1", "Hoyo 1", "hoyo1", "Hole 1", etc.
-    const holeMatch = h.raw.match(/^(?:h(?:oyo|ole)?\s*)?(\d{1,2})$/i);
-    const holeNum = holeMatch ? parseInt(holeMatch[1], 10) : NaN;
-    if (!isNaN(holeNum) && holeNum >= 1 && holeNum <= 18) {
-      map.holeColumns.push(h.col);
+    const hole = matchHoleHeader(h.raw);
+    if (hole && hole.num >= 1 && hole.num <= 18) {
+      if (hole.kind === 'gross') gross.push({ col: h.col, num: hole.num });
+      else if (hole.kind === 'points') points.push({ col: h.col, num: hole.num });
+      else plain.push({ col: h.col, num: hole.num });
       continue;
     }
 
@@ -97,16 +116,13 @@ function detectColumns(ws: XLSX.WorkSheet, headerRow: number, range: XLSX.Range)
     }
   }
 
-  // Sort hole columns by their header number
-  map.holeColumns.sort((a, b) => {
-    const aCell = ws[XLSX.utils.encode_cell({ r: headerRow, c: a })];
-    const bCell = ws[XLSX.utils.encode_cell({ r: headerRow, c: b })];
-    const extractNum = (v: string) => {
-      const m = v.match(/(\d{1,2})/);
-      return m ? parseInt(m[1]) : 0;
-    };
-    return extractNum(String(aCell?.v || '0')) - extractNum(String(bCell?.v || '0'));
-  });
+  const byNum = (a: { num: number }, b: { num: number }) => a.num - b.num;
+  gross.sort(byNum); points.sort(byNum); plain.sort(byNum);
+
+  // Gross strokes always win over per-hole stableford points for the scorecard
+  const chosen = gross.length > 0 ? gross : (plain.length > 0 ? plain : points);
+  map.holeColumns = chosen.map(x => x.col);
+  map.stablefordHoleColumns = (chosen === points ? [] : points).map(x => x.col);
 
   return map;
 }
@@ -123,11 +139,9 @@ function findHeaderRow(ws: XLSX.WorkSheet, range: XLSX.Range): number {
       for (const aliases of Object.values(HEADER_ALIASES)) {
         if (aliases.includes(n)) { matchCount++; break; }
       }
-      // Also count hole numbers
-      const raw = String(cell.v);
-      const holeMatch = raw.match(/^(?:h(?:oyo|ole)?\s*)?(\d{1,2})$/i);
-      const num = holeMatch ? parseInt(holeMatch[1], 10) : NaN;
-      if (!isNaN(num) && num >= 1 && num <= 18) matchCount++;
+      // Also count per-hole columns
+      const hole = matchHoleHeader(String(cell.v));
+      if (hole && hole.num >= 1 && hole.num <= 18) matchCount++;
     }
     if (matchCount >= 3) return r;
   }
