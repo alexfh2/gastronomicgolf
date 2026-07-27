@@ -287,25 +287,26 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
 
           <div className="flex items-center gap-4 mb-6 sm:mb-4">
-            <div className="h-px flex-1 bg-border/40" />
-            <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
+            <div className="h-px flex-1 bg-border" />
+            <h2 className="font-body text-[12px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-[1.4]">
               Patrocinadors
             </h2>
-            <div className="h-px flex-1 bg-border/40" />
+            <div className="h-px flex-1 bg-border" />
           </div>
           <img
             src={sponsorsLineLight}
             alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
             loading="lazy"
-            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
           />
           <img
             src={sponsorsLine}
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
           />
+
         </div>
       </section>
 
