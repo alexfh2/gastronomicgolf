@@ -133,7 +133,7 @@ const Index = () => {
   return (
     <div className="animate-fade-in overflow-x-hidden">
       {/* ——— HERO ——— */}
-      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-24 sm:pb-12 lg:min-h-0 lg:pt-24 lg:pb-8">
+      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-24 sm:pb-12 lg:min-h-0 lg:pt-20 lg:pb-6">
         {/* Background image — player kept readable on the right */}
         <div className="absolute inset-0">
           <img
@@ -298,7 +298,7 @@ const Index = () => {
       </section>
 
       {/* ——— SPONSORS ——— */}
-      <section className="container pt-10 pb-10 sm:pt-6 sm:pb-8">
+      <section className="container pt-10 pb-10 sm:pt-4 sm:pb-8">
         <div className="max-w-4xl mx-auto">
 
           <div className="flex items-center gap-4 mb-6 sm:mb-4">
