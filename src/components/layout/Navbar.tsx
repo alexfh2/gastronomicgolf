@@ -51,7 +51,7 @@ const Navbar = () => {
               <Link
                 key={item.key}
                 to={item.path}
-                className={`px-4 py-2 text-[13px] font-body font-semibold uppercase tracking-[0.15em] transition-colors ${
+                className={`px-4 py-2 text-[14px] font-body font-semibold uppercase tracking-[0.15em] transition-colors ${
                   isActive
                     ? 'text-accent border border-accent/40 rounded-sm'
                     : isHome
@@ -90,7 +90,7 @@ const Navbar = () => {
                       key={item.key}
                       to={item.path}
                       onClick={() => setOpen(false)}
-                      className={`px-4 py-3 text-[13px] font-body font-semibold uppercase tracking-[0.12em] transition-colors ${
+                      className={`px-4 py-3 text-[14px] font-body font-semibold uppercase tracking-[0.12em] transition-colors ${
                         isActive
                           ? 'text-accent border-l-2 border-accent'
                           : 'text-muted-foreground hover:text-foreground'
