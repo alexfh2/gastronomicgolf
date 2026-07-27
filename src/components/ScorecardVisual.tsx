@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const DEFAULT_PAR = [4, 4, 5, 3, 5, 3, 4, 4, 4, 4, 5, 3, 4, 5, 4, 4, 3, 5];
 
@@ -51,6 +51,7 @@ const getStbStyle = (pts: number | null): string => {
 };
 
 const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT_PAR, handicap, handicapWomen, playerHandicap, playerGender }) => {
+  const [mobileHalf, setMobileHalf] = useState<0 | 1>(0);
   // Pick female-specific stroke index distribution when applicable
   const effectiveHandicap = (playerGender === 'F' && Array.isArray(handicapWomen) && handicapWomen.length === 18)
     ? handicapWomen
@@ -254,13 +255,100 @@ const ScorecardVisual: React.FC<ScorecardVisualProps> = ({ scores, par = DEFAULT
   const totalStrokes = frontTotal != null && backTotal != null ? frontTotal + backTotal : null;
   const totalPar = par.reduce((a, b) => a + b, 0);
 
+  /** Mobile: one hole per row, no horizontal scroll */
+  const renderMobileHalf = (
+    halfScores: number[],
+    halfPar: number[],
+    startHole: number,
+    total: number | null,
+    halfHcp?: number[],
+    halfStb?: (number | null)[],
+    holeOffset = 0
+  ) => (
+    <div className="rounded-md border border-border/40 overflow-hidden">
+      <div className="grid grid-cols-5 bg-[hsl(var(--primary)/0.08)] text-[11px] font-medium text-muted-foreground/80">
+        <div className="py-1.5 text-center">Forat</div>
+        <div className="py-1.5 text-center">Par</div>
+        <div className="py-1.5 text-center">HCP</div>
+        <div className="py-1.5 text-center">Cops</div>
+        <div className="py-1.5 text-center text-accent">STB</div>
+      </div>
+      {halfScores.map((s, i) => {
+        const strokes = getStrokeMarker(holeOffset + i);
+        const pts = halfStb?.[i] ?? null;
+        return (
+          <div
+            key={i}
+            className="grid grid-cols-5 items-center min-h-[44px] border-t border-border/30 odd:bg-secondary/10"
+          >
+            <div className="flex items-center justify-center gap-1 font-mono text-sm font-bold text-foreground">
+              {startHole + i}
+              {strokes > 0 && (
+                <span className="flex gap-[2px]">
+                  {Array.from({ length: Math.min(strokes, 3) }).map((_, j) => (
+                    <span key={j} className="w-[4px] h-[4px] rounded-full bg-accent inline-block" />
+                  ))}
+                </span>
+              )}
+            </div>
+            <div className="text-center font-mono text-xs text-muted-foreground">{halfPar[i]}</div>
+            <div className="text-center font-mono text-xs text-muted-foreground">{halfHcp?.[i] ?? '—'}</div>
+            <div className="flex items-center justify-center">{renderScore(s, halfPar[i])}</div>
+            <div className="flex items-center justify-center">
+              {halfStb ? (
+                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-md text-sm ${getStbStyle(pts)}`}>
+                  {pts != null ? pts : '—'}
+                </span>
+              ) : (
+                <span className="text-muted-foreground text-xs">—</span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      <div className="grid grid-cols-5 items-center min-h-[40px] border-t border-border/40 bg-[hsl(var(--primary)/0.12)] font-mono text-sm font-bold">
+        <div className="text-center text-[11px] uppercase tracking-wider text-muted-foreground font-body font-medium">Tot</div>
+        <div className="text-center text-xs text-muted-foreground">{halfPar.reduce((a, b) => a + b, 0)}</div>
+        <div />
+        <div className="text-center text-foreground">{total != null ? total : '—'}</div>
+        <div className="text-center text-accent">{halfStb ? sumStb(halfStb) : '—'}</div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-3">
-      {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)}
-      {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
+    <div className="space-y-3 min-w-0">
+      {/* Mobile view: one hole per row, split in two halves */}
+      <div className="sm:hidden space-y-2">
+        <div className="grid grid-cols-2 gap-1 p-1 rounded-md bg-secondary/40 border border-border/40">
+          {([0, 1] as const).map((half) => (
+            <button
+              key={half}
+              type="button"
+              onClick={() => setMobileHalf(half)}
+              aria-pressed={mobileHalf === half}
+              className={`min-h-[40px] rounded-[4px] text-xs font-medium transition-colors ${
+                mobileHalf === half ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              {half === 0 ? 'Forats 1–9' : 'Forats 10–18'}
+            </button>
+          ))}
+        </div>
+        {mobileHalf === 0
+          ? renderMobileHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)
+          : renderMobileHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
+      </div>
+
+      {/* Desktop view */}
+      <div className="hidden sm:block space-y-3">
+        {renderHalf(front9, frontPar, 1, frontTotal, frontHcp, frontStb ?? undefined, 0)}
+        {renderHalf(back9, backPar, 10, backTotal, backHcp, backStb ?? undefined, 9)}
+      </div>
+
 
       {/* Totales 18 hoyos dentro de la tarjeta */}
-      <div className="grid grid-cols-3 gap-2 border-2 border-accent/40 rounded-lg bg-secondary/30 p-3">
+      <div className="grid grid-cols-3 gap-1 sm:gap-2 border-2 border-accent/40 rounded-lg bg-secondary/30 p-2 sm:p-3">
         <div className="text-center">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">PAR CAMP</div>
           <div className="font-mono font-bold text-base text-foreground mt-1">{totalPar}</div>
