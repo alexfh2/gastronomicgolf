@@ -134,17 +134,49 @@ const Index = () => {
     <div className="animate-fade-in overflow-x-hidden">
       {/* ——— HERO ——— */}
       <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-28 sm:pb-16 lg:min-h-[86vh] lg:pt-44 lg:pb-28">
-        {/* Background image — subtler and pushed right on mobile */}
+        {/* Background image — player kept readable on the right */}
         <div className="absolute inset-0">
           <img
             src={heroBg}
             alt=""
-            className="w-full h-full object-cover object-[78%_bottom] sm:object-bottom opacity-45 saturate-[0.65] sm:opacity-100 sm:saturate-100"
+            className="w-full h-full object-cover object-[78%_bottom] sm:object-[72%_bottom] opacity-45 saturate-[0.65] sm:opacity-100 sm:saturate-[0.9] sm:contrast-[1.08] sm:brightness-[1.06]"
           />
         </div>
-        {/* Gradients — keep top transparent so navbar blends */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background/60 sm:bg-gradient-to-r sm:from-background sm:via-background/70 sm:to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/60 to-transparent" />
+
+        {/* Layer 1 — horizontal scrim: dark on the left, clears over the player */}
+        <div
+          className="absolute inset-0 sm:hidden"
+          style={{
+            background:
+              'linear-gradient(180deg, hsl(var(--background) / 0.92) 0%, hsl(var(--background) / 0.82) 45%, hsl(var(--background) / 0.6) 100%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 hidden sm:block"
+          style={{
+            background:
+              'linear-gradient(90deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.94) 28%, hsl(var(--background) / 0.7) 46%, hsl(var(--background) / 0.32) 62%, hsl(var(--background) / 0.08) 76%, hsl(var(--background) / 0) 92%)',
+          }}
+        />
+
+        {/* Layer 2 — bottom fade for continuity with the section below */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-1/3 sm:h-2/5"
+          style={{
+            background:
+              'linear-gradient(0deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.75) 30%, hsl(var(--background) / 0.28) 65%, hsl(var(--background) / 0) 100%)',
+          }}
+        />
+
+        {/* Layer 3 — subtle atmospheric vignette */}
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden sm:block pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(120% 90% at 72% 55%, hsl(var(--background) / 0) 38%, hsl(var(--background) / 0.22) 78%, hsl(var(--background) / 0.45) 100%)',
+          }}
+        />
 
         {/* Hero text */}
         <div className="relative z-10 container">
