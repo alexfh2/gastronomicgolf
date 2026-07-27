@@ -472,8 +472,8 @@ function RankingRow({
   onClick: () => void;
 }) {
   const isTop3 = position <= 3;
-  // Use accent (green) intensity instead of medal colours.
-  const accentAlpha = position === 1 ? 0.22 : position === 2 ? 0.14 : position === 3 ? 0.08 : 0;
+  // Accent tint intensity (works in both themes); rank is also marked by the left rule.
+  const accentAlpha = position === 1 ? 0.14 : position === 2 ? 0.09 : position === 3 ? 0.05 : 0;
 
   return (
     <button
