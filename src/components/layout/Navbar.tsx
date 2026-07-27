@@ -93,14 +93,16 @@ const Navbar = () => {
                       key={item.key}
                       to={item.path}
                       onClick={() => setOpen(false)}
-                      className={`px-4 py-3 text-[14px] font-body font-semibold uppercase tracking-[0.12em] transition-colors ${
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`px-4 py-3 min-h-[44px] flex items-center text-[15px] font-body font-semibold uppercase tracking-[0.08em] leading-[1.3] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
                         isActive
-                          ? 'text-accent border-l-2 border-accent'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'text-foreground bg-accent/10 border-l-2 border-accent'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover/60'
                       }`}
                     >
                       {t(`nav.${item.key}`)}
                     </Link>
+
                   );
                 })}
               </nav>
