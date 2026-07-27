@@ -44,7 +44,7 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
         .select('*, rounds!inner(name, date, club, round_number, status, is_master, master_coefficient, course_par, course_handicap, course_handicap_women)')
         .eq('player_id', playerId!)
         .eq('rounds.status', 'published')
-        .order('rounds(round_number)');
+        .order('rounds(round_number)', { ascending: false });
       return data || [];
     },
     enabled: !!playerId && open,
