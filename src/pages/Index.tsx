@@ -133,7 +133,7 @@ const Index = () => {
   return (
     <div className="animate-fade-in overflow-x-hidden">
       {/* ——— HERO ——— */}
-      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-24 sm:pb-12 lg:min-h-0 lg:pt-32 lg:pb-14">
+      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-24 sm:pb-12 lg:min-h-0 lg:pt-24 lg:pb-8">
         {/* Background image — player kept readable on the right */}
         <div className="absolute inset-0">
           <img
@@ -185,7 +185,7 @@ const Index = () => {
             <p className="font-body text-[10px] sm:text-[12px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-3 sm:mb-3">
               {t('common.season')} 2026
             </p>
-            <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-6xl font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
+            <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-[3.4rem] font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
               Gastronòmic <span className="font-extrabold">GOLF</span>
             </h1>
             <p className="font-brand text-lg sm:text-xl lg:text-[1.4rem] text-accent/70 font-light tracking-wide mt-2 sm:mt-2">
@@ -193,7 +193,7 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="mt-0 sm:mt-8 lg:mt-9 max-w-2xl space-y-4 sm:space-y-3.5">
+          <div className="mt-0 sm:mt-7 lg:mt-7 max-w-2xl space-y-4 sm:space-y-3.5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
               {lastRound && (
                 <HeroAccessCard
@@ -298,10 +298,10 @@ const Index = () => {
       </section>
 
       {/* ——— SPONSORS ——— */}
-      <section className="container pt-10 pb-10 sm:pt-8 sm:pb-10">
+      <section className="container pt-10 pb-10 sm:pt-6 sm:pb-8">
         <div className="max-w-4xl mx-auto">
 
-          <div className="flex items-center gap-4 mb-6 sm:mb-5">
+          <div className="flex items-center gap-4 mb-6 sm:mb-4">
             <div className="h-px flex-1 bg-border/40" />
             <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
               Patrocinadors
