@@ -133,13 +133,13 @@ const Index = () => {
   return (
     <div className="animate-fade-in overflow-x-hidden">
       {/* ——— HERO ——— */}
-      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-28 sm:pb-16 lg:min-h-[86vh] lg:pt-44 lg:pb-28">
+      <section className="relative overflow-hidden flex items-center pt-[80px] pb-12 sm:pt-24 sm:pb-12 lg:min-h-0 lg:pt-20 lg:pb-6">
         {/* Background image — player kept readable on the right */}
         <div className="absolute inset-0">
           <img
             src={heroBg}
             alt=""
-            className="w-full h-full object-cover object-[78%_bottom] sm:object-[72%_bottom] opacity-45 saturate-[0.65] sm:opacity-100 sm:saturate-[0.9] sm:contrast-[1.08] sm:brightness-[1.06]"
+            className="w-full h-full object-cover object-[78%_bottom] sm:object-[74%_bottom] opacity-45 saturate-[0.65] sm:opacity-100 sm:saturate-[0.9] sm:contrast-[1.08] sm:brightness-[1.06] sm:scale-[0.88] sm:origin-bottom-right"
           />
         </div>
 
@@ -182,19 +182,19 @@ const Index = () => {
         <div className="relative z-10 container">
           {/* Bloc textual del hero — només desktop/tablet */}
           <div className="hidden sm:block">
-            <p className="font-body text-[10px] sm:text-[11px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-4 sm:mb-5">
+            <p className="font-body text-[10px] sm:text-[12px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-3 sm:mb-3">
               {t('common.season')} 2026
             </p>
-            <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-7xl font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
+            <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-[3.4rem] font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
               Gastronòmic <span className="font-extrabold">GOLF</span>
             </h1>
-            <p className="font-brand text-lg sm:text-xl lg:text-2xl text-accent/70 font-light tracking-wide mt-3 sm:mt-4">
+            <p className="font-brand text-lg sm:text-xl lg:text-[1.4rem] text-accent/70 font-light tracking-wide mt-2 sm:mt-2">
               circuit de golf
             </p>
           </div>
 
-          <div className="mt-0 sm:mt-12 lg:mt-14 max-w-2xl space-y-4 sm:space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
+          <div className="mt-0 sm:mt-7 lg:mt-7 max-w-2xl space-y-4 sm:space-y-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
               {lastRound && (
                 <HeroAccessCard
                   to={`/jornades?round=${lastRound.id}`}
@@ -224,7 +224,7 @@ const Index = () => {
           {latestNews && (
             <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
               <div
-                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch h-full min-h-[112px] sm:min-h-[120px]"
+                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch h-full min-h-[112px] sm:min-h-[104px]"
                 style={{
                   background:
                     'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
@@ -247,15 +247,15 @@ const Index = () => {
                     <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
                   </div>
                 )}
-                <div className="min-w-0 flex-1 flex items-center gap-3 sm:gap-4 px-4 py-4 sm:px-6 sm:py-5">
+                <div className="min-w-0 flex-1 flex items-center gap-3 sm:gap-4 px-4 py-4 sm:px-6 sm:py-4">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1.5">
+                    <p className="font-body text-[10px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1.5">
                       Última notícia
                     </p>
-                    <h3 className="font-body text-[15px] sm:text-lg font-semibold text-foreground tracking-wide leading-snug line-clamp-2 sm:line-clamp-3">
+                    <h3 className="font-body text-[15px] sm:text-[17px] font-semibold text-foreground tracking-wide leading-snug line-clamp-2">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 leading-snug truncate mt-1.5">
+                    <p className="text-[11px] sm:text-[12px] text-muted-foreground/70 leading-snug truncate mt-1.5">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -270,11 +270,11 @@ const Index = () => {
             </Link>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
             {quickLinks.map((link) => (
               <Link key={link.path} to={link.path} className="group block h-full">
                 <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-6 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[86px] sm:min-h-[120px]"
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[86px] sm:min-h-[96px]"
                   style={{
                     background:
                       'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
@@ -285,8 +285,8 @@ const Index = () => {
                   <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <link.icon className="h-5 w-5 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-body text-[15px] sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
-                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 leading-snug truncate mt-1">{link.desc}</p>
+                    <h3 className="font-body text-[15px] sm:text-[15px] font-semibold text-foreground tracking-wide">{link.label}</h3>
+                    <p className="text-[11px] sm:text-[12px] text-muted-foreground/70 leading-snug truncate mt-1">{link.desc}</p>
                   </div>
                   <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
                 </div>
@@ -298,10 +298,10 @@ const Index = () => {
       </section>
 
       {/* ——— SPONSORS ——— */}
-      <section className="container pt-12 pb-10 sm:pt-14 sm:pb-12">
+      <section className="container pt-10 pb-10 sm:pt-4 sm:pb-8">
         <div className="max-w-4xl mx-auto">
 
-          <div className="flex items-center gap-4 mb-7 sm:mb-8">
+          <div className="flex items-center gap-4 mb-6 sm:mb-4">
             <div className="h-px flex-1 bg-border/40" />
             <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
               Patrocinadors
@@ -312,14 +312,14 @@ const Index = () => {
             src={sponsorsLineLight}
             alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
             loading="lazy"
-            className="block dark:hidden mx-auto w-[92%] sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
           />
           <img
             src={sponsorsLine}
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="hidden dark:block mx-auto w-[92%] sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
           />
         </div>
       </section>
@@ -454,7 +454,7 @@ function HeroAccessCard({
   return (
     <Link to={to} className="group block h-full">
       <div
-        className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-6 hover:border-accent/40 transition-all duration-500 flex items-center gap-3.5 h-full min-h-[86px] sm:min-h-[120px]"
+        className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-3.5 h-full min-h-[86px] sm:min-h-[104px]"
         style={{
           background:
             'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
@@ -465,10 +465,10 @@ function HeroAccessCard({
         <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <span className="text-accent/80 shrink-0">{icon}</span>
         <div className="min-w-0 flex-1">
-          <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">{eyebrow}</p>
-          <p className="font-body text-[14px] sm:text-[13px] font-semibold text-foreground truncate leading-snug">{title}</p>
-          {meta && <p className="text-[10px] text-muted-foreground/70 truncate mt-1">{meta}</p>}
-          <p className="text-[10px] text-accent/70 font-body tracking-wider uppercase mt-2 hidden sm:block">{action}</p>
+          <p className="font-body text-[10px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">{eyebrow}</p>
+          <p className="font-body text-[15px] sm:text-[15px] font-semibold text-foreground truncate leading-snug">{title}</p>
+          {meta && <p className="text-[11px] text-muted-foreground/70 truncate mt-1">{meta}</p>}
+          <p className="text-[11px] text-accent/70 font-body tracking-wider uppercase mt-1.5 hidden sm:block">{action}</p>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
       </div>
