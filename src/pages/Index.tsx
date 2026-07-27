@@ -131,31 +131,35 @@ const Index = () => {
 
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in overflow-x-hidden">
       {/* ——— HERO ——— */}
-      <section className="relative min-h-[68vh] lg:min-h-[78vh] overflow-hidden flex items-center">
-        {/* Background image */}
+      <section className="relative overflow-hidden flex items-center pt-20 pb-10 sm:pt-24 sm:pb-14 lg:min-h-[80vh] lg:py-0">
+        {/* Background image — subtler and pushed right on mobile */}
         <div className="absolute inset-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover object-bottom" />
+          <img
+            src={heroBg}
+            alt=""
+            className="w-full h-full object-cover object-[78%_bottom] sm:object-bottom opacity-45 saturate-[0.65] sm:opacity-100 sm:saturate-100"
+          />
         </div>
         {/* Gradients — keep top transparent so navbar blends */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background/60 sm:bg-gradient-to-r sm:from-background sm:via-background/70 sm:to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background/60 to-transparent" />
 
-        {/* Hero text — vertically centered, balanced spacing */}
-        <div className="relative z-10 container py-10">
-          <p className="font-body text-[11px] font-medium tracking-[0.35em] uppercase text-accent/80 mb-3">
+        {/* Hero text */}
+        <div className="relative z-10 container">
+          <p className="font-body text-[10px] sm:text-[11px] font-medium tracking-[0.32em] sm:tracking-[0.35em] uppercase text-accent/80 mb-4 sm:mb-5">
             {t('common.season')} 2026
           </p>
-          <h1 className="font-brand text-5xl lg:text-7xl font-bold text-foreground leading-[0.95] mb-1 tracking-tight">
+          <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-7xl font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
             Gastronòmic <span className="font-extrabold">GOLF</span>
           </h1>
-          <p className="font-brand text-xl lg:text-2xl text-accent/70 font-light tracking-wide mb-3">
+          <p className="font-brand text-lg sm:text-xl lg:text-2xl text-accent/70 font-light tracking-wide mt-3 sm:mt-4">
             circuit de golf
           </p>
 
-          <div className="mt-6 max-w-2xl space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="mt-10 sm:mt-12 lg:mt-14 max-w-2xl space-y-3.5 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
               {lastRound && (
                 <HeroAccessCard
                   to={`/jornades?round=${lastRound.id}`}
@@ -185,16 +189,17 @@ const Index = () => {
           {latestNews && (
             <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
               <div
-                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4 h-full min-h-[120px]"
+                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch h-full min-h-[112px] sm:min-h-[120px]"
                 style={{
                   background:
-                    'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
+                    'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
                   boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+                  backdropFilter: 'blur(4px)',
                 }}
               >
                 <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 {latestNewsPhoto?.url ? (
-                  <div className="h-[120px] w-[120px] shrink-0 overflow-hidden">
+                  <div className="w-[104px] sm:w-[132px] shrink-0 overflow-hidden">
                     <img
                       src={latestNewsPhoto.url}
                       alt={latestNewsPhoto.caption || latestNews.title}
@@ -203,19 +208,19 @@ const Index = () => {
                     />
                   </div>
                 ) : (
-                  <div className="h-[120px] w-[120px] shrink-0 flex items-center justify-center bg-muted/20">
+                  <div className="w-[104px] sm:w-[132px] shrink-0 flex items-center justify-center bg-muted/20">
                     <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
                   </div>
                 )}
-                <div className="min-w-0 flex-1 flex items-center gap-4 py-4 pr-4 sm:py-5">
+                <div className="min-w-0 flex-1 flex items-center gap-3 sm:gap-4 px-4 py-4 sm:px-6 sm:py-5">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1">
+                    <p className="font-body text-[9px] font-medium tracking-[0.25em] uppercase text-accent/70 mb-1.5">
                       Última notícia
                     </p>
-                    <h3 className="font-body text-base sm:text-lg font-semibold text-foreground tracking-wide leading-snug line-clamp-2">
+                    <h3 className="font-body text-[15px] sm:text-lg font-semibold text-foreground tracking-wide leading-snug line-clamp-2 sm:line-clamp-3">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[11px] text-muted-foreground leading-snug truncate mt-1">
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 leading-snug truncate mt-1.5">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -224,30 +229,31 @@ const Index = () => {
                       ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
             </Link>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             {quickLinks.map((link) => (
               <Link key={link.path} to={link.path} className="group block h-full">
                 <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[120px]"
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-6 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[86px] sm:min-h-[120px]"
                   style={{
                     background:
-                      'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
+                      'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
                     boxShadow: '0 12px 30px -20px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(var(--foreground) / 0.03)',
+                    backdropFilter: 'blur(4px)',
                   }}
                 >
                   <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <link.icon className="h-6 w-6 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
+                  <link.icon className="h-5 w-5 sm:h-6 sm:w-6 text-accent/80 shrink-0" strokeWidth={1.5} />
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-body text-base sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
-                    <p className="hidden sm:block text-[11px] text-muted-foreground leading-snug truncate mt-0.5">{link.desc}</p>
+                    <h3 className="font-body text-[15px] sm:text-sm font-semibold text-foreground tracking-wide">{link.label}</h3>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground/70 leading-snug truncate mt-1">{link.desc}</p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 ml-auto shrink-0 group-hover:text-accent/70 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </Link>
             ))}
@@ -257,10 +263,10 @@ const Index = () => {
       </section>
 
       {/* ——— SPONSORS ——— */}
-      <section className="container pt-8 pb-4">
+      <section className="container pt-12 pb-10 sm:pt-14 sm:pb-12">
         <div className="max-w-4xl mx-auto">
 
-          <div className="flex items-center gap-4 mb-5">
+          <div className="flex items-center gap-4 mb-7 sm:mb-8">
             <div className="h-px flex-1 bg-border/40" />
             <h2 className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground/70">
               Patrocinadors
@@ -271,17 +277,18 @@ const Index = () => {
             src={sponsorsLineLight}
             alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
             loading="lazy"
-            className="block dark:hidden mx-auto w-full sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="block dark:hidden mx-auto w-[92%] sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
           />
           <img
             src={sponsorsLine}
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="hidden dark:block mx-auto w-full sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
+            className="hidden dark:block mx-auto w-[92%] sm:w-[85%] h-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-500"
           />
         </div>
       </section>
+
 
 
       {/* ——— RANKING + STATS ——— */}
