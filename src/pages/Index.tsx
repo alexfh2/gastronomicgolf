@@ -194,7 +194,7 @@ const Index = () => {
               >
                 <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 {latestNewsPhoto?.url ? (
-                  <div className="h-full aspect-square shrink-0 overflow-hidden">
+                  <div className="h-[120px] w-[120px] shrink-0 overflow-hidden">
                     <img
                       src={latestNewsPhoto.url}
                       alt={latestNewsPhoto.caption || latestNews.title}
@@ -203,7 +203,7 @@ const Index = () => {
                     />
                   </div>
                 ) : (
-                  <div className="h-full aspect-square shrink-0 flex items-center justify-center bg-muted/20">
+                  <div className="h-[120px] w-[120px] shrink-0 flex items-center justify-center bg-muted/20">
                     <Newspaper className="h-6 w-6 text-accent/60" strokeWidth={1.5} />
                   </div>
                 )}
