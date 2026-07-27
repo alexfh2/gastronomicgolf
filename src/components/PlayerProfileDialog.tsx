@@ -214,27 +214,28 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 gap-0 bg-card border-border">
-        <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/50">
-          <DialogTitle className="flex items-center gap-2 font-display text-foreground">
-            <User className="h-5 w-5 text-accent" />
-            {t('players.profile')}
+      <DialogContent className="w-full max-w-none min-w-0 h-[100dvh] max-h-[100dvh] rounded-none translate-x-[-50%] translate-y-[-50%] p-0 gap-0 bg-card border-border flex flex-col overflow-hidden sm:max-w-3xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
+        <DialogHeader className="shrink-0 h-14 justify-center px-4 sm:px-6 border-b border-border/50 bg-card">
+          <DialogTitle className="flex items-center gap-2 font-display text-foreground text-base sm:text-lg">
+            <User className="h-5 w-5 text-accent shrink-0" />
+            <span className="truncate">{t('players.profile')}</span>
           </DialogTitle>
         </DialogHeader>
 
+        <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain">
         {/* Header con gradiente sutil */}
-        <div className="from-primary to-primary/80 px-6 py-5 mx-6 rounded-lg flex items-center gap-4 border border-accent/20 bg-[sidebar-accent-foreground] bg-border">
-          <Avatar className="h-14 w-14 border-2 border-accent/30">
+        <div className="from-primary to-primary/80 px-4 py-4 mx-4 mt-4 sm:px-6 sm:py-5 sm:mx-6 sm:mt-5 rounded-lg flex items-center gap-3 sm:gap-4 border border-accent/20 bg-[sidebar-accent-foreground] bg-border">
+          <Avatar className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 border-2 border-accent/30">
             {player.photo_url && <AvatarImage src={player.photo_url} alt={player.name} />}
             <AvatarFallback className="bg-accent/20 text-accent font-semibold">
               {initials(player.name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display font-bold text-lg leading-tight text-cream truncate">
+            <h3 className="font-display font-bold text-base sm:text-lg leading-tight text-cream break-words line-clamp-2 sm:truncate">
               {player.name}
             </h3>
-            <p className="text-xs text-cream-dark mt-1">
+            <p className="text-xs text-cream-dark mt-1 break-words">
               {results?.length || 0} {(results?.length || 0) === 1 ? t('players.singleRound') : t('players.multipleRounds')}
               {player.current_handicap != null && <> · Hcp {player.current_handicap}</>}
               {player.club && <> · {player.club}</>}
@@ -242,7 +243,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
           </div>
         </div>
 
-        <div className="px-6 py-5 space-y-5">
+        <div className="px-4 sm:px-6 py-5 space-y-6 sm:space-y-5 min-w-0">
+
           {/* Category positions */}
           {mainCategory && (
             <div>
