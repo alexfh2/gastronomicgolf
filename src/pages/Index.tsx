@@ -183,9 +183,9 @@ const Index = () => {
             </div>
 
           {latestNews && (
-            <Link to={`/noticies?article=${latestNews.id}`} className="group block">
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
               <div
-                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4"
+                className="relative overflow-hidden border border-border/50 hover:border-accent/40 transition-all duration-500 flex items-stretch gap-4 h-full min-h-[120px]"
                 style={{
                   background:
                     'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
@@ -230,9 +230,9 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {quickLinks.map((link) => (
-              <Link key={link.path} to={link.path} className="group">
+              <Link key={link.path} to={link.path} className="group block h-full">
                 <div
-                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4"
+                  className="relative overflow-hidden border border-border/50 px-5 py-5 sm:px-6 sm:py-5 hover:border-accent/40 transition-all duration-500 flex items-center gap-4 h-full min-h-[120px]"
                   style={{
                     background:
                       'linear-gradient(180deg, hsl(var(--card) / 0.55) 0%, hsl(var(--card) / 0.2) 100%)',
@@ -407,9 +407,9 @@ function HeroAccessCard({
   action: string;
 }) {
   return (
-    <Link to={to} className="group">
+    <Link to={to} className="group block h-full">
       <div
-        className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3"
+        className="relative overflow-hidden border border-border/50 px-4 py-3 hover:border-accent/40 transition-all duration-500 flex items-center gap-3 h-full min-h-[120px]"
         style={{
           background:
             'linear-gradient(180deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.35) 100%)',
