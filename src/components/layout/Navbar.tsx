@@ -9,7 +9,6 @@ import ThemeToggle from './ThemeToggle';
 import logo from '@/assets/logo.png';
 
 const navItems = [
-  { key: 'overview', path: '/' },
   { key: 'rankings', path: '/ranquings' },
   { key: 'rounds', path: '/jornades' },
   { key: 'players', path: '/jugadors' },
@@ -67,11 +66,6 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          <span className={`hidden sm:inline-flex text-[10px] font-body font-medium tracking-[0.2em] uppercase ${
-            isHome ? 'text-foreground/40' : 'text-muted-foreground'
-          }`}>
-            Temporada 2026
-          </span>
           <LanguageSwitcher />
           <ThemeToggle isHome={isHome} />
 
