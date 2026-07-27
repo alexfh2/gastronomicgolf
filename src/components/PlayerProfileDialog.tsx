@@ -489,6 +489,8 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
             )}
           </div>
         </div>
+        </div>
+
       </DialogContent>
     </Dialog>
   );
