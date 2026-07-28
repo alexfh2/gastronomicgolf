@@ -14,7 +14,7 @@ import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 import { computeScratchStableford } from '@/lib/scratchStableford';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
-const Rounds = () => {
+const Rounds = ({ mode = 'results' }: { mode?: 'results' | 'calendar' }) => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'ca' ? ca : es;
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
@@ -24,7 +24,7 @@ const Rounds = () => {
   const roundRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: allRounds, isLoading } = useQuery({
-    queryKey: ['public-rounds-all'],
+    queryKey: ['public-rounds-all', mode],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
@@ -36,20 +36,22 @@ const Rounds = () => {
 
   // Split into played (descending) and upcoming (ascending)
   const today = new Date().toISOString().split('T')[0];
-  const playedRounds = (allRounds || []).filter((r) => r.date < today || (r.end_date && r.end_date < today)).sort((a, b) => b.date.localeCompare(a.date));
-  const upcomingRounds = (allRounds || []).filter((r) => !(r.date < today || (r.end_date && r.end_date < today)));
-  const rounds = [...playedRounds, ...upcomingRounds];
+  const isPlayed = (r: NonNullable<typeof allRounds>[number]) => r.date < today || (r.end_date && r.end_date < today);
+  const playedRounds = (allRounds || []).filter((r) => isPlayed(r) && r.status === 'published').sort((a, b) => b.date.localeCompare(a.date));
+  const upcomingRounds = (allRounds || []).filter((r) => !isPlayed(r)).sort((a, b) => a.date.localeCompare(b.date));
+  const rounds = mode === 'calendar' ? upcomingRounds : playedRounds;
 
   const roundParam = searchParams.get('round');
   useEffect(() => {
-    if (!roundParam || !allRounds?.length) return;
+    if (mode === 'calendar' || !roundParam || !allRounds?.length) return;
     const target = allRounds.find((r) => r.id === roundParam && r.status === 'published');
     if (!target) return;
     setExpandedRound(target.id);
     setTimeout(() => {
       roundRefs.current[target.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
-  }, [roundParam, allRounds]);
+  }, [roundParam, allRounds, mode]);
+
 
 
   const buildIcsContent = (round: any) => {
