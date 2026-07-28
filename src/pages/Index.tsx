@@ -284,7 +284,7 @@ const Index = () => {
       </section>
 
       {/* ——— SPONSORS ——— */}
-      <section className="container pt-10 pb-10 sm:pt-1 sm:pb-6">
+      <section className="container pt-10 pb-10 sm:pt-0 sm:pb-5">
         <div className="max-w-4xl mx-auto">
 
           <div className="flex items-center gap-4 mb-4 sm:mb-2.5">
