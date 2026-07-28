@@ -43,12 +43,15 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/ranquings" element={<Rankings />} />
+              <Route path="/resultats" element={<Rounds />} />
               <Route path="/jornades" element={<Rounds />} />
+              <Route path="/calendari" element={<Calendar />} />
               <Route path="/jugadors" element={<Players />} />
               <Route path="/jugadors/:id" element={<PlayerDetail />} />
               
               <Route path="/estadistiques" element={<Stats />} />
               <Route path="/noticies" element={<News />} />
+
             </Route>
 
             {/* Admin routes */}
