@@ -26,6 +26,8 @@ const AdminNews = () => {
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editArticle, setEditArticle] = useState<Tables<'news_drafts'> | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
 
   const { data: news, isLoading } = useQuery({
     queryKey: ['admin-news'],
