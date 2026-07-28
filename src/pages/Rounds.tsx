@@ -164,11 +164,11 @@ const Rounds = () => {
     if (!results?.length) return <p className="text-muted-foreground text-sm py-4 text-center">{t('common.noData')}</p>;
     return (
       <div className="overflow-x-auto">
-        <table className="w-full text-sm border-separate border-spacing-0">
+        <table className="w-full border-separate border-spacing-0">
           <thead>
-            <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+            <tr className="type-table-header">
               <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
-              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span></th>
+              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal normal-case">(hcp)</span></th>
               <th className="text-right py-3 border-b border-border/30">{scoreField === 'scratch' ? 'Scratch' : 'Stableford'}</th>
             </tr>
           </thead>
@@ -192,19 +192,20 @@ const Rounds = () => {
                       : undefined
                   }
                 >
-                  <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>{position}</td>
-                  <td className="py-3.5">
+                  <td className={`py-3 pr-2 font-body text-[14px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}>{position}</td>
+                  <td className="py-3">
                     <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="flex items-center gap-2 hover:text-accent transition-colors text-left">
                       <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                        <Users className="h-3 w-3 text-muted-foreground/60" />
+                        <Users className="h-3 w-3 text-secondary-foreground" />
                       </div>
-                      <span className="text-sm font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
+                      <span className="text-[15px] font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
                       {r.handicap_at_round != null && (
-                        <span className="text-[10px] text-muted-foreground/60 font-mono">({Number(r.handicap_at_round).toFixed(1)})</span>
+                        <span className="text-[13px] text-secondary-foreground font-body tabular-nums">({Number(r.handicap_at_round).toFixed(1)})</span>
                       )}
                     </button>
                   </td>
-                  <td className={`py-3.5 text-right font-mono font-bold text-sm ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{value ?? '—'}</td>
+                  <td className={`py-3 text-right font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{value ?? '—'}</td>
+
                 </tr>
               );
             })}
