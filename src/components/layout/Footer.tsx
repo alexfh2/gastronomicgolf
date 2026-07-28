@@ -12,7 +12,7 @@ const Footer = () => {
       {/* Removed per user request */}
 
       {/* Bottom bar */}
-      <div className="container py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="container py-8 flex flex-col items-center justify-center gap-3 text-center">
         <img
           src={logo}
           alt="Gastronòmic Golf"
@@ -20,9 +20,6 @@ const Footer = () => {
         />
         <p className="text-[10px] text-muted-foreground/60 tracking-[0.15em] uppercase">
           {t('footer.officialClassification')}
-        </p>
-        <p className="text-[10px] text-muted-foreground/40">
-          © {new Date().getFullYear()}
         </p>
       </div>
 
