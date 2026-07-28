@@ -62,12 +62,12 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
               style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.14) 0%, hsl(var(--accent) / 0.06) 45%, hsl(var(--card) / 0.4) 100%)' }}
             >
               <Crown className="h-4 w-4 text-accent" strokeWidth={1.5} />
-              <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">Líders per categoria</span>
-              <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
+              <span className="font-body text-[12px] sm:text-[13px] font-medium tracking-[0.05em] uppercase text-foreground flex-1">Líders per categoria</span>
+              <ChevronDown className={cn('h-4 w-4 text-secondary-foreground transition-transform duration-200', isOpen && 'rotate-180')} />
             </div>
             <div className="px-5 py-4">
-              <p className="text-2xl font-display font-semibold text-foreground">{leader ? `${leader.totalPoints} pts` : '—'}</p>
-              <p className="text-[11px] font-body text-muted-foreground mt-1">
+              <p className="type-numeric-feature font-semibold">{leader ? `${leader.totalPoints} pts` : '—'}</p>
+              <p className="type-metadata mt-1.5">
                 {leader ? `${leader.name} · ${categories.find(c => c.key === activeTab)?.label}` : noDataLabel}
               </p>
             </div>
@@ -82,10 +82,10 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                   <button
                     key={cat.key}
                     onClick={() => setActiveTab(cat.key)}
-                    className={`px-3 py-1.5 text-[10px] font-body font-medium tracking-[0.15em] uppercase transition-all border ${
+                    className={`px-3.5 min-h-[40px] type-action-label transition-all border ${
                       activeTab === cat.key
                         ? 'border-accent/50 text-accent'
-                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/30 hover:text-foreground'
+                        : 'border-border/50 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
                     }`}
                     style={activeTab === cat.key ? {
                       background: 'linear-gradient(90deg, hsl(var(--accent) / 0.18) 0%, hsl(var(--accent) / 0.06) 100%)',
@@ -101,7 +101,7 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                 return (
                   <div key={cat.key}>
                     {!players.length ? (
-                      <p className="text-muted-foreground text-sm py-2">{noDataLabel}</p>
+                      <p className="type-body-secondary py-2">{noDataLabel}</p>
                     ) : (
                       <div className="space-y-1.5">
                         {players.map((p, i) => (
@@ -109,11 +109,16 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                             key={p.playerId}
                             type="button"
                             onClick={(e) => { e.stopPropagation(); onSelectPlayer(p.playerId); }}
-                            className="w-full flex items-center gap-2 text-sm hover:text-accent transition-colors text-left"
+                            className="w-full flex items-center gap-2 text-[14px] hover:text-accent transition-colors text-left"
                           >
-                            <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
+                            <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
                             <span className="flex-1 min-w-0 text-foreground font-body leading-tight truncate">{p.name}</span>
-                            <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
+                            <span className="font-body font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-[13px] text-secondary-foreground font-normal">pts</span></span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                           </button>
                         ))}
                       </div>
