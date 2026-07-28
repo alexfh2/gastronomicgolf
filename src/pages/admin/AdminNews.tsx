@@ -217,6 +217,13 @@ const AdminNews = () => {
           onClose={() => setEditArticle(null)}
         />
       )}
+
+      <NewsCreateDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(article) => setEditArticle(article)}
+      />
+
     </div>
   );
 };
