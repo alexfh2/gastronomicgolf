@@ -113,7 +113,7 @@ const AdminNews = () => {
               ) : !news?.length ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No hi ha notícies. Genera-les des de les jornades.
+                    No hi ha notícies. Genera-les des de les jornades o crea'n una manualment.
                   </TableCell>
                 </TableRow>
               ) : (
