@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Undo2, Trash2, Calendar, Pencil } from 'lucide-react';
+import { Send, Undo2, Trash2, Calendar, Pencil, Plus } from 'lucide-react';
 import NewsEditDialog from '@/components/admin/NewsEditDialog';
+import NewsCreateDialog from '@/components/admin/NewsCreateDialog';
 import type { Tables } from '@/integrations/supabase/types';
 import {
   AlertDialog,
@@ -25,6 +26,8 @@ const AdminNews = () => {
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editArticle, setEditArticle] = useState<Tables<'news_drafts'> | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
 
   const { data: news, isLoading } = useQuery({
     queryKey: ['admin-news'],
@@ -80,7 +83,13 @@ const AdminNews = () => {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="font-display text-2xl font-bold mb-6">Notícies</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold">Notícies</h1>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" /> Nova notícia
+        </Button>
+      </div>
+
 
       <Card className="border-border/60">
         <CardContent className="p-0">
@@ -104,7 +113,7 @@ const AdminNews = () => {
               ) : !news?.length ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No hi ha notícies. Genera-les des de les jornades.
+                    No hi ha notícies. Genera-les des de les jornades o crea'n una manualment.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -208,6 +217,13 @@ const AdminNews = () => {
           onClose={() => setEditArticle(null)}
         />
       )}
+
+      <NewsCreateDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(article) => setEditArticle(article)}
+      />
+
     </div>
   );
 };
