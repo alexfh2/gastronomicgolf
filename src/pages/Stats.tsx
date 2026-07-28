@@ -380,20 +380,21 @@ const Stats = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1.5">
           <BarChart3 className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-          <h1 className="font-display text-2xl font-semibold text-foreground">{t('stats.title')}</h1>
+          <h1 className="type-page-title">{t('stats.title')}</h1>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {t('common.season')} 2026
         </p>
       </section>
 
       <section className="container pb-14">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.loading')}</p>
         ) : !stats ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.noData')}</p>
+
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <LeadersCard
