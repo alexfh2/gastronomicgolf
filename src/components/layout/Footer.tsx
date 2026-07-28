@@ -1,5 +1,8 @@
 import logo from '@/assets/logo.png';
+import fairwayDark from '@/assets/fairway-studio-dark.png';
+import fairwayLight from '@/assets/fairway-studio-light.png';
 import { useTranslation } from 'react-i18next';
+
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -22,7 +25,29 @@ const Footer = () => {
           © {new Date().getFullYear()}
         </p>
       </div>
+
+      {/* Powered by */}
+      <div className="border-t border-border/30">
+        <div className="container py-5 flex justify-center">
+          <a
+            href="https://www.fairwaystudio.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-2.5 opacity-60 transition-opacity hover:opacity-100"
+          >
+            <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              Powered by
+            </span>
+            <img src={fairwayDark} alt="" className="h-4 w-auto dark:hidden" />
+            <img src={fairwayLight} alt="" className="h-4 w-auto hidden dark:block" />
+            <span className="text-[11px] tracking-[0.2em] uppercase text-foreground/80">
+              Fairway Studio
+            </span>
+          </a>
+        </div>
+      </div>
     </footer>
+
   );
 };
 
