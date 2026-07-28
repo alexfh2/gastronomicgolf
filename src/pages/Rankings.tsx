@@ -241,36 +241,52 @@ const Rankings = () => {
                   <button
                     type="button"
                     onClick={() => setExpandedPlayerId(isExpanded ? null : p.id)}
-                    className="w-full flex items-center gap-2 min-h-[44px] py-2.5 px-2 text-left"
+                    className="w-full grid items-center gap-x-2 min-h-[44px] py-2.5 px-1.5 text-left"
+                    style={{ gridTemplateColumns: '28px minmax(0,1fr) 52px 20px' }}
                     aria-expanded={isExpanded}
                   >
                     <span
-                      className={`w-5 font-body text-[13px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}
+                      className={`font-body text-[13px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}
                     >
                       {position}
                     </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block font-body text-[14px] font-medium text-foreground leading-tight truncate">
+                    <span className="min-w-0">
+                      <span className="block font-body text-[14px] font-medium text-foreground leading-[1.25] line-clamp-2 break-words">
                         {p.name}
-                        {p.displayHandicap != null && (
-                          <span className="ml-1 text-[12.5px] text-secondary-foreground font-body tabular-nums">
-                            ({Number(p.displayHandicap).toFixed(1)})
-                          </span>
-                        )}
                       </span>
+                      {p.displayHandicap != null && (
+                        <span className="block text-[11.5px] leading-tight text-secondary-foreground font-body tabular-nums mt-0.5">
+                          Hcp {Number(p.displayHandicap).toFixed(1)}
+                        </span>
+                      )}
                     </span>
                     <span
-                      className={`font-body font-semibold text-[16px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                      className={`text-right font-body font-semibold text-[16px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                     >
                       {p.total}
                     </span>
                     <ChevronDown
-                      className={`h-4 w-4 text-secondary-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                      className={`h-4 w-4 justify-self-end text-secondary-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                     />
                   </button>
 
                   {isExpanded && (
-                    <div className="px-2 pb-3 pt-1 animate-fade-in">
+                    <div className="px-1.5 pb-3 pt-1 animate-fade-in">
+                      <div className="mb-2.5 flex items-start justify-between gap-2 border-b border-border/25 pb-2">
+                        <div className="min-w-0">
+                          <p className="font-body text-[14px] font-medium text-foreground leading-[1.25] break-words">
+                            {p.name}
+                          </p>
+                          <p className="text-[11.5px] text-secondary-foreground font-body tabular-nums mt-0.5">
+                            Pos. {position}
+                            {p.displayHandicap != null && ` · Hcp ${Number(p.displayHandicap).toFixed(1)}`}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className={`font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{p.total}</p>
+                          <p className="text-[10.5px] uppercase tracking-[0.08em] text-secondary-foreground">Total</p>
+                        </div>
+                      </div>
                       <div className="grid grid-cols-5 gap-1.5 mb-3">
                         {rounds?.map((r) => {
                           const score = p.roundScores.get(r.id);
@@ -299,6 +315,7 @@ const Rankings = () => {
                         })}
 
                       </div>
+
                       <button
                         type="button"
                         onClick={(e) => {
