@@ -214,7 +214,8 @@ const News = () => {
                       )}
 
                       <div
-                        className="prose prose-sm max-w-none text-foreground/90 font-body"
+                        className="prose max-w-[68ch] text-[15.5px] sm:text-[16px] leading-[1.65] text-foreground font-body prose-p:mb-4 prose-strong:text-foreground"
+
                         dangerouslySetInnerHTML={{
                           __html: article.body?.replace(/\n/g, '<br/>') || '',
                         }}
