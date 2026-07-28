@@ -83,7 +83,13 @@ const AdminNews = () => {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="font-display text-2xl font-bold mb-6">Notícies</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold">Notícies</h1>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" /> Nova notícia
+        </Button>
+      </div>
+
 
       <Card className="border-border/60">
         <CardContent className="p-0">
