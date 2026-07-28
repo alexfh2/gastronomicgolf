@@ -298,13 +298,13 @@ const Rounds = () => {
                         </div>
 
                         {hasResults && (
-                          <span className="text-[10px] text-accent/70 font-body font-medium flex items-center gap-1 tracking-wide uppercase">
-                            <BarChart3 className="h-3 w-3" />
+                          <span className="type-action-label text-accent flex items-center gap-1.5">
+                            <BarChart3 className="h-3.5 w-3.5" />
                             Veure resultats
                           </span>
                         )}
                         {!hasResults && played && (
-                          <span className="text-[10px] text-muted-foreground/50 font-body italic">Pendent de resultats</span>
+                          <span className="type-metadata italic">Pendent de resultats</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -317,11 +317,11 @@ const Rounds = () => {
                             className="p-1.5 hover:bg-muted/30 transition-colors"
                             title="Afegir al calendari"
                           >
-                            <CalendarPlus className="h-4 w-4 text-muted-foreground/50 hover:text-accent transition-colors" />
+                            <CalendarPlus className="h-4 w-4 text-secondary-foreground hover:text-accent transition-colors" />
                           </button>
                         )}
                         {hasResults && (
-                          <ChevronDown className={`h-4 w-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`h-4 w-4 text-secondary-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                         )}
                       </div>
                     </div>
@@ -329,7 +329,7 @@ const Rounds = () => {
 
                   {isExpanded && (
                     <div className="border-t border-border/30 px-5 py-4">
-                      <div className="flex items-center gap-2 mb-3 text-[11px] font-body text-muted-foreground tracking-wide">
+                      <div className="flex items-center gap-2 mb-3 type-metadata">
                         <Users className="h-3.5 w-3.5" />
                         <span>{roundResults?.length || 0} participants</span>
                       </div>
@@ -341,12 +341,13 @@ const Rounds = () => {
                               <button
                                 key={cat.key}
                                 onClick={() => setActiveResultTab(cat.key)}
-                                className={`px-4 py-2 text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+                                className={`px-4 min-h-[44px] type-action-label uppercase tracking-[0.06em] transition-all duration-300 border ${
                                   activeResultTab === cat.key
-                                    ? 'border-accent/40 bg-accent/10 text-accent'
-                                    : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                                    ? 'border-accent/50 bg-accent/10 text-accent'
+                                    : 'border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
                                 }`}
                               >
+
                                 {cat.label}
                               </button>
                             ))}
