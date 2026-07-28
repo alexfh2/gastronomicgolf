@@ -1,8 +1,10 @@
 import logo from '@/assets/logo.png';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="border-t border-border/40 bg-background">
       {/* Brand CTA */}
@@ -40,7 +42,7 @@ const Footer = () => {
           className="h-7 w-auto opacity-40"
         />
         <p className="text-[10px] text-muted-foreground/60 tracking-[0.15em] uppercase">
-          Circuit privat de golf — Classificació oficial
+          {t('footer.officialClassification')}
         </p>
         <p className="text-[10px] text-muted-foreground/40">
           © {new Date().getFullYear()}
