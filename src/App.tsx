@@ -12,11 +12,13 @@ import AdminLayout from "./components/admin/AdminLayout";
 import Index from "./pages/Index";
 import Rankings from "./pages/Rankings";
 import Rounds from "./pages/Rounds";
+import Calendar from "./pages/Calendar";
 import Players from "./pages/Players";
 import PlayerDetail from "./pages/PlayerDetail";
 
 import Stats from "./pages/Stats";
 import News from "./pages/News";
+
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminSeasons from "./pages/admin/AdminSeasons";
