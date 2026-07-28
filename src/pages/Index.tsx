@@ -242,13 +242,13 @@ const Index = () => {
                 )}
                 <div className="min-w-0 flex-1 flex items-center gap-3 pl-5 pr-4 py-4 sm:pl-7 sm:pr-5 sm:py-[18px]">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1 leading-[1.4]">
+                    <p className="font-body text-[12px] font-semibold tracking-[0.14em] uppercase text-accent mb-1 leading-[1.4]">
                       Última notícia
                     </p>
                     <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3] line-clamp-2 max-w-[46ch]">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[13px] text-muted-foreground leading-[1.45] truncate mt-1 tnum">
+                    <p className="text-[13px] text-text-secondary leading-[1.45] truncate mt-1 tnum">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -284,12 +284,12 @@ const Index = () => {
       </section>
 
       {/* ——— SPONSORS ——— */}
-      <section className="container pt-10 pb-10 sm:pt-4 sm:pb-8">
+      <section className="container pt-10 pb-10 sm:pt-0 sm:pb-5">
         <div className="max-w-4xl mx-auto">
 
-          <div className="flex items-center gap-4 mb-6 sm:mb-4">
+          <div className="flex items-center gap-4 mb-4 sm:mb-2.5">
             <div className="h-px flex-1 bg-border" />
-            <h2 className="font-body text-[12px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-[1.4]">
+            <h2 className="font-body text-[12px] font-semibold tracking-[0.16em] uppercase text-text-secondary leading-[1.4]">
               Patrocinadors
             </h2>
             <div className="h-px flex-1 bg-border" />
@@ -298,15 +298,16 @@ const Index = () => {
             src={sponsorsLineLight}
             alt="Patrocinadors: Escampa Hotels, bonÀrea, Santi Pàmies Joiers, Grup Optimotor, Pruna Car Go - Omoda Jaecoo, Tancat de Codorniu, Garmin"
             loading="lazy"
-            className="block dark:hidden mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
+            className="block dark:hidden mx-auto w-full sm:w-[77%] h-auto object-contain opacity-95 hover:opacity-100 transition-opacity duration-200"
           />
           <img
             src={sponsorsLine}
             alt=""
             aria-hidden="true"
             loading="lazy"
-            className="hidden dark:block mx-auto w-[92%] sm:w-[72%] h-auto object-contain opacity-85 hover:opacity-100 transition-opacity duration-200"
+            className="hidden dark:block mx-auto w-full sm:w-[77%] h-auto object-contain opacity-100 contrast-[1.06] transition-opacity duration-200"
           />
+
 
         </div>
       </section>
@@ -446,9 +447,9 @@ function HeroAccessCard({
         {/* icon optically aligned with the title line, not with the whole box */}
         <span className="text-accent shrink-0 self-start mt-[19px]">{icon}</span>
         <div className="min-w-0">
-          <p className="font-body text-[11px] font-semibold tracking-[0.16em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
+          <p className="font-body text-[12px] font-semibold tracking-[0.14em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
           <p className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground truncate leading-[1.3]">{title}</p>
-          {meta && <p className="text-[13px] text-muted-foreground truncate mt-1 leading-[1.45] tnum">{meta}</p>}
+          {meta && <p className="text-[13px] text-text-secondary truncate mt-1 leading-[1.45] tnum">{meta}</p>}
           <p className="text-[13px] text-accent font-body font-semibold tracking-[0.08em] uppercase mt-1.5 hidden sm:block leading-[1.4]">{action}</p>
         </div>
         <ChevronRight className="h-3.5 w-3.5 text-text-tertiary shrink-0 self-center group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.75} />
