@@ -1,5 +1,8 @@
 import logo from '@/assets/logo.png';
+import fairwayDark from '@/assets/fairway-studio-dark.png';
+import fairwayLight from '@/assets/fairway-studio-light.png';
 import { useTranslation } from 'react-i18next';
+
 
 const Footer = () => {
   const { t } = useTranslation();
