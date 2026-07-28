@@ -387,7 +387,24 @@ const Rounds = () => {
 
                       {roundResults && roundResults.length > 0 ? (
                         <>
-                          <div className="flex flex-wrap gap-2 mb-4">
+                          {/* Mobile: dropdown selector */}
+                          <div className="sm:hidden mb-4">
+                            <Select value={activeResultTab} onValueChange={setActiveResultTab}>
+                              <SelectTrigger className="w-full h-10 type-action-label uppercase tracking-[0.06em] border border-border/60 bg-card/30 text-secondary-foreground focus:ring-accent focus:ring-offset-0">
+                                <SelectValue placeholder={t('common.select')} />
+                              </SelectTrigger>
+                              <SelectContent className="border border-border/60 bg-card">
+                                {roundCategories.map((cat) => (
+                                  <SelectItem key={cat.key} value={cat.key} className="type-action-label uppercase tracking-[0.05em]">
+                                    {cat.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Desktop: tabs */}
+                          <div className="hidden sm:flex flex-wrap gap-2 mb-4">
                             {roundCategories.map((cat) => (
                               <button
                                 key={cat.key}
@@ -398,11 +415,11 @@ const Rounds = () => {
                                     : 'border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
                                 }`}
                               >
-
                                 {cat.label}
                               </button>
                             ))}
                           </div>
+
                           {renderResultsTable((categorized as any)[activeResultTab], activeResultTab === 'scratch' ? 'scratch' : 'stableford')}
                         </>
                       ) : (
