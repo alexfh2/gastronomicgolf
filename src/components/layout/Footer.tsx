@@ -1,8 +1,10 @@
 import logo from '@/assets/logo.png';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="border-t border-border/40 bg-background">
       {/* Brand CTA */}
