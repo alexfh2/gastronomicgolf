@@ -56,7 +56,10 @@
     "topPlayers": "Mejor clasificados",
     "viewRankings": "Clasificaciins",
     "viewStats": "Ver estadísticas",
-    "comparePlayers": "Comparar jugadores"
+    "comparePlayers": "Comparar jugadores",
+    "calendar": "Resultados",
+    "tornejosDesc": "Consulta los torneos disputados",
+    "statsDesc": "Descubre datos, gráficos y comparativas del circuito"
   },
   "rankings": {
     "title": "Rankings",
