@@ -324,17 +324,17 @@ const Rankings = () => {
           <div className="overflow-x-auto scroll-smooth -mx-2 px-2 [scrollbar-width:thin]">
             <table className="w-full text-sm border-separate border-spacing-0 min-w-[420px]">
               <thead>
-                <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+                <tr className="type-table-header">
                   <th className="text-left py-3 pr-1.5 w-8 border-b border-border/30 sticky left-0 z-[6]" style={{ background: cardSolid }}>Pos.</th>
                   <th className="text-left py-3 pr-2 border-b border-border/30 sticky left-8 z-[6]" style={{ background: cardSolid }}>
-                    {t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span>
+                    {t('common.name')} <span className="font-normal normal-case">(hcp)</span>
                   </th>
                   {rounds?.map((r) => (
-                    <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 font-mono text-[10px]" style={{ background: cardSolid }}>
+                    <th key={r.id} className="text-right py-3 px-2 whitespace-nowrap border-b border-border/30 tabular-nums" style={{ background: cardSolid }}>
                       J{r.round_number}
                     </th>
                   ))}
-                  <th className="text-right py-3 pl-3 pr-2 border-b border-border/30 border-l border-border/30 sticky right-0 z-[7] text-[10px]" style={{ background: cardSolid, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}>{t('common.total')}</th>
+                  <th className="text-right py-3 pl-3 pr-2 border-b border-border/30 border-l border-border/30 sticky right-0 z-[7] text-foreground" style={{ background: cardSolid, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}>{t('common.total')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -346,24 +346,24 @@ const Rankings = () => {
                   return (
                     <tr key={p.id} className="border-b border-border/20 last:border-0 group">
                       <td
-                        className={`py-3 pr-1.5 text-sm font-body font-semibold sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
+                        className={`py-2.5 pr-1.5 font-body text-[14px] font-semibold tabular-nums sticky left-0 z-[4] ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}
                         style={{ background: rowBg }}
                       >
                         {position}
                       </td>
-                      <td className="py-3 pr-2 sticky left-8 z-[4]" style={{ background: rowBg }}>
+                      <td className="py-2.5 pr-2 sticky left-8 z-[4]" style={{ background: rowBg }}>
                         <button
                           type="button"
                           onClick={() => setSelectedPlayerId(p.id)}
                           className="flex items-center gap-2 hover:text-accent transition-colors text-left"
                         >
                           <div className="h-5 w-5 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                            <Users className="h-2.5 w-2.5 text-muted-foreground/60" />
+                            <Users className="h-2.5 w-2.5 text-secondary-foreground" />
                           </div>
-                          <span className="text-[13px] font-body font-medium text-foreground leading-tight whitespace-nowrap">
+                          <span className="text-[15px] font-body font-medium text-foreground leading-tight whitespace-nowrap">
                             {p.name}
                             {p.displayHandicap != null && (
-                              <span className="ml-1 text-[10px] text-muted-foreground/60 font-mono">
+                              <span className="ml-1 text-[13px] text-secondary-foreground font-body tabular-nums">
                                 ({Number(p.displayHandicap).toFixed(1)})
                               </span>
                             )}
@@ -377,21 +377,22 @@ const Rankings = () => {
                         return (
                           <td
                             key={r.id}
-                            className={`py-3 px-2 text-right font-mono text-xs ${isDropped ? 'line-through opacity-60 text-red-400/70' : ''}`}
+                            className={`py-2.5 px-2 text-right font-body text-[14px] tabular-nums ${isDropped ? 'line-through opacity-70 text-destructive' : 'text-foreground'}`}
                             style={{ background: rowBg }}
                             title={isDropped ? 'No computa entre les 8 millors proves' : undefined}
                           >
-                            {val != null ? val : <span className="text-muted-foreground/30 no-underline">—</span>}
+                            {val != null ? val : <span className="text-secondary-foreground/60 no-underline">—</span>}
                           </td>
                         );
                       })}
 
                       <td
-                        className={`py-3 pl-3 pr-2 text-right font-mono font-bold text-sm border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                        className={`py-2.5 pl-3 pr-2 text-right font-body font-semibold text-[17px] tabular-nums border-l border-border/30 sticky right-0 z-[5] ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                         style={{ background: rowBg, boxShadow: '-4px 0 6px -4px hsl(var(--background) / 0.6)' }}
                       >
                         {p.total}
                       </td>
+
                     </tr>
                   );
                 })}
