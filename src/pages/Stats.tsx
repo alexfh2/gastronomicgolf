@@ -118,11 +118,6 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                         ))}
                       </div>
                     )}
-
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })}
