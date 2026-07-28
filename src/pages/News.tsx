@@ -110,14 +110,15 @@ const News = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1.5">
           <Newspaper className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-          <h1 className="font-display text-2xl font-semibold text-foreground">{t('news.title')}</h1>
+          <h1 className="type-page-title">{t('news.title')}</h1>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {t('common.season')} 2026
         </p>
       </section>
+
 
       <section className="container pb-14">
         {isLoading ? (
