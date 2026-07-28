@@ -443,19 +443,20 @@ function HeroAccessCard({
   action: string;
 }) {
   return (
-    <Link to={to} className="group block h-full rounded-[2px]">
-      <div className="surface-card rounded-[2px] relative overflow-hidden px-5 py-4 sm:px-6 sm:py-[18px] grid grid-cols-[auto_1fr_auto] items-center gap-x-3.5 h-full min-h-[92px] sm:min-h-[108px]">
+    <Link to={to} className="group block h-full">
+      <div className="surface-card relative overflow-hidden px-5 py-4 sm:px-6 sm:py-5 grid grid-cols-[auto_1fr_auto] items-start gap-x-3.5 h-full min-h-[92px] sm:min-h-[112px]">
         <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200" />
-        {/* icon optically aligned with the title line, not with the whole box */}
-        <span className="text-accent shrink-0 self-start mt-[19px]">{icon}</span>
+        {/* icon optically aligned with the eyebrow baseline */}
+        <span className="text-accent/85 shrink-0 self-start mt-[3px] group-hover:text-accent transition-colors duration-200">{icon}</span>
         <div className="min-w-0">
-          <p className="font-body text-[12px] font-semibold tracking-[0.14em] uppercase text-accent mb-1 leading-[1.4]">{eyebrow}</p>
+          <p className="font-body text-[11px] font-semibold tracking-[0.2em] uppercase text-accent mb-1.5 leading-[1.4]">{eyebrow}</p>
           <p className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground truncate leading-[1.3]">{title}</p>
           {meta && <p className="text-[13px] text-text-secondary truncate mt-1 leading-[1.45] tnum">{meta}</p>}
-          <p className="text-[13px] text-accent font-body font-semibold tracking-[0.08em] uppercase mt-1.5 hidden sm:block leading-[1.4]">{action}</p>
+          <p className="text-[12px] text-text-secondary font-body font-semibold tracking-[0.12em] uppercase mt-2.5 hidden sm:block leading-[1.4] group-hover:text-accent transition-colors duration-200">{action}</p>
         </div>
-        <ChevronRight className="h-3.5 w-3.5 text-text-tertiary shrink-0 self-center group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.75} />
+        <ChevronRight className="h-3.5 w-3.5 text-text-tertiary/70 shrink-0 self-start mt-[3px] opacity-70 group-hover:opacity-100 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.5} />
       </div>
+
     </Link>
   );
 }
