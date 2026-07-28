@@ -264,7 +264,7 @@ const News = () => {
                 className="max-h-[80vh] w-auto h-auto object-contain"
               />
               {lightbox.caption && (
-                <p className="text-xs text-muted-foreground font-body text-center">
+                <p className="type-metadata text-center">
                   {lightbox.caption}
                 </p>
               )}
