@@ -410,9 +410,9 @@ function CategoryTab({ value, children }: { value: string; children: React.React
 
 function StatCard({ label, value, sub, icon }: { label: string; value: string | number; sub?: string; icon: React.ReactNode }) {
   return (
-    <div className="surface-card rounded-[2px] group relative overflow-hidden p-7 flex flex-col justify-between flex-1">
-      {/* accent top rule */}
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-accent/70" />
+    <div className="surface-card group relative overflow-hidden p-7 flex flex-col justify-between flex-1">
+      {/* hairline accent rule */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-accent/50" />
 
       <div className="relative flex items-center justify-between mb-6 gap-3">
         <span className="font-body text-[14px] font-semibold tracking-[0.1em] uppercase text-foreground leading-[1.3]">{label}</span>
