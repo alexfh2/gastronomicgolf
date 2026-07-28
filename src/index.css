@@ -263,6 +263,22 @@
     border-top-color: hsl(var(--border-active) / 0.6);
   }
 
+  /* Editorial band — lighter than a card: hairline rules, no elevation */
+  .surface-editorial {
+    background-color: hsl(var(--surface-primary) / 0.42);
+    border: 0;
+    border-top: 1px solid hsl(var(--border-subtle));
+    border-bottom: 1px solid hsl(var(--border-subtle));
+    box-shadow: none;
+    transition: background-color 200ms ease, border-color 200ms ease;
+  }
+
+  .surface-editorial:hover {
+    background-color: hsl(var(--surface-hover) / 0.55);
+    border-top-color: hsl(var(--border-active) / 0.45);
+    border-bottom-color: hsl(var(--border-active) / 0.45);
+  }
+
   /* Tabular figures for data, rankings and metadata */
   .tnum {
     font-variant-numeric: tabular-nums;
