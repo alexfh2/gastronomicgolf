@@ -415,6 +415,20 @@ const Stats = () => {
               const lb = leaderboards[idx] || [];
               const hasLeaderboard = lb.length > 0;
               const isOpen = openCards.has(idx);
+              // Slight typographic differentiation per family (no new colours):
+              // best rounds → strongest figure; averages → lighter figure;
+              // courses/holes → slightly smaller; special milestones → editorial.
+              const isBestRound = idx === 0 || idx === 1;
+              const isAverage = idx === 2 || idx >= 8;
+              const isSpecialCard = card.unit === 'special';
+              const isCourseHole = idx >= 5 && idx <= 7;
+              const figureClass = cn(
+                'type-numeric-feature',
+                isBestRound && 'font-semibold',
+                isAverage && 'font-medium',
+                isCourseHole && 'text-[1.5rem] sm:text-[1.625rem]',
+                isSpecialCard && 'font-medium italic',
+              );
 
               return (
                 <Collapsible key={card.label} open={isOpen} onOpenChange={() => hasLeaderboard && toggleCard(idx)}>
@@ -426,14 +440,14 @@ const Stats = () => {
                           style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--accent) / 0.04) 50%, hsl(var(--card) / 0.4) 100%)' }}
                         >
                           <card.icon className="h-4 w-4 text-accent" strokeWidth={1.5} />
-                          <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">{card.label}</span>
+                          <span className={cn('font-body text-[12px] sm:text-[13px] font-medium tracking-[0.05em] uppercase text-foreground flex-1', isSpecialCard && 'tracking-[0.02em]')}>{card.label}</span>
                           {hasLeaderboard && (
-                            <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
+                            <ChevronDown className={cn('h-4 w-4 text-secondary-foreground transition-transform duration-200', isOpen && 'rotate-180')} />
                           )}
                         </div>
                         <div className="px-5 py-4">
-                          <p className="text-2xl font-display font-semibold text-foreground">{card.value}</p>
-                          <p className="text-[11px] font-body text-muted-foreground mt-1">{card.detail}</p>
+                          <p className={figureClass}>{card.value}</p>
+                          <p className="type-metadata mt-1.5">{card.detail}</p>
                         </div>
                       </button>
                     </CollapsibleTrigger>
@@ -442,7 +456,8 @@ const Stats = () => {
                       <CollapsibleContent>
                         <div className="px-5 pb-4">
                           <div className="border-t border-border/30 pt-3 space-y-1.5">
-                            <p className="text-[10px] font-body font-medium text-muted-foreground/70 tracking-[0.2em] uppercase mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
+                            <p className="type-eyebrow mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
+
                             {lb.map((entry, i) => {
                               const isHoleStat = card.unit === 'cops';
                               const isSpecial = card.unit === 'special';
