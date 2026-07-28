@@ -218,29 +218,30 @@ const Rounds = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between gap-3 mb-1.5">
           <div className="flex items-center gap-3">
             <CalendarDays className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-            <h1 className="font-display text-2xl font-semibold text-foreground">{t('rounds.title')}</h1>
+            <h1 className="type-page-title">{t('rounds.title')}</h1>
           </div>
           <button
             onClick={downloadAllIcs}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-body font-medium tracking-[0.1em] uppercase border border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground transition-all"
+            className="flex items-center gap-1.5 px-3 min-h-[44px] type-action-label uppercase tracking-[0.05em] border border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground transition-all"
           >
-            <CalendarPlus className="h-3.5 w-3.5" />
+            <CalendarPlus className="h-4 w-4" />
             Afegir totes
           </button>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {t('rounds.calendar')} — {t('common.season')} 2026
         </p>
       </section>
 
       <section className="container pb-14">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.loading')}</p>
         ) : !rounds?.length ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.noData')}</p>
+
         ) : (
           <div className="space-y-2">
             {rounds.map((round, index) => {
