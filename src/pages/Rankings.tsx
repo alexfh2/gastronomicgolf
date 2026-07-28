@@ -241,31 +241,31 @@ const Rankings = () => {
                   <button
                     type="button"
                     onClick={() => setExpandedPlayerId(isExpanded ? null : p.id)}
-                    className="w-full flex items-center gap-2 py-3 px-2 text-left"
+                    className="w-full flex items-center gap-2 min-h-[44px] py-2.5 px-2 text-left"
                     aria-expanded={isExpanded}
                   >
                     <span
-                      className={`w-5 text-[12px] font-body font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}
+                      className={`w-5 font-body text-[13px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}
                     >
                       {position}
                     </span>
                     <span className="flex-1 min-w-0">
-                      <span className="block text-[12px] font-body font-medium text-foreground leading-tight truncate">
+                      <span className="block font-body text-[14px] font-medium text-foreground leading-tight truncate">
                         {p.name}
                         {p.displayHandicap != null && (
-                          <span className="ml-1 text-[10px] text-muted-foreground/60 font-mono">
+                          <span className="ml-1 text-[12.5px] text-secondary-foreground font-body tabular-nums">
                             ({Number(p.displayHandicap).toFixed(1)})
                           </span>
                         )}
                       </span>
                     </span>
                     <span
-                      className={`font-mono font-bold text-[13px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}
+                      className={`font-body font-semibold text-[16px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}
                     >
                       {p.total}
                     </span>
                     <ChevronDown
-                      className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                      className={`h-4 w-4 text-secondary-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                     />
                   </button>
 
@@ -281,18 +281,18 @@ const Rankings = () => {
                               key={r.id}
                               className="flex flex-col items-center justify-center py-1.5 px-1 border border-border/30 bg-card/40"
                             >
-                              <span className="text-[8.5px] font-body font-medium tracking-[0.1em] uppercase text-muted-foreground/60">
+                              <span className="font-body text-[10px] font-medium tracking-[0.05em] uppercase text-secondary-foreground">
                                 J{r.round_number}
                               </span>
                               {val != null ? (
                                 <span
-                                  className={`font-mono text-[11px] tabular-nums ${isDropped ? 'line-through opacity-60 text-red-400/70' : 'text-foreground'}`}
+                                  className={`font-body text-[13px] tabular-nums ${isDropped ? 'line-through opacity-70 text-destructive' : 'text-foreground'}`}
                                   title={isDropped ? 'No computa entre les 8 millors proves' : undefined}
                                 >
                                   {val}
                                 </span>
                               ) : (
-                                <span className="font-mono text-[11px] tabular-nums text-muted-foreground/30">—</span>
+                                <span className="font-body text-[13px] tabular-nums text-secondary-foreground/60">—</span>
                               )}
                             </div>
                           );
@@ -305,11 +305,12 @@ const Rankings = () => {
                           e.stopPropagation();
                           setSelectedPlayerId(p.id);
                         }}
-                        className="w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[10px] font-body font-medium tracking-[0.2em] uppercase text-accent border border-accent/30 hover:bg-accent/10 transition-colors"
+                        className="w-full flex items-center justify-center gap-1.5 min-h-[44px] px-3 type-action-label text-accent border border-accent/40 hover:bg-accent/10 transition-colors"
                       >
-                        <User className="h-3 w-3" strokeWidth={1.5} />
+                        <User className="h-3.5 w-3.5" strokeWidth={1.5} />
                         Veure perfil del jugador
                       </button>
+
                     </div>
                   )}
                 </li>
