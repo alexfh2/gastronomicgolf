@@ -449,13 +449,14 @@ const Rankings = () => {
       {/* Table section */}
       <section className="container pb-14">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.loading')}</p>
         ) : (
           <div className="border border-border/50 bg-card/30">
-            <div className="flex items-center justify-between px-7 py-5 border-b border-border/40">
-              <h3 className="font-body text-[11px] font-medium tracking-[0.25em] uppercase text-foreground">
+            <div className="flex items-center justify-between px-4 sm:px-7 py-4 border-b border-border/40">
+              <h3 className="type-eyebrow text-foreground">
                 {categories.find(c => c.key === activeTab)?.label}
               </h3>
+
             </div>
             <div className="px-3 sm:px-7 py-2">
               {renderTable((rankings as any)[activeTab])}
