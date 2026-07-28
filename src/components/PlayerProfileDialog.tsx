@@ -304,10 +304,13 @@ const PlayerProfileDialog = ({ playerId, open, onOpenChange }: PlayerProfileDial
           {(() => {
             const hcpData = (results || [])
               .filter(r => r.handicap_at_round != null)
+              .slice()
+              .sort((a, b) => ((a.rounds as any)?.round_number ?? 0) - ((b.rounds as any)?.round_number ?? 0))
               .map(r => ({
                 label: `J${(r.rounds as any)?.round_number}`,
                 hcp: Number(r.handicap_at_round),
               }));
+
             if (hcpData.length < 2) return null;
 
             return (
