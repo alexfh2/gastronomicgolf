@@ -462,34 +462,35 @@ const Stats = () => {
                               const isHoleStat = card.unit === 'cops';
                               const isSpecial = card.unit === 'special';
                               return (
-                                <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-b-0' : 'flex flex-col gap-0.5')}>
+                                <div key={`${entry.name}-${i}`} className={cn('text-[14px]', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-b-0' : 'flex flex-col gap-0.5')}>
                                   {isSpecial ? (
                                     <>
                                       <div className="flex items-center gap-2">
-                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
-                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-body font-semibold text-foreground hover:text-accent transition-colors text-left">{entry.name}</button> : <span className="font-body font-semibold text-foreground">{entry.name}</span>}
+                                        <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
+                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-body font-semibold text-[14px] text-foreground hover:text-accent transition-colors text-left">{entry.name}</button> : <span className="font-body font-semibold text-[14px] text-foreground">{entry.name}</span>}
                                       </div>
-                                      {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.detail}</span>}
+                                      {entry.detail && <span className="type-metadata pl-8">{entry.detail}</span>}
                                     </>
                                   ) : isHoleStat ? (
                                     <>
                                       <div className="flex items-center gap-2">
-                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
-                                        <span className="font-mono font-semibold text-foreground tabular-nums">{entry.value} <span className="text-xs font-normal text-muted-foreground">{card.unit}</span></span>
-                                        {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60">· {entry.detail}</span>}
+                                        <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
+                                        <span className="font-body font-semibold text-[14px] text-foreground tabular-nums">{entry.value} <span className="text-[13px] font-normal text-secondary-foreground">{card.unit}</span></span>
+                                        {entry.detail && <span className="type-metadata">· {entry.detail}</span>}
                                       </div>
-                                      <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.name}</span>
+                                      <span className="type-metadata pl-8">{entry.name}</span>
                                     </>
                                   ) : (
                                     <>
                                       <div className="flex items-center gap-2">
-                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
-                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 font-body text-foreground leading-tight hover:text-accent transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 font-body text-foreground leading-tight truncate">{entry.name}</span>}
-                                        <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">{entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span></span>
+                                        <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
+                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 font-body text-[14px] text-foreground leading-tight hover:text-accent transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 font-body text-[14px] text-foreground leading-tight truncate">{entry.name}</span>}
+                                        <span className="font-body font-semibold text-[14px] text-foreground tabular-nums whitespace-nowrap">{entry.value} <span className="text-[13px] text-secondary-foreground font-normal">{card.unit}</span></span>
                                       </div>
-                                      {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.detail}</span>}
+                                      {entry.detail && <span className="type-metadata pl-8">{entry.detail}</span>}
                                     </>
                                   )}
+
                                 </div>
                               );
                             })}
