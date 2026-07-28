@@ -40,7 +40,7 @@ const Footer = () => {
           className="h-7 w-auto opacity-40"
         />
         <p className="text-[10px] text-muted-foreground/60 tracking-[0.15em] uppercase">
-          Circuit privat de golf — Classificació oficial
+          {t('footer.officialClassification')}
         </p>
         <p className="text-[10px] text-muted-foreground/40">
           © {new Date().getFullYear()}
