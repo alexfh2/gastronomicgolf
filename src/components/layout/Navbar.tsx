@@ -10,11 +10,13 @@ import logo from '@/assets/logo.png';
 
 const navItems = [
   { key: 'rankings', path: '/ranquings' },
-  { key: 'rounds', path: '/jornades' },
+  { key: 'rounds', path: '/resultats' },
   { key: 'players', path: '/jugadors' },
   { key: 'stats', path: '/estadistiques' },
   { key: 'news', path: '/noticies' },
+  { key: 'calendar', path: '/calendari' },
 ] as const;
+
 
 const Navbar = () => {
   const { t } = useTranslation();
