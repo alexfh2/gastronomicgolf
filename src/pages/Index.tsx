@@ -180,21 +180,22 @@ const Index = () => {
 
         {/* Hero text */}
         <div className="relative z-10 container">
-          {/* Bloc textual del hero — només desktop/tablet */}
+          {/* Bloc textual del hero — només desktop/tablet. Sense lockup de marca:
+              el logo del header és l'única presència principal de marca. */}
           <div className="hidden sm:block">
-            <p className="font-body text-[12px] font-semibold tracking-[0.22em] uppercase text-accent mb-3 leading-[1.4]">
-              {"\n"}
+            <div className="flex items-center gap-3.5">
+              <span aria-hidden className="h-px w-10 bg-accent/70" />
+              <p className="font-body text-[11px] font-semibold tracking-[0.28em] uppercase text-text-secondary leading-[1.4]">
+                Circuit de golf
+              </p>
+            </div>
+            <p className="font-brand text-[2rem] lg:text-[2.6rem] leading-[1.05] text-foreground font-normal tracking-tight mt-2.5">
+              {t('common.season')} <span className="text-accent">2026</span>
             </p>
-            <h1 className="font-brand text-[2.5rem] leading-[1.02] xs:text-5xl lg:text-[3.4rem] font-bold text-foreground lg:leading-[0.95] tracking-tight max-w-[14ch] lg:max-w-none">
-              Gastronòmic <span className="font-extrabold">GOLF</span>
-            </h1>
-            <p className="font-brand text-lg sm:text-xl lg:text-[1.4rem] text-accent font-normal tracking-wide mt-2">
-              {t('common.season')} 2026
-            </p>
-
           </div>
 
-          <div className="mt-0 sm:mt-7 lg:mt-7 max-w-2xl space-y-4 sm:space-y-3.5">
+          <div className="mt-0 sm:mt-8 lg:mt-9 max-w-2xl space-y-4 sm:space-y-3.5">
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
               {lastRound && (
                 <HeroAccessCard
