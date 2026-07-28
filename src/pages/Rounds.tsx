@@ -14,7 +14,7 @@ import { buildPlayerCategoryHandicapMap } from '@/lib/playerCategoryHandicap';
 import { computeScratchStableford } from '@/lib/scratchStableford';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
 
-const Rounds = () => {
+const Rounds = ({ mode = 'results' }: { mode?: 'results' | 'calendar' }) => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'ca' ? ca : es;
   const [expandedRound, setExpandedRound] = useState<string | null>(null);
@@ -24,7 +24,7 @@ const Rounds = () => {
   const roundRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: allRounds, isLoading } = useQuery({
-    queryKey: ['public-rounds-all'],
+    queryKey: ['public-rounds-all', mode],
     queryFn: async () => {
       const { data } = await supabase
         .from('rounds')
@@ -36,20 +36,22 @@ const Rounds = () => {
 
   // Split into played (descending) and upcoming (ascending)
   const today = new Date().toISOString().split('T')[0];
-  const playedRounds = (allRounds || []).filter((r) => r.date < today || (r.end_date && r.end_date < today)).sort((a, b) => b.date.localeCompare(a.date));
-  const upcomingRounds = (allRounds || []).filter((r) => !(r.date < today || (r.end_date && r.end_date < today)));
-  const rounds = [...playedRounds, ...upcomingRounds];
+  const isPlayed = (r: NonNullable<typeof allRounds>[number]) => r.date < today || (r.end_date && r.end_date < today);
+  const playedRounds = (allRounds || []).filter((r) => isPlayed(r) && r.status === 'published').sort((a, b) => b.date.localeCompare(a.date));
+  const upcomingRounds = (allRounds || []).filter((r) => !isPlayed(r)).sort((a, b) => a.date.localeCompare(b.date));
+  const rounds = mode === 'calendar' ? upcomingRounds : playedRounds;
 
   const roundParam = searchParams.get('round');
   useEffect(() => {
-    if (!roundParam || !allRounds?.length) return;
+    if (mode === 'calendar' || !roundParam || !allRounds?.length) return;
     const target = allRounds.find((r) => r.id === roundParam && r.status === 'published');
     if (!target) return;
     setExpandedRound(target.id);
     setTimeout(() => {
       roundRefs.current[target.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
-  }, [roundParam, allRounds]);
+  }, [roundParam, allRounds, mode]);
+
 
 
   const buildIcsContent = (round: any) => {
@@ -272,20 +274,25 @@ const Rounds = () => {
         <div className="flex items-center justify-between gap-3 mb-1.5">
           <div className="flex items-center gap-3">
             <CalendarDays className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-            <h1 className="type-page-title">{t('rounds.title')}</h1>
+            <h1 className="type-page-title">
+              {mode === 'calendar' ? t('nav.calendar') : t('nav.rounds')}
+            </h1>
           </div>
-          <button
-            onClick={downloadAllIcs}
-            className="flex items-center gap-1.5 px-3 min-h-[44px] type-action-label uppercase tracking-[0.05em] border border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground transition-all"
-          >
-            <CalendarPlus className="h-4 w-4" />
-            Afegir totes
-          </button>
+          {mode === 'calendar' && (
+            <button
+              onClick={downloadAllIcs}
+              className="flex items-center gap-1.5 px-3 min-h-[44px] type-action-label uppercase tracking-[0.05em] border border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground transition-all"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Afegir totes
+            </button>
+          )}
         </div>
         <p className="type-page-subtitle mb-6">
-          {t('rounds.calendar')} — {t('common.season')} 2026
+          {mode === 'calendar' ? t('rounds.calendar') : t('rounds.results')} — {t('common.season')} 2026
         </p>
       </section>
+
 
       <section className="container pb-14">
         {isLoading ? (
@@ -295,22 +302,14 @@ const Rounds = () => {
 
         ) : (
           <div className="space-y-2">
-            {rounds.map((round, index) => {
-              const played = round.date < today || (round.end_date && round.end_date < today);
-              const hasResults = round.status === 'published';
+            {rounds.map((round) => {
+              const played = isPlayed(round);
+              const hasResults = mode !== 'calendar' && round.status === 'published';
               const isExpanded = expandedRound === round.id;
-              const showDivider = playedRounds.length > 0 && upcomingRounds.length > 0 && index === playedRounds.length;
 
               return (
-                <>
-                  {showDivider && (
-                    <div className="py-4 flex items-center gap-3">
-                      <div className="h-px flex-1 bg-border/30" />
-                      <span className="type-eyebrow">Properes jornades</span>
-                      <div className="h-px flex-1 bg-border/30" />
-                    </div>
-                  )}
-                  <div key={round.id} ref={(el) => { roundRefs.current[round.id] = el; }} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
+                <div key={round.id} ref={(el) => { roundRefs.current[round.id] = el; }} className={`border transition-all ${played ? 'border-accent/20 bg-accent/[0.03]' : 'border-border/50 bg-card/30'}`}>
+
                   <button
                     onClick={() => hasResults ? setExpandedRound(isExpanded ? null : round.id) : null}
                     className={`w-full text-left px-5 py-4 ${!hasResults ? 'cursor-default' : 'hover:bg-muted/10'}`}
@@ -428,8 +427,8 @@ const Rounds = () => {
                     </div>
                   )}
                 </div>
-                </>
               );
+
             })}
           </div>
         )}

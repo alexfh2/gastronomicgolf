@@ -2,14 +2,16 @@
   "nav": {
     "overview": "Visió general",
     "rankings": "Classificació",
-    "rounds": "Jornades",
+    "rounds": "Resultats",
     "players": "Jugadors",
     "compare": "Comparador",
     "stats": "Estadístiques",
     "news": "Notícies",
+    "calendar": "Calendari",
     "admin": "Administració",
     "login": "Accés admin"
   },
+
   "common": {
     "season": "Temporada",
     "position": "Pos.",

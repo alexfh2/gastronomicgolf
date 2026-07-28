@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,11 +13,13 @@ import AdminLayout from "./components/admin/AdminLayout";
 import Index from "./pages/Index";
 import Rankings from "./pages/Rankings";
 import Rounds from "./pages/Rounds";
+import Calendar from "./pages/Calendar";
 import Players from "./pages/Players";
 import PlayerDetail from "./pages/PlayerDetail";
 
 import Stats from "./pages/Stats";
 import News from "./pages/News";
+
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminSeasons from "./pages/admin/AdminSeasons";
@@ -41,12 +44,16 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/ranquings" element={<Rankings />} />
-              <Route path="/jornades" element={<Rounds />} />
+              <Route path="/resultats" element={<Rounds />} />
+              <Route path="/jornades" element={<Navigate to="/resultats" replace />} />
+              <Route path="/calendari" element={<Calendar />} />
+
               <Route path="/jugadors" element={<Players />} />
               <Route path="/jugadors/:id" element={<PlayerDetail />} />
               
               <Route path="/estadistiques" element={<Stats />} />
               <Route path="/noticies" element={<News />} />
+
             </Route>
 
             {/* Admin routes */}
