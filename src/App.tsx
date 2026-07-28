@@ -45,8 +45,9 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/ranquings" element={<Rankings />} />
               <Route path="/resultats" element={<Rounds />} />
-              <Route path="/jornades" element={<Rounds />} />
+              <Route path="/jornades" element={<Navigate to="/resultats" replace />} />
               <Route path="/calendari" element={<Calendar />} />
+
               <Route path="/jugadors" element={<Players />} />
               <Route path="/jugadors/:id" element={<PlayerDetail />} />
               
