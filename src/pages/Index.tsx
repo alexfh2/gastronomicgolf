@@ -186,7 +186,7 @@ const Index = () => {
             <div className="flex items-center gap-3.5">
               <span aria-hidden className="h-px w-10 bg-accent/70" />
               <p className="font-body text-[11px] font-semibold tracking-[0.28em] uppercase text-text-secondary leading-[1.4]">
-                Circuit de golf
+                {"\n\n\n"}
               </p>
             </div>
             <p className="font-brand text-[2rem] lg:text-[2.6rem] leading-[1.05] text-foreground font-normal tracking-tight mt-2.5">
