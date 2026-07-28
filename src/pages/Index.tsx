@@ -188,6 +188,14 @@ const Index = () => {
             </p>
           </div>
 
+          {/* Títol de temporada visible només a mòbil */}
+          <div className="sm:hidden mb-5">
+            <p className="font-brand text-[1.85rem] leading-[1.1] text-foreground font-normal tracking-tight">
+              {t('common.season')} <span className="text-accent">2026</span>
+            </p>
+          </div>
+
+
           <div className="mt-0 sm:mt-8 lg:mt-9 max-w-2xl space-y-4 sm:space-y-3.5">
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
