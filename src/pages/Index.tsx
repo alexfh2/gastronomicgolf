@@ -202,7 +202,8 @@ const Index = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3.5">
               {lastRound && (
                 <HeroAccessCard
-                  to={`/jornades?round=${lastRound.id}`}
+                  to={`/resultats?round=${lastRound.id}`}
+
                   icon={<Trophy className="h-4 w-4" strokeWidth={1.5} />}
                   eyebrow="Última jornada"
                   title={lastRound.name}
