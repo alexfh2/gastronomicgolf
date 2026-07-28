@@ -406,15 +406,15 @@ const Rankings = () => {
     <div className="animate-fade-in">
       {/* Header section matching Index style */}
       <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1.5">
           <Trophy className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-          <h1 className="font-display text-2xl font-semibold text-foreground">{t('rankings.title')}</h1>
+          <h1 className="type-page-title">{t('rankings.title')}</h1>
         </div>
-        <div className="flex items-center gap-2 mb-6">
-          <p className="text-[11px] font-body text-muted-foreground tracking-wide">
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <p className="type-page-subtitle">
             {t('rankings.generalClassification')} — {t('common.season')} 2026
           </p>
-          <span className="inline-block text-[9px] px-2 py-0.5 border border-accent/30 text-accent/80 font-body font-medium tracking-[0.15em] uppercase">
+          <span className="inline-block type-eyebrow px-2 py-0.5 border border-accent/40 text-accent">
             Millors {bestN} jornades
           </span>
         </div>
@@ -422,7 +422,7 @@ const Rankings = () => {
         {/* Category tabs matching Index editorial style */}
         <div className="flex items-center gap-4 mb-4">
           <div className="h-px flex-1 bg-border/60" />
-          <span className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+          <span className="type-eyebrow">
             Categories
           </span>
           <div className="h-px flex-1 bg-border/60" />
@@ -433,10 +433,10 @@ const Rankings = () => {
             <button
               key={cat.key}
               onClick={() => setActiveTab(cat.key)}
-              className={`px-4 py-2 text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+              className={`px-4 min-h-[44px] type-action-label uppercase tracking-[0.06em] transition-all duration-300 border ${
                 activeTab === cat.key
-                  ? 'border-accent/40 bg-accent/10 text-accent'
-                  : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                  ? 'border-accent/50 bg-accent/10 text-accent'
+                  : 'border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
               }`}
             >
               {cat.label}
@@ -444,6 +444,7 @@ const Rankings = () => {
           ))}
         </div>
       </section>
+
 
       {/* Table section */}
       <section className="container pb-14">
