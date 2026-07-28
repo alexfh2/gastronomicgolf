@@ -362,7 +362,7 @@ const Index = () => {
 
           {/* Stats cards */}
           <div className="flex flex-col gap-4">
-            <StatCard label="Torneigs disputats" value={totalRounds} sub="de 17" icon={<Calendar className="h-5 w-5" />} />
+            <StatCard label="TORNEJOS DISPUTATS" value={totalRounds} sub="de 17" icon={<Calendar className="h-5 w-5" />} />
             <StatCard label="Jugadors actius" value={uniquePlayers} icon={<Users className="h-5 w-5" />} />
             <StatCard label="Punts acumulats" value={totalPoints.toLocaleString()} icon={<TrendingUp className="h-5 w-5" />} />
           </div>
