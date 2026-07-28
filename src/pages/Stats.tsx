@@ -62,12 +62,12 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
               style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.14) 0%, hsl(var(--accent) / 0.06) 45%, hsl(var(--card) / 0.4) 100%)' }}
             >
               <Crown className="h-4 w-4 text-accent" strokeWidth={1.5} />
-              <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">Líders per categoria</span>
-              <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
+              <span className="font-body text-[12px] sm:text-[13px] font-medium tracking-[0.05em] uppercase text-foreground flex-1">Líders per categoria</span>
+              <ChevronDown className={cn('h-4 w-4 text-secondary-foreground transition-transform duration-200', isOpen && 'rotate-180')} />
             </div>
             <div className="px-5 py-4">
-              <p className="text-2xl font-display font-semibold text-foreground">{leader ? `${leader.totalPoints} pts` : '—'}</p>
-              <p className="text-[11px] font-body text-muted-foreground mt-1">
+              <p className="type-numeric-feature font-semibold">{leader ? `${leader.totalPoints} pts` : '—'}</p>
+              <p className="type-metadata mt-1.5">
                 {leader ? `${leader.name} · ${categories.find(c => c.key === activeTab)?.label}` : noDataLabel}
               </p>
             </div>
@@ -82,10 +82,10 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                   <button
                     key={cat.key}
                     onClick={() => setActiveTab(cat.key)}
-                    className={`px-3 py-1.5 text-[10px] font-body font-medium tracking-[0.15em] uppercase transition-all border ${
+                    className={`px-3.5 min-h-[40px] type-action-label transition-all border ${
                       activeTab === cat.key
                         ? 'border-accent/50 text-accent'
-                        : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/30 hover:text-foreground'
+                        : 'border-border/50 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
                     }`}
                     style={activeTab === cat.key ? {
                       background: 'linear-gradient(90deg, hsl(var(--accent) / 0.18) 0%, hsl(var(--accent) / 0.06) 100%)',
@@ -101,7 +101,7 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                 return (
                   <div key={cat.key}>
                     {!players.length ? (
-                      <p className="text-muted-foreground text-sm py-2">{noDataLabel}</p>
+                      <p className="type-body-secondary py-2">{noDataLabel}</p>
                     ) : (
                       <div className="space-y-1.5">
                         {players.map((p, i) => (
@@ -109,11 +109,11 @@ const LeadersCard = ({ categories, data, noDataLabel, onSelectPlayer, isOpen, on
                             key={p.playerId}
                             type="button"
                             onClick={(e) => { e.stopPropagation(); onSelectPlayer(p.playerId); }}
-                            className="w-full flex items-center gap-2 text-sm hover:text-accent transition-colors text-left"
+                            className="w-full flex items-center gap-2 text-[14px] hover:text-accent transition-colors text-left"
                           >
-                            <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
+                            <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
                             <span className="flex-1 min-w-0 text-foreground font-body leading-tight truncate">{p.name}</span>
-                            <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-xs text-muted-foreground font-normal">pts</span></span>
+                            <span className="font-body font-semibold text-foreground tabular-nums whitespace-nowrap">{p.totalPoints} <span className="text-[13px] text-secondary-foreground font-normal">pts</span></span>
                           </button>
                         ))}
                       </div>
@@ -380,20 +380,21 @@ const Stats = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1.5">
           <BarChart3 className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-          <h1 className="font-display text-2xl font-semibold text-foreground">{t('stats.title')}</h1>
+          <h1 className="type-page-title">{t('stats.title')}</h1>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {t('common.season')} 2026
         </p>
       </section>
 
       <section className="container pb-14">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.loading')}</p>
         ) : !stats ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.noData')}</p>
+
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <LeadersCard
@@ -414,6 +415,20 @@ const Stats = () => {
               const lb = leaderboards[idx] || [];
               const hasLeaderboard = lb.length > 0;
               const isOpen = openCards.has(idx);
+              // Slight typographic differentiation per family (no new colours):
+              // best rounds → strongest figure; averages → lighter figure;
+              // courses/holes → slightly smaller; special milestones → editorial.
+              const isBestRound = idx === 0 || idx === 1;
+              const isAverage = idx === 2 || idx >= 8;
+              const isSpecialCard = card.unit === 'special';
+              const isCourseHole = idx >= 5 && idx <= 7;
+              const figureClass = cn(
+                'type-numeric-feature',
+                isBestRound && 'font-semibold',
+                isAverage && 'font-medium',
+                isCourseHole && 'text-[1.5rem] sm:text-[1.625rem]',
+                isSpecialCard && 'font-medium italic',
+              );
 
               return (
                 <Collapsible key={card.label} open={isOpen} onOpenChange={() => hasLeaderboard && toggleCard(idx)}>
@@ -425,14 +440,14 @@ const Stats = () => {
                           style={{ background: 'linear-gradient(90deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--accent) / 0.04) 50%, hsl(var(--card) / 0.4) 100%)' }}
                         >
                           <card.icon className="h-4 w-4 text-accent" strokeWidth={1.5} />
-                          <span className="font-body text-[11px] font-medium tracking-[0.15em] uppercase text-foreground flex-1">{card.label}</span>
+                          <span className={cn('font-body text-[12px] sm:text-[13px] font-medium tracking-[0.05em] uppercase text-foreground flex-1', isSpecialCard && 'tracking-[0.02em]')}>{card.label}</span>
                           {hasLeaderboard && (
-                            <ChevronDown className={cn('h-4 w-4 text-muted-foreground/40 transition-transform duration-200', isOpen && 'rotate-180')} />
+                            <ChevronDown className={cn('h-4 w-4 text-secondary-foreground transition-transform duration-200', isOpen && 'rotate-180')} />
                           )}
                         </div>
                         <div className="px-5 py-4">
-                          <p className="text-2xl font-display font-semibold text-foreground">{card.value}</p>
-                          <p className="text-[11px] font-body text-muted-foreground mt-1">{card.detail}</p>
+                          <p className={figureClass}>{card.value}</p>
+                          <p className="type-metadata mt-1.5">{card.detail}</p>
                         </div>
                       </button>
                     </CollapsibleTrigger>
@@ -441,39 +456,41 @@ const Stats = () => {
                       <CollapsibleContent>
                         <div className="px-5 pb-4">
                           <div className="border-t border-border/30 pt-3 space-y-1.5">
-                            <p className="text-[10px] font-body font-medium text-muted-foreground/70 tracking-[0.2em] uppercase mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
+                            <p className="type-eyebrow mb-2">{card.unit === 'special' ? 'Registre' : 'Top 10'}</p>
+
                             {lb.map((entry, i) => {
                               const isHoleStat = card.unit === 'cops';
                               const isSpecial = card.unit === 'special';
                               return (
-                                <div key={`${entry.name}-${i}`} className={cn('text-sm', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-b-0' : 'flex flex-col gap-0.5')}>
+                                <div key={`${entry.name}-${i}`} className={cn('text-[14px]', (isHoleStat || isSpecial) ? 'flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-b-0' : 'flex flex-col gap-0.5')}>
                                   {isSpecial ? (
                                     <>
                                       <div className="flex items-center gap-2">
-                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
-                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-body font-semibold text-foreground hover:text-accent transition-colors text-left">{entry.name}</button> : <span className="font-body font-semibold text-foreground">{entry.name}</span>}
+                                        <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
+                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="font-body font-semibold text-[14px] text-foreground hover:text-accent transition-colors text-left">{entry.name}</button> : <span className="font-body font-semibold text-[14px] text-foreground">{entry.name}</span>}
                                       </div>
-                                      {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.detail}</span>}
+                                      {entry.detail && <span className="type-metadata pl-8">{entry.detail}</span>}
                                     </>
                                   ) : isHoleStat ? (
                                     <>
                                       <div className="flex items-center gap-2">
-                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
-                                        <span className="font-mono font-semibold text-foreground tabular-nums">{entry.value} <span className="text-xs font-normal text-muted-foreground">{card.unit}</span></span>
-                                        {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60">· {entry.detail}</span>}
+                                        <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
+                                        <span className="font-body font-semibold text-[14px] text-foreground tabular-nums">{entry.value} <span className="text-[13px] font-normal text-secondary-foreground">{card.unit}</span></span>
+                                        {entry.detail && <span className="type-metadata">· {entry.detail}</span>}
                                       </div>
-                                      <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.name}</span>
+                                      <span className="type-metadata pl-8">{entry.name}</span>
                                     </>
                                   ) : (
                                     <>
                                       <div className="flex items-center gap-2">
-                                        <span className={cn('w-6 text-center font-body font-bold text-xs', i < 3 ? 'text-accent' : 'text-muted-foreground')}>{i + 1}</span>
-                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 font-body text-foreground leading-tight hover:text-accent transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 font-body text-foreground leading-tight truncate">{entry.name}</span>}
-                                        <span className="font-mono font-semibold text-foreground tabular-nums whitespace-nowrap">{entry.value} <span className="text-xs text-muted-foreground font-normal">{card.unit}</span></span>
+                                        <span className={cn('w-6 text-center font-body font-semibold text-[13px] tabular-nums', i < 3 ? 'text-accent' : 'text-secondary-foreground')}>{i + 1}</span>
+                                        {entry.playerId ? <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedPlayerId(entry.playerId!); }} className="flex-1 min-w-0 font-body text-[14px] text-foreground leading-tight hover:text-accent transition-colors text-left truncate">{entry.name}</button> : <span className="flex-1 min-w-0 font-body text-[14px] text-foreground leading-tight truncate">{entry.name}</span>}
+                                        <span className="font-body font-semibold text-[14px] text-foreground tabular-nums whitespace-nowrap">{entry.value} <span className="text-[13px] text-secondary-foreground font-normal">{card.unit}</span></span>
                                       </div>
-                                      {entry.detail && <span className="text-[10px] font-body text-muted-foreground/60 pl-8 leading-snug">{entry.detail}</span>}
+                                      {entry.detail && <span className="type-metadata pl-8">{entry.detail}</span>}
                                     </>
                                   )}
+
                                 </div>
                               );
                             })}

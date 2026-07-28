@@ -164,11 +164,11 @@ const Rounds = () => {
     if (!results?.length) return <p className="text-muted-foreground text-sm py-4 text-center">{t('common.noData')}</p>;
     return (
       <div className="overflow-x-auto">
-        <table className="w-full text-sm border-separate border-spacing-0">
+        <table className="w-full border-separate border-spacing-0">
           <thead>
-            <tr className="text-[10px] text-muted-foreground/70 font-body font-medium tracking-[0.15em] uppercase">
+            <tr className="type-table-header">
               <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
-              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal text-muted-foreground/50">(hcp)</span></th>
+              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal normal-case">(hcp)</span></th>
               <th className="text-right py-3 border-b border-border/30">{scoreField === 'scratch' ? 'Scratch' : 'Stableford'}</th>
             </tr>
           </thead>
@@ -192,19 +192,20 @@ const Rounds = () => {
                       : undefined
                   }
                 >
-                  <td className={`py-3.5 pr-2 text-sm font-body font-semibold ${isTop3 ? 'text-accent' : 'text-muted-foreground'}`}>{position}</td>
-                  <td className="py-3.5">
+                  <td className={`py-3 pr-2 font-body text-[14px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}>{position}</td>
+                  <td className="py-3">
                     <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="flex items-center gap-2 hover:text-accent transition-colors text-left">
                       <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                        <Users className="h-3 w-3 text-muted-foreground/60" />
+                        <Users className="h-3 w-3 text-secondary-foreground" />
                       </div>
-                      <span className="text-sm font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
+                      <span className="text-[15px] font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
                       {r.handicap_at_round != null && (
-                        <span className="text-[10px] text-muted-foreground/60 font-mono">({Number(r.handicap_at_round).toFixed(1)})</span>
+                        <span className="text-[13px] text-secondary-foreground font-body tabular-nums">({Number(r.handicap_at_round).toFixed(1)})</span>
                       )}
                     </button>
                   </td>
-                  <td className={`py-3.5 text-right font-mono font-bold text-sm ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{value ?? '—'}</td>
+                  <td className={`py-3 text-right font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{value ?? '—'}</td>
+
                 </tr>
               );
             })}
@@ -217,29 +218,30 @@ const Rounds = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between gap-3 mb-1.5">
           <div className="flex items-center gap-3">
             <CalendarDays className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-            <h1 className="font-display text-2xl font-semibold text-foreground">{t('rounds.title')}</h1>
+            <h1 className="type-page-title">{t('rounds.title')}</h1>
           </div>
           <button
             onClick={downloadAllIcs}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-body font-medium tracking-[0.1em] uppercase border border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground transition-all"
+            className="flex items-center gap-1.5 px-3 min-h-[44px] type-action-label uppercase tracking-[0.05em] border border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground transition-all"
           >
-            <CalendarPlus className="h-3.5 w-3.5" />
+            <CalendarPlus className="h-4 w-4" />
             Afegir totes
           </button>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {t('rounds.calendar')} — {t('common.season')} 2026
         </p>
       </section>
 
       <section className="container pb-14">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.loading')}</p>
         ) : !rounds?.length ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.noData')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.noData')}</p>
+
         ) : (
           <div className="space-y-2">
             {rounds.map((round, index) => {
@@ -253,7 +255,7 @@ const Rounds = () => {
                   {showDivider && (
                     <div className="py-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-border/30" />
-                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Properes jornades</span>
+                      <span className="type-eyebrow">Properes jornades</span>
                       <div className="h-px flex-1 bg-border/30" />
                     </div>
                   )}
@@ -265,43 +267,44 @@ const Rounds = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex-1 space-y-1.5">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`font-mono text-[10px] tracking-wider ${played ? 'text-accent/60' : 'text-muted-foreground/40'}`}>J{round.round_number}</span>
-                          <span className={`font-display text-base font-semibold ${played ? 'text-foreground' : 'text-muted-foreground/50'}`}>{round.name}</span>
+                          <span className={`font-body text-[12px] font-medium tabular-nums tracking-[0.04em] ${played ? 'text-accent' : 'text-secondary-foreground'}`}>J{round.round_number}</span>
+                          <span className={`font-display text-[17px] sm:text-[18px] font-semibold leading-tight ${played ? 'text-foreground' : 'text-secondary-foreground'}`}>{round.name}</span>
                           {round.is_master && (
-                            <span className="text-[9px] px-2 py-0.5 border border-accent/30 text-accent/80 font-body font-medium tracking-[0.15em] uppercase">MASTER</span>
+                            <span className="text-[11px] px-2 py-0.5 border border-accent/40 text-accent font-body font-medium tracking-[0.06em] uppercase">Master</span>
                           )}
                           {played ? (
-                            <span className="text-[9px] px-2 py-0.5 border border-accent/20 text-accent/60 font-body font-medium tracking-[0.1em] uppercase">Jugada</span>
+                            <span className="text-[11px] px-2 py-0.5 border border-accent/30 text-accent font-body font-medium tracking-[0.05em] uppercase">Jugada</span>
                           ) : (
-                            <span className="text-[9px] px-2 py-0.5 border border-border/40 text-muted-foreground/40 font-body font-medium tracking-[0.1em] uppercase">Pendent</span>
+                            <span className="text-[11px] px-2 py-0.5 border border-border/60 text-secondary-foreground font-body font-medium tracking-[0.05em] uppercase">Pendent</span>
                           )}
                           {round.sponsor && (
-                            <span className={`text-[11px] font-body ${played ? 'text-muted-foreground/60' : 'text-muted-foreground/30'}`}>· {round.sponsor}</span>
+                            <span className="text-[13px] font-body text-secondary-foreground">· {round.sponsor}</span>
                           )}
                         </div>
-                        <div className={`flex items-center gap-4 text-[11px] font-body ${played ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                        <div className="flex items-center gap-4 flex-wrap type-metadata">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5" />
                             {format(new Date(round.date), 'dd MMM yyyy', { locale })}
                             {round.end_date && round.end_date !== round.date && (
                               <> — {format(new Date(round.end_date), 'dd MMM yyyy', { locale })}</>
                             )}
                           </span>
                           {round.course && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5" />
                               {round.course}
                             </span>
                           )}
                         </div>
+
                         {hasResults && (
-                          <span className="text-[10px] text-accent/70 font-body font-medium flex items-center gap-1 tracking-wide uppercase">
-                            <BarChart3 className="h-3 w-3" />
+                          <span className="type-action-label text-accent flex items-center gap-1.5">
+                            <BarChart3 className="h-3.5 w-3.5" />
                             Veure resultats
                           </span>
                         )}
                         {!hasResults && played && (
-                          <span className="text-[10px] text-muted-foreground/50 font-body italic">Pendent de resultats</span>
+                          <span className="type-metadata italic">Pendent de resultats</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -314,11 +317,11 @@ const Rounds = () => {
                             className="p-1.5 hover:bg-muted/30 transition-colors"
                             title="Afegir al calendari"
                           >
-                            <CalendarPlus className="h-4 w-4 text-muted-foreground/50 hover:text-accent transition-colors" />
+                            <CalendarPlus className="h-4 w-4 text-secondary-foreground hover:text-accent transition-colors" />
                           </button>
                         )}
                         {hasResults && (
-                          <ChevronDown className={`h-4 w-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`h-4 w-4 text-secondary-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                         )}
                       </div>
                     </div>
@@ -326,7 +329,7 @@ const Rounds = () => {
 
                   {isExpanded && (
                     <div className="border-t border-border/30 px-5 py-4">
-                      <div className="flex items-center gap-2 mb-3 text-[11px] font-body text-muted-foreground tracking-wide">
+                      <div className="flex items-center gap-2 mb-3 type-metadata">
                         <Users className="h-3.5 w-3.5" />
                         <span>{roundResults?.length || 0} participants</span>
                       </div>
@@ -338,12 +341,13 @@ const Rounds = () => {
                               <button
                                 key={cat.key}
                                 onClick={() => setActiveResultTab(cat.key)}
-                                className={`px-4 py-2 text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+                                className={`px-4 min-h-[44px] type-action-label uppercase tracking-[0.06em] transition-all duration-300 border ${
                                   activeResultTab === cat.key
-                                    ? 'border-accent/40 bg-accent/10 text-accent'
-                                    : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                                    ? 'border-accent/50 bg-accent/10 text-accent'
+                                    : 'border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
                                 }`}
                               >
+
                                 {cat.label}
                               </button>
                             ))}

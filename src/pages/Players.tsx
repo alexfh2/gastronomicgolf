@@ -188,29 +188,29 @@ const Players = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1.5">
           <Users className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-          <h1 className="font-display text-2xl font-semibold text-foreground">{t('players.title')}</h1>
+          <h1 className="type-page-title">{t('players.title')}</h1>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {players?.length || 0} jugadors registrats — {t('common.season')} 2026
         </p>
 
         {/* Search */}
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cercar jugador..."
-            className="pl-9 bg-card/30 border-border/50 font-body text-sm"
+            className="pl-9 h-11 bg-card/30 border-border/60 font-body text-[15px]"
           />
         </div>
 
         {/* Filter pills */}
         <div className="flex items-center gap-4 mb-3">
           <div className="h-px flex-1 bg-border/60" />
-          <span className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">Categories</span>
+          <span className="type-eyebrow">Categories</span>
           <div className="h-px flex-1 bg-border/60" />
         </div>
         <div className="flex flex-wrap gap-2 mb-4">
@@ -218,10 +218,10 @@ const Players = () => {
             <button
               key={cat.key}
               onClick={() => setActiveFilter(activeFilter === cat.key ? null : cat.key)}
-              className={`px-4 py-2 text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+              className={`px-4 min-h-[44px] type-action-label uppercase tracking-[0.06em] transition-all duration-300 border ${
                 activeFilter === cat.key
-                  ? 'border-accent/40 bg-accent/10 text-accent'
-                  : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                  ? 'border-accent/50 bg-accent/10 text-accent'
+                  : 'border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
               }`}
             >
               {cat.label}
@@ -232,7 +232,7 @@ const Players = () => {
         {/* Sort pills */}
         <div className="flex items-center gap-4 mb-3">
           <div className="h-px flex-1 bg-border/60" />
-          <span className="font-body text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">Ordenar</span>
+          <span className="type-eyebrow">Ordenar</span>
           <div className="h-px flex-1 bg-border/60" />
         </div>
         <div className="flex flex-wrap gap-2 mb-6">
@@ -240,10 +240,10 @@ const Players = () => {
             <button
               key={opt.key}
               onClick={() => setSortBy(opt.key)}
-              className={`px-4 py-2 text-[11px] font-body font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+              className={`px-4 min-h-[44px] type-action-label uppercase tracking-[0.06em] transition-all duration-300 border ${
                 sortBy === opt.key
-                  ? 'border-accent/40 bg-accent/10 text-accent'
-                  : 'border-border/50 bg-card/30 text-muted-foreground hover:border-accent/20 hover:text-foreground'
+                  ? 'border-accent/50 bg-accent/10 text-accent'
+                  : 'border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground'
               }`}
             >
               {opt.label}
@@ -252,12 +252,13 @@ const Players = () => {
         </div>
       </section>
 
+
       <section className="container pb-14">
         {isLoading ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">{t('common.loading')}</p>
+          <p className="type-body-secondary py-8 text-center">{t('common.loading')}</p>
         ) : (
           <>
-            <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-3">{filtered.length} jugadors</p>
+            <p className="type-metadata mb-3">{filtered.length} jugadors</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map(({ player: p, stats, ranks }) => {
                 const rankBadges = (Object.keys(ranks) as CategoryKey[])
@@ -270,22 +271,22 @@ const Players = () => {
                     <div className="flex items-start gap-3 mb-3">
                       <Avatar className="h-11 w-11 border border-border/30">
                         {p.photo_url && <AvatarImage src={p.photo_url} alt={p.name} />}
-                        <AvatarFallback className="bg-muted/40 text-[10px] font-body font-semibold text-muted-foreground">{initials(p.name)}</AvatarFallback>
+                        <AvatarFallback className="bg-muted/40 text-[12px] font-body font-semibold text-secondary-foreground">{initials(p.name)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <button
                           type="button"
                           onClick={() => setSelectedPlayerId(p.id)}
-                          className="font-body font-medium text-sm leading-tight hover:text-accent transition-colors block truncate text-left w-full text-foreground"
+                          className="font-body font-semibold text-[15px] sm:text-[16px] leading-tight hover:text-accent transition-colors block truncate text-left w-full text-foreground"
                         >
                           {p.name}
                         </button>
-                        <div className="flex flex-wrap gap-1 mt-1.5">
-                          <span className="text-[9px] px-2 py-0.5 border border-border/40 text-muted-foreground font-mono tracking-wide">
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          <span className="text-[13px] px-2 py-0.5 border border-border/50 text-secondary-foreground font-body tabular-nums">
                             Hdcp {formatHcp(p.current_handicap)}
                           </span>
                           {rankBadges.map((r) => (
-                            <span key={r.key} className="text-[9px] px-2 py-0.5 border border-accent/30 text-accent/80 font-mono tracking-wide">
+                            <span key={r.key} className="text-[11.5px] px-2 py-0.5 border border-accent/40 text-accent font-body tabular-nums">
                               #{r.pos} {RANK_LABELS[r.key]}
                             </span>
                           ))}
@@ -296,27 +297,28 @@ const Players = () => {
                       }>
                         {stats?.trend === 'up' && <TrendingUp className="h-4 w-4 text-accent" />}
                         {stats?.trend === 'down' && <TrendingDown className="h-4 w-4 text-destructive" />}
-                        {(!stats || stats.trend === 'stable') && <Minus className="h-4 w-4 text-muted-foreground/30" />}
+                        {(!stats || stats.trend === 'stable') && <Minus className="h-4 w-4 text-secondary-foreground/70" />}
                       </div>
                     </div>
 
                     {stats ? (
-                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-mono tracking-wide">
-                        <span className="flex items-center gap-1">
-                          <BarChart3 className="h-3 w-3" /> Ø{stats.avgStableford} pts
+                      <div className="flex items-center gap-3 text-[13px] sm:text-[14px] text-secondary-foreground font-body tabular-nums">
+                        <span className="flex items-center gap-1.5">
+                          <BarChart3 className="h-3.5 w-3.5" /> Ø{stats.avgStableford} pts
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Trophy className="h-3 w-3" /> {stats.bestStableford || '—'}
+                        <span className="flex items-center gap-1.5">
+                          <Trophy className="h-3.5 w-3.5" /> {stats.bestStableford || '—'}
                         </span>
                         <span>{stats.rounds} {stats.rounds === 1 ? 'prova' : 'proves'}</span>
                       </div>
                     ) : (
-                      <p className="text-[10px] text-muted-foreground/50 font-body italic">Sense proves jugades</p>
+                      <p className="type-metadata italic">Sense proves jugades</p>
                     )}
 
-                    <div className="mt-3 pt-3 border-t border-border/20 text-[9px] text-muted-foreground/50 font-body">
+                    <div className="mt-3 pt-3 border-t border-border/20 type-metadata">
                       Act. {formatDate(p.updated_at)}
                     </div>
+
                   </div>
                 );
               })}

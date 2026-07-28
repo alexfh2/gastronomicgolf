@@ -110,14 +110,15 @@ const News = () => {
   return (
     <div className="animate-fade-in">
       <section className="container pt-6 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1.5">
           <Newspaper className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-          <h1 className="font-display text-2xl font-semibold text-foreground">{t('news.title')}</h1>
+          <h1 className="type-page-title">{t('news.title')}</h1>
         </div>
-        <p className="text-[11px] font-body text-muted-foreground tracking-wide mb-6">
+        <p className="type-page-subtitle mb-6">
           {t('common.season')} 2026
         </p>
       </section>
+
 
       <section className="container pb-14">
         {isLoading ? (
@@ -130,7 +131,7 @@ const News = () => {
           </div>
         ) : !news?.length ? (
           <div className="border border-border/50 bg-card/30 py-12 text-center">
-            <p className="text-muted-foreground text-sm">{t('common.noData')}</p>
+            <p className="type-body-secondary">{t('common.noData')}</p>
           </div>
         ) : (
           <div className="border border-border/50 bg-card/30">
@@ -159,8 +160,8 @@ const News = () => {
                     id={`article-${article.id}`}
                     className="border-border/30 px-5"
                   >
-                    <AccordionTrigger className="hover:no-underline py-4">
-                      <div className="flex items-center gap-3 sm:gap-4 flex-1 pr-4 text-left">
+                    <AccordionTrigger className="hover:no-underline py-5">
+                      <div className="flex items-start gap-3 sm:gap-4 flex-1 pr-4 text-left">
                         {coverPhoto && (
                           <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-md overflow-hidden bg-muted/20 border border-border/40">
                             <img
@@ -170,9 +171,9 @@ const News = () => {
                             />
                           </div>
                         )}
-                        <div className="flex flex-col items-start gap-1 min-w-0">
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70 font-body tracking-wide uppercase">
-                            <Calendar className="h-3 w-3" />
+                        <div className="flex flex-col items-start gap-1.5 min-w-0">
+                          <div className="flex items-center gap-2 type-metadata">
+                            <Calendar className="h-3.5 w-3.5" />
                             {dateStr}
                             {round && (
                               <>
@@ -181,14 +182,15 @@ const News = () => {
                               </>
                             )}
                           </div>
-                          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground leading-tight">
+                          <h2 className="font-display text-[17px] sm:text-[19px] font-semibold text-foreground leading-[1.3] max-w-[46ch]">
                             {article.title}
                           </h2>
                           {article.subtitle && (
-                            <p className="text-[11px] text-muted-foreground/60 font-body line-clamp-1">
+                            <p className="text-[13.5px] sm:text-[14px] leading-[1.45] text-secondary-foreground font-body line-clamp-2 max-w-[62ch]">
                               {article.subtitle}
                             </p>
                           )}
+
                         </div>
                       </div>
                     </AccordionTrigger>
@@ -212,7 +214,8 @@ const News = () => {
                       )}
 
                       <div
-                        className="prose prose-sm max-w-none text-foreground/90 font-body"
+                        className="prose max-w-[68ch] text-[15.5px] sm:text-[16px] leading-[1.65] text-foreground font-body prose-p:mb-4 prose-strong:text-foreground"
+
                         dangerouslySetInnerHTML={{
                           __html: article.body?.replace(/\n/g, '<br/>') || '',
                         }}
@@ -261,7 +264,7 @@ const News = () => {
                 className="max-h-[80vh] w-auto h-auto object-contain"
               />
               {lightbox.caption && (
-                <p className="text-xs text-muted-foreground font-body text-center">
+                <p className="type-metadata text-center">
                   {lightbox.caption}
                 </p>
               )}
