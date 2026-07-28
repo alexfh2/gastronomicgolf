@@ -224,11 +224,11 @@ const Index = () => {
             </div>
 
           {latestNews && (
-            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full rounded-[2px]">
-              <div className="surface-card rounded-[2px] relative overflow-hidden flex items-stretch h-full min-h-[116px] sm:min-h-[104px]">
-                <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-70 transition-opacity duration-200 z-10" />
+            <Link to={`/noticies?article=${latestNews.id}`} className="group block h-full">
+              <div className="surface-editorial relative overflow-hidden flex items-stretch h-full min-h-[112px] sm:min-h-[100px]">
+                <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-accent opacity-0 group-hover:opacity-60 transition-opacity duration-200 z-10" />
                 {latestNewsPhoto?.url ? (
-                  <div className="w-[92px] sm:w-[116px] shrink-0 overflow-hidden">
+                  <div className="w-[84px] sm:w-[104px] shrink-0 overflow-hidden">
                     <img
                       src={latestNewsPhoto.url}
                       alt={latestNewsPhoto.caption || latestNews.title}
@@ -237,19 +237,19 @@ const Index = () => {
                     />
                   </div>
                 ) : (
-                  <div className="w-[92px] sm:w-[116px] shrink-0 flex items-center justify-center bg-surface-secondary">
-                    <Newspaper className="h-5 w-5 text-accent" strokeWidth={1.5} />
+                  <div className="w-[84px] sm:w-[104px] shrink-0 flex items-center justify-center border-r border-border-subtle">
+                    <Newspaper className="h-[18px] w-[18px] text-accent" strokeWidth={1.5} />
                   </div>
                 )}
-                <div className="min-w-0 flex-1 flex items-center gap-3 pl-5 pr-4 py-4 sm:pl-7 sm:pr-5 sm:py-[18px]">
+                <div className="min-w-0 flex-1 flex items-center gap-4 pl-5 pr-4 py-4 sm:pl-8 sm:pr-6 sm:py-[18px]">
                   <div className="min-w-0 flex-1">
-                    <p className="font-body text-[12px] font-semibold tracking-[0.14em] uppercase text-accent mb-1 leading-[1.4]">
+                    <p className="font-body text-[11px] font-semibold tracking-[0.2em] uppercase text-text-secondary mb-1.5 leading-[1.4]">
                       Última notícia
                     </p>
-                    <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3] line-clamp-2 max-w-[46ch]">
+                    <h3 className="font-body text-[16px] sm:text-[17px] font-medium text-foreground leading-[1.35] line-clamp-2 max-w-[42ch]">
                       {latestNews.title}
                     </h3>
-                    <p className="text-[13px] text-text-secondary leading-[1.45] truncate mt-1 tnum">
+                    <p className="text-[13px] text-text-secondary leading-[1.45] truncate mt-1.5 tnum">
                       {[
                         (latestNews.rounds as any)?.name,
                         latestNews.published_at
@@ -258,26 +258,27 @@ const Index = () => {
                       ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-text-tertiary shrink-0 self-center group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.75} />
+                  <ChevronRight className="h-3.5 w-3.5 text-text-tertiary/70 shrink-0 self-center opacity-70 group-hover:opacity-100 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.5} />
                 </div>
               </div>
             </Link>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-x-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-x-5">
             {quickLinks.map((link) => (
               <Link key={link.path} to={link.path} className="group block h-full">
-                <div className="surface-quiet relative px-1 py-4 sm:px-2 sm:py-[18px] flex items-center gap-3.5 h-full min-h-[76px] sm:min-h-[80px]">
-                  <link.icon className="h-[18px] w-[18px] text-accent shrink-0" strokeWidth={1.5} />
+                <div className="surface-quiet relative px-1 py-4 sm:px-1.5 sm:py-[18px] flex items-center gap-3.5 h-full min-h-[72px] sm:min-h-[76px]">
+                  <link.icon className="h-4 w-4 text-accent/80 shrink-0 group-hover:text-accent transition-colors duration-200" strokeWidth={1.5} />
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-body text-[16px] sm:text-[17px] font-semibold text-foreground leading-[1.3]">{link.label}</h3>
-                    <p className="text-[13px] text-text-secondary leading-[1.45] truncate mt-0.5">{link.desc}</p>
+                    <h3 className="font-body text-[15px] sm:text-[16px] font-medium text-foreground leading-[1.3]">{link.label}</h3>
+                    <p className="text-[12.5px] text-text-secondary leading-[1.45] truncate mt-0.5">{link.desc}</p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-text-tertiary ml-auto shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.75} />
+                  <ChevronRight className="h-3 w-3 text-text-tertiary/60 ml-auto shrink-0 group-hover:text-accent group-hover:translate-x-[2px] transition-all duration-200" strokeWidth={1.5} />
                 </div>
               </Link>
             ))}
           </div>
+
 
 
           </div>
