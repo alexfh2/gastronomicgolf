@@ -427,8 +427,8 @@ const Rounds = ({ mode = 'results' }: { mode?: 'results' | 'calendar' }) => {
                     </div>
                   )}
                 </div>
-                </>
               );
+
             })}
           </div>
         )}
