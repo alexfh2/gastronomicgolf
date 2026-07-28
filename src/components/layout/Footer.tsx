@@ -22,7 +22,8 @@ const Footer = () => {
             </div>
           </div>
           <Link
-            to="/jornades"
+            to="/resultats"
+
             className="flex items-center gap-2 px-6 py-3 border border-foreground/20 text-xs font-body font-medium uppercase tracking-[0.2em] text-foreground hover:border-accent hover:text-accent transition-colors"
           >
             Descobreix el circuit
