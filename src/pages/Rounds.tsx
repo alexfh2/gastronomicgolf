@@ -255,7 +255,7 @@ const Rounds = () => {
                   {showDivider && (
                     <div className="py-4 flex items-center gap-3">
                       <div className="h-px flex-1 bg-border/30" />
-                      <span className="text-[10px] font-body text-muted-foreground/40 tracking-[0.15em] uppercase">Properes jornades</span>
+                      <span className="type-eyebrow">Properes jornades</span>
                       <div className="h-px flex-1 bg-border/30" />
                     </div>
                   )}
@@ -267,35 +267,36 @@ const Rounds = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex-1 space-y-1.5">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`font-mono text-[10px] tracking-wider ${played ? 'text-accent/60' : 'text-muted-foreground/40'}`}>J{round.round_number}</span>
-                          <span className={`font-display text-base font-semibold ${played ? 'text-foreground' : 'text-muted-foreground/50'}`}>{round.name}</span>
+                          <span className={`font-body text-[12px] font-medium tabular-nums tracking-[0.04em] ${played ? 'text-accent' : 'text-secondary-foreground'}`}>J{round.round_number}</span>
+                          <span className={`font-display text-[17px] sm:text-[18px] font-semibold leading-tight ${played ? 'text-foreground' : 'text-secondary-foreground'}`}>{round.name}</span>
                           {round.is_master && (
-                            <span className="text-[9px] px-2 py-0.5 border border-accent/30 text-accent/80 font-body font-medium tracking-[0.15em] uppercase">MASTER</span>
+                            <span className="text-[11px] px-2 py-0.5 border border-accent/40 text-accent font-body font-medium tracking-[0.06em] uppercase">Master</span>
                           )}
                           {played ? (
-                            <span className="text-[9px] px-2 py-0.5 border border-accent/20 text-accent/60 font-body font-medium tracking-[0.1em] uppercase">Jugada</span>
+                            <span className="text-[11px] px-2 py-0.5 border border-accent/30 text-accent font-body font-medium tracking-[0.05em] uppercase">Jugada</span>
                           ) : (
-                            <span className="text-[9px] px-2 py-0.5 border border-border/40 text-muted-foreground/40 font-body font-medium tracking-[0.1em] uppercase">Pendent</span>
+                            <span className="text-[11px] px-2 py-0.5 border border-border/60 text-secondary-foreground font-body font-medium tracking-[0.05em] uppercase">Pendent</span>
                           )}
                           {round.sponsor && (
-                            <span className={`text-[11px] font-body ${played ? 'text-muted-foreground/60' : 'text-muted-foreground/30'}`}>· {round.sponsor}</span>
+                            <span className="text-[13px] font-body text-secondary-foreground">· {round.sponsor}</span>
                           )}
                         </div>
-                        <div className={`flex items-center gap-4 text-[11px] font-body ${played ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                        <div className="flex items-center gap-4 flex-wrap type-metadata">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5" />
                             {format(new Date(round.date), 'dd MMM yyyy', { locale })}
                             {round.end_date && round.end_date !== round.date && (
                               <> — {format(new Date(round.end_date), 'dd MMM yyyy', { locale })}</>
                             )}
                           </span>
                           {round.course && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5" />
                               {round.course}
                             </span>
                           )}
                         </div>
+
                         {hasResults && (
                           <span className="text-[10px] text-accent/70 font-body font-medium flex items-center gap-1 tracking-wide uppercase">
                             <BarChart3 className="h-3 w-3" />
