@@ -274,20 +274,25 @@ const Rounds = ({ mode = 'results' }: { mode?: 'results' | 'calendar' }) => {
         <div className="flex items-center justify-between gap-3 mb-1.5">
           <div className="flex items-center gap-3">
             <CalendarDays className="h-5 w-5 text-accent/70" strokeWidth={1.5} />
-            <h1 className="type-page-title">{t('rounds.title')}</h1>
+            <h1 className="type-page-title">
+              {mode === 'calendar' ? t('nav.calendar') : t('nav.rounds')}
+            </h1>
           </div>
-          <button
-            onClick={downloadAllIcs}
-            className="flex items-center gap-1.5 px-3 min-h-[44px] type-action-label uppercase tracking-[0.05em] border border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground transition-all"
-          >
-            <CalendarPlus className="h-4 w-4" />
-            Afegir totes
-          </button>
+          {mode === 'calendar' && (
+            <button
+              onClick={downloadAllIcs}
+              className="flex items-center gap-1.5 px-3 min-h-[44px] type-action-label uppercase tracking-[0.05em] border border-border/60 bg-card/30 text-secondary-foreground hover:border-accent/30 hover:text-foreground transition-all"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Afegir totes
+            </button>
+          )}
         </div>
         <p className="type-page-subtitle mb-6">
-          {t('rounds.calendar')} — {t('common.season')} 2026
+          {mode === 'calendar' ? t('rounds.calendar') : t('rounds.results')} — {t('common.season')} 2026
         </p>
       </section>
+
 
       <section className="container pb-14">
         {isLoading ? (
