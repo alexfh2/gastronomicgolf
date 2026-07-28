@@ -162,58 +162,107 @@ const Rounds = () => {
 
   const renderResultsTable = (results: any[], scoreField: 'stableford' | 'scratch' = 'stableford') => {
     if (!results?.length) return <p className="text-muted-foreground text-sm py-4 text-center">{t('common.noData')}</p>;
+    const scoreValue = (r: any) =>
+      scoreField === 'scratch'
+        ? (r._scratchPts ?? computeScratchStableford(r.scorecard, r.rounds?.course_par))
+        : r.stableford_points;
+    const top3Style = (position: number) => {
+      const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
+      return position <= 3
+        ? { background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 30%, transparent 70%)` }
+        : undefined;
+    };
+
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full border-separate border-spacing-0">
-          <thead>
-            <tr className="type-table-header">
-              <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
-              <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal normal-case">(hcp)</span></th>
-              <th className="text-right py-3 border-b border-border/30">{scoreField === 'scratch' ? 'Scratch' : 'Stableford'}</th>
-            </tr>
-          </thead>
-          <tbody>
+      <>
+        {/* ---------- MOBILE: llista compacta ---------- */}
+        <div className="sm:hidden">
+          <div
+            className="grid gap-x-2 py-2 border-b border-border/30 type-table-header"
+            style={{ gridTemplateColumns: '32px minmax(0,1fr) 54px' }}
+          >
+            <span>Pos.</span>
+            <span>Jugador</span>
+            <span className="text-right">{scoreField === 'scratch' ? 'Scr.' : 'Stbf'}</span>
+          </div>
+          <ul className="divide-y divide-border/20">
             {results.map((r: any, i: number) => {
               const position = i + 1;
               const isTop3 = position <= 3;
-              const accentAlpha = position === 1 ? 0.18 : position === 2 ? 0.11 : position === 3 ? 0.06 : 0;
-              const value = scoreField === 'scratch'
-                ? (r._scratchPts ?? computeScratchStableford(r.scorecard, r.rounds?.course_par))
-                : r.stableford_points;
               return (
-                <tr
-                  key={r.id}
-                  className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors"
-                  style={
-                    isTop3
-                      ? {
-                          background: `linear-gradient(90deg, hsl(var(--accent) / ${accentAlpha}) 0%, hsl(var(--accent) / ${accentAlpha * 0.4}) 30%, transparent 70%)`,
-                        }
-                      : undefined
-                  }
-                >
-                  <td className={`py-3 pr-2 font-body text-[14px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}>{position}</td>
-                  <td className="py-3">
-                    <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="flex items-center gap-2 hover:text-accent transition-colors text-left">
-                      <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
-                        <Users className="h-3 w-3 text-secondary-foreground" />
-                      </div>
-                      <span className="text-[15px] font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
+                <li key={r.id} style={top3Style(position)}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlayerId(r.player_id)}
+                    className="w-full grid items-center gap-x-2 min-h-[44px] py-2.5 text-left"
+                    style={{ gridTemplateColumns: '32px minmax(0,1fr) 54px' }}
+                  >
+                    <span className={`font-body text-[13px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}>
+                      {position}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-body text-[14px] font-medium text-foreground leading-[1.25] line-clamp-2 break-words">
+                        {((r as any).players_public)?.name}
+                      </span>
                       {r.handicap_at_round != null && (
-                        <span className="text-[13px] text-secondary-foreground font-body tabular-nums">({Number(r.handicap_at_round).toFixed(1)})</span>
+                        <span className="block text-[11.5px] leading-tight text-secondary-foreground font-body tabular-nums mt-0.5">
+                          Hcp {Number(r.handicap_at_round).toFixed(1)}
+                        </span>
                       )}
-                    </button>
-                  </td>
-                  <td className={`py-3 text-right font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{value ?? '—'}</td>
-
-                </tr>
+                    </span>
+                    <span className={`text-right font-body font-semibold text-[16px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>
+                      {scoreValue(r) ?? '—'}
+                    </span>
+                  </button>
+                </li>
               );
             })}
-          </tbody>
-        </table>
-      </div>
+          </ul>
+        </div>
+
+        {/* ---------- DESKTOP / TABLET ---------- */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full border-separate border-spacing-0">
+            <thead>
+              <tr className="type-table-header">
+                <th className="text-left py-3 pr-2 w-12 border-b border-border/30">Pos.</th>
+                <th className="text-left py-3 border-b border-border/30">{t('common.name')} <span className="font-normal normal-case">(hcp)</span></th>
+                <th className="text-right py-3 border-b border-border/30">{scoreField === 'scratch' ? 'Scratch' : 'Stableford'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((r: any, i: number) => {
+                const position = i + 1;
+                const isTop3 = position <= 3;
+                return (
+                  <tr
+                    key={r.id}
+                    className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors"
+                    style={top3Style(position)}
+                  >
+                    <td className={`py-3 pr-2 font-body text-[14px] font-semibold tabular-nums ${isTop3 ? 'text-accent' : 'text-secondary-foreground'}`}>{position}</td>
+                    <td className="py-3">
+                      <button type="button" onClick={() => setSelectedPlayerId(r.player_id)} className="flex items-center gap-2 hover:text-accent transition-colors text-left">
+                        <div className="h-6 w-6 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+                          <Users className="h-3 w-3 text-secondary-foreground" />
+                        </div>
+                        <span className="text-[15px] font-body font-medium text-foreground">{((r as any).players_public)?.name}</span>
+                        {r.handicap_at_round != null && (
+                          <span className="text-[13px] text-secondary-foreground font-body tabular-nums">({Number(r.handicap_at_round).toFixed(1)})</span>
+                        )}
+                      </button>
+                    </td>
+                    <td className={`py-3 text-right font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{scoreValue(r) ?? '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </>
     );
   };
+
 
   return (
     <div className="animate-fade-in">
