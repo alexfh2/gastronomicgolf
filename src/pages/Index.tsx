@@ -321,7 +321,7 @@ const Index = () => {
 
 
       {/* ——— RANKING + STATS ——— */}
-      <section className="container pb-16 sm:pb-20">
+      <section className="container pb-16 sm:pb-20 hidden sm:block">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
 
           {/* General Ranking */}
