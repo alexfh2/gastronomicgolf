@@ -183,12 +183,6 @@ const Index = () => {
           {/* Bloc textual del hero — només desktop/tablet. Sense lockup de marca:
               el logo del header és l'única presència principal de marca. */}
           <div className="hidden sm:block">
-            <div className="flex items-center gap-3.5">
-              <span aria-hidden className="h-px w-10 bg-accent/70" />
-              <p className="font-body text-[11px] font-semibold tracking-[0.28em] uppercase text-text-secondary leading-[1.4]">
-                {"\n\n\n"}
-              </p>
-            </div>
             <p className="font-brand text-[2rem] lg:text-[2.6rem] leading-[1.05] text-foreground font-normal tracking-tight mt-2.5">
               {t('common.season')} <span className="text-accent">2026</span>
             </p>
