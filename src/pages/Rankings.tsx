@@ -434,7 +434,24 @@ const Rankings = () => {
           <div className="h-px flex-1 bg-border/60" />
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* Mobile: dropdown */}
+        <div className="sm:hidden mb-4">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full min-h-[44px] type-action-label uppercase tracking-[0.06em] border-accent/40 bg-accent/5 text-accent">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border z-50">
+              {categories.map((cat) => (
+                <SelectItem key={cat.key} value={cat.key} className="type-action-label uppercase tracking-[0.06em]">
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop: tabs */}
+        <div className="hidden sm:flex flex-wrap gap-2 mb-6">
           {categories.map((cat) => (
             <button
               key={cat.key}
@@ -449,6 +466,11 @@ const Rankings = () => {
             </button>
           ))}
         </div>
+
+        <p className="sm:hidden text-[11.5px] leading-snug text-secondary-foreground font-body mb-2">
+          Clica a sobre de cada jugador per veure el resultat prova a prova.
+        </p>
+
       </section>
 
 
