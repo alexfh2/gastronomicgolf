@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import PlayerProfileDialog from '@/components/PlayerProfileDialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchPublicCircuitData, publicCircuitDataQueryKey, type PublicResult } from '@/lib/publicCircuitData';
 import { buildPlayerCategoryHandicapMap, buildPlayerLastHandicapMap } from '@/lib/playerCategoryHandicap';
 import { Trophy, ChevronRight, Users, ChevronDown, User } from 'lucide-react';
@@ -273,22 +274,8 @@ const Rankings = () => {
 
                   {isExpanded && (
                     <div className="px-1.5 pb-3 pt-1 animate-fade-in">
-                      <div className="mb-2.5 flex items-start justify-between gap-2 border-b border-border/25 pb-2">
-                        <div className="min-w-0">
-                          <p className="font-body text-[14px] font-medium text-foreground leading-[1.25] break-words">
-                            {p.name}
-                          </p>
-                          <p className="text-[11.5px] text-secondary-foreground font-body tabular-nums mt-0.5">
-                            Pos. {position}
-                            {p.displayHandicap != null && ` · Hcp ${Number(p.displayHandicap).toFixed(1)}`}
-                          </p>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className={`font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{p.total}</p>
-                          <p className="text-[10.5px] uppercase tracking-[0.08em] text-secondary-foreground">Total</p>
-                        </div>
-                      </div>
                       <div className="grid grid-cols-5 gap-1.5 mb-3">
+
                         {rounds?.map((r) => {
                           const score = p.roundScores.get(r.id);
                           const val = score?.weighted ?? score?.points;
@@ -448,7 +435,24 @@ const Rankings = () => {
           <div className="h-px flex-1 bg-border/60" />
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* Mobile: dropdown */}
+        <div className="sm:hidden mb-4">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full min-h-[44px] type-action-label uppercase tracking-[0.06em] border-accent/40 bg-accent/5 text-accent">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border z-50">
+              {categories.map((cat) => (
+                <SelectItem key={cat.key} value={cat.key} className="type-action-label uppercase tracking-[0.06em]">
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop: tabs */}
+        <div className="hidden sm:flex flex-wrap gap-2 mb-6">
           {categories.map((cat) => (
             <button
               key={cat.key}
@@ -463,6 +467,11 @@ const Rankings = () => {
             </button>
           ))}
         </div>
+
+        <p className="sm:hidden text-[11.5px] leading-snug text-secondary-foreground font-body mb-2">
+          Clica a sobre de cada jugador per veure el resultat prova a prova.
+        </p>
+
       </section>
 
 
