@@ -273,22 +273,8 @@ const Rankings = () => {
 
                   {isExpanded && (
                     <div className="px-1.5 pb-3 pt-1 animate-fade-in">
-                      <div className="mb-2.5 flex items-start justify-between gap-2 border-b border-border/25 pb-2">
-                        <div className="min-w-0">
-                          <p className="font-body text-[14px] font-medium text-foreground leading-[1.25] break-words">
-                            {p.name}
-                          </p>
-                          <p className="text-[11.5px] text-secondary-foreground font-body tabular-nums mt-0.5">
-                            Pos. {position}
-                            {p.displayHandicap != null && ` · Hcp ${Number(p.displayHandicap).toFixed(1)}`}
-                          </p>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className={`font-body font-semibold text-[17px] tabular-nums ${isTop3 ? 'text-accent' : 'text-foreground'}`}>{p.total}</p>
-                          <p className="text-[10.5px] uppercase tracking-[0.08em] text-secondary-foreground">Total</p>
-                        </div>
-                      </div>
                       <div className="grid grid-cols-5 gap-1.5 mb-3">
+
                         {rounds?.map((r) => {
                           const score = p.roundScores.get(r.id);
                           const val = score?.weighted ?? score?.points;
