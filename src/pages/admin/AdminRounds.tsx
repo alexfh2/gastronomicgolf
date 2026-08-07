@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send, Upload, ChevronDown, Flag } from 'lucide-react';
+import { Plus, Pencil, Star, Download, Check, Link2, FileSpreadsheet, Trash2, Globe, Loader2, Newspaper, Send, Upload, ChevronDown, Flag, UserPen } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import RoundResultsImport from '@/components/admin/RoundResultsImport';
+import ResultsEditDialog from '@/components/admin/ResultsEditDialog';
 import NewsGenerationDialog from '@/components/admin/NewsGenerationDialog';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 import type { Database } from '@/integrations/supabase/types';
@@ -77,6 +78,7 @@ const AdminRounds = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [resultsRound, setResultsRound] = useState<Round | null>(null);
+  const [editResultsRound, setEditResultsRound] = useState<Round | null>(null);
   const [deletingRound, setDeletingRound] = useState<Round | null>(null);
   const [newsRound, setNewsRound] = useState<Round | null>(null);
   const [courseUrl, setCourseUrl] = useState('');
@@ -652,6 +654,24 @@ const AdminRounds = () => {
                         </div>
                       </button>
 
+                      {/* Edit results player by player */}
+                      <button
+                        onClick={() => setEditResultsRound(round)}
+                        className="text-left p-4 rounded-lg border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary/20">
+                            <UserPen className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm mb-1">Editar resultats jugador a jugador</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">
+                              Cerca un jugador i corregeix els cops forat a forat o el seu handicap. Cal confirmar la contrasenya.
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+
                       {/* Generate news */}
                       <button
                         onClick={() => round.status === 'published' && setNewsRound(round)}
@@ -1005,6 +1025,19 @@ const AdminRounds = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Per-player results edit dialog */}
+      <Dialog open={!!editResultsRound} onOpenChange={(open) => !open && setEditResultsRound(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              Editar resultats jugador a jugador — {editResultsRound?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {editResultsRound && <ResultsEditDialog round={editResultsRound} />}
+        </DialogContent>
+      </Dialog>
+
 
       {/* News generation dialog */}
       {newsRound && (
