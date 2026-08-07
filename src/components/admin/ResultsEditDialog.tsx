@@ -138,7 +138,7 @@ const ResultsEditDialog = ({ round }: { round: Round }) => {
     if (!selected) return;
     setSaving(true);
     const totalStrokes = numericStrokes.reduce((a, b) => a + b, 0);
-    const payload: Record<string, unknown> = {
+    const payload: Partial<Tables<'results'>> = {
       handicap_at_round: playerHcp,
       scorecard: totalStrokes > 0 ? numericStrokes : null,
     };
