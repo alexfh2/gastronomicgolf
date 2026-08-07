@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Search, ShieldCheck, Save } from 'lucide-react';
+import { Loader2, Search, Save } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Round = Tables<'rounds'>;
@@ -49,12 +48,7 @@ const holeStableford = (gross: number, par: number, strokeIndex: number, hcp: nu
 
 const ResultsEditDialog = ({ round }: { round: Round }) => {
   const { toast } = useToast();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  const [verified, setVerified] = useState(false);
-  const [password, setPassword] = useState('');
-  const [verifying, setVerifying] = useState(false);
 
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -64,7 +58,6 @@ const ResultsEditDialog = ({ round }: { round: Round }) => {
 
   const { data: results, isLoading } = useQuery({
     queryKey: ['admin-round-results-edit', round.id],
-    enabled: verified,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('results')
@@ -121,19 +114,6 @@ const ResultsEditDialog = ({ round }: { round: Round }) => {
     return { stb, scratch };
   }, [numericStrokes.join(','), playerHcp, par?.join(','), effectiveIdx?.join(',')]);
 
-  const handleVerify = async () => {
-    if (!user?.email || !password) return;
-    setVerifying(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: user.email, password });
-    setVerifying(false);
-    if (error) {
-      toast({ title: 'Contrasenya incorrecta', variant: 'destructive' });
-      return;
-    }
-    setPassword('');
-    setVerified(true);
-  };
-
   const handleSave = async () => {
     if (!selected) return;
     setSaving(true);
@@ -155,33 +135,6 @@ const ResultsEditDialog = ({ round }: { round: Round }) => {
     queryClient.invalidateQueries({ queryKey: ['admin-round-results-edit', round.id] });
     queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
   };
-
-  if (!verified) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-start gap-3 rounded-md border border-border bg-muted/20 p-4">
-          <ShieldCheck className="h-5 w-5 text-primary mt-0.5" />
-          <div className="text-xs text-muted-foreground leading-relaxed">
-            Per seguretat, confirma la teva contrasenya abans d'editar resultats ja publicats.
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label>Contrasenya de {user?.email}</Label>
-          <Input
-            type="password"
-            value={password}
-            autoComplete="current-password"
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-          />
-        </div>
-        <Button onClick={handleVerify} disabled={verifying || !password} className="w-full">
-          {verifying ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
-          Confirmar identitat
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-5">
