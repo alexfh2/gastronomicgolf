@@ -1006,6 +1006,19 @@ const AdminRounds = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Per-player results edit dialog */}
+      <Dialog open={!!editResultsRound} onOpenChange={(open) => !open && setEditResultsRound(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              Editar resultats jugador a jugador — {editResultsRound?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {editResultsRound && <ResultsEditDialog round={editResultsRound} />}
+        </DialogContent>
+      </Dialog>
+
+
       {/* News generation dialog */}
       {newsRound && (
         <NewsGenerationDialog
