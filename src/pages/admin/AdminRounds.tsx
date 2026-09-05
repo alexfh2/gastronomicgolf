@@ -782,7 +782,16 @@ const AdminRounds = () => {
               {statusLabels[editingRound.status]}
             </Badge>
           )}
-          <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(); }} className="space-y-4">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const num = parseInt(form.round_number);
+            const seasonId = form.season_id || activeSeasonId;
+            const exists = !editingRound && (rounds ?? []).some(
+              (r) => r.season_id === seasonId && r.round_number === num
+            );
+            if (exists) setShiftConfirmOpen(true);
+            else saveMutation.mutate();
+          }} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Nom</Label>
