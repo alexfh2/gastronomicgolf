@@ -1058,6 +1058,26 @@ const AdminRounds = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Confirm insert + renumber */}
+      <AlertDialog open={shiftConfirmOpen} onOpenChange={setShiftConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Ja existeix la jornada {form.round_number}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Si continues, aquesta jornada i totes les següents es renumeraran automàticament (+1).
+              Les jornades existents conserven les seves dates, resultats, notícies i fotos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setShiftConfirmOpen(false); saveMutation.mutate(); }}>
+              Inserir i renumerar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
 
       {/* News generation dialog */}
       {newsRound && (
