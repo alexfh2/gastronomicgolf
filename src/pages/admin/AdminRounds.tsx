@@ -270,6 +270,7 @@ const AdminRounds = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
+      queryClient.invalidateQueries({ queryKey: ['public-rounds-all'] });
       toast({ title: editingRound ? 'Jornada actualitzada' : 'Jornada creada' });
       setDialogOpen(false);
       setEditingRound(null);
