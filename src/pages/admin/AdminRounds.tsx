@@ -97,6 +97,8 @@ const AdminRounds = () => {
     course_handicap_women: '' as string,
     has_women_handicap: false,
   });
+  const [shiftConfirmOpen, setShiftConfirmOpen] = useState(false);
+
 
   const { data: seasons } = useQuery({
     queryKey: ['admin-seasons-list'],
@@ -253,8 +255,17 @@ const AdminRounds = () => {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('rounds').insert(payload);
-        if (error) throw error;
+        const conflict = (rounds ?? []).some(
+          (r) => r.season_id === payload.season_id && r.round_number === payload.round_number
+        );
+        if (conflict) {
+          // Atomic shift (+1) of same-season rounds >= number, then insert — in one transaction.
+          const { error } = await supabase.rpc('insert_round_with_shift', { _round: payload as any });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('rounds').insert(payload);
+          if (error) throw error;
+        }
       }
     },
     onSuccess: () => {
