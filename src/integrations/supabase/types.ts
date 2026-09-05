@@ -460,6 +460,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_round_with_shift: { Args: { _round: Json }; Returns: string }
     }
     Enums: {
       app_role: "admin"
