@@ -97,6 +97,8 @@ const AdminRounds = () => {
     course_handicap_women: '' as string,
     has_women_handicap: false,
   });
+  const [shiftConfirmOpen, setShiftConfirmOpen] = useState(false);
+
 
   const { data: seasons } = useQuery({
     queryKey: ['admin-seasons-list'],
@@ -253,12 +255,22 @@ const AdminRounds = () => {
         const { error } = await supabase.from('rounds').update(payload).eq('id', editingRound.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('rounds').insert(payload);
-        if (error) throw error;
+        const conflict = (rounds ?? []).some(
+          (r) => r.season_id === payload.season_id && r.round_number === payload.round_number
+        );
+        if (conflict) {
+          // Atomic shift (+1) of same-season rounds >= number, then insert — in one transaction.
+          const { error } = await supabase.rpc('insert_round_with_shift', { _round: payload as any });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('rounds').insert(payload);
+          if (error) throw error;
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-rounds'] });
+      queryClient.invalidateQueries({ queryKey: ['public-rounds-all'] });
       toast({ title: editingRound ? 'Jornada actualitzada' : 'Jornada creada' });
       setDialogOpen(false);
       setEditingRound(null);
@@ -771,7 +783,16 @@ const AdminRounds = () => {
               {statusLabels[editingRound.status]}
             </Badge>
           )}
-          <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(); }} className="space-y-4">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const num = parseInt(form.round_number);
+            const seasonId = form.season_id || activeSeasonId;
+            const exists = !editingRound && (rounds ?? []).some(
+              (r) => r.season_id === seasonId && r.round_number === num
+            );
+            if (exists) setShiftConfirmOpen(true);
+            else saveMutation.mutate();
+          }} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Nom</Label>
@@ -1037,6 +1058,26 @@ const AdminRounds = () => {
           {editResultsRound && <ResultsEditDialog round={editResultsRound} />}
         </DialogContent>
       </Dialog>
+
+      {/* Confirm insert + renumber */}
+      <AlertDialog open={shiftConfirmOpen} onOpenChange={setShiftConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Ja existeix la jornada {form.round_number}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Si continues, aquesta jornada i totes les següents es renumeraran automàticament (+1).
+              Les jornades existents conserven les seves dates, resultats, notícies i fotos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel·lar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setShiftConfirmOpen(false); saveMutation.mutate(); }}>
+              Inserir i renumerar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
 
       {/* News generation dialog */}
