@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -58,6 +60,22 @@ Deno.serve(async (req: Request) => {
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) return jsonResponse({ error: 'Cal iniciar sessió com a administrador.' }, 401)
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    if (!supabaseUrl || !anonKey) return jsonResponse({ error: 'No s’ha pogut validar la sessió.' }, 500)
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    })
+    const token = authHeader.slice('Bearer '.length)
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token)
+    const userId = typeof claimsData?.claims?.sub === 'string' ? claimsData.claims.sub : null
+    if (claimsError || !userId) return jsonResponse({ error: 'La sessió no és vàlida.' }, 401)
+    const { data: isAdmin, error: roleError } = await authClient.rpc('has_role', {
+      _user_id: userId,
+      _role: 'admin',
+    })
+    if (roleError || !isAdmin) return jsonResponse({ error: 'Aquesta acció és només per a administradors.' }, 403)
 
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')
     if (!lovableApiKey) return jsonResponse({ error: 'El lector de classificacions no està configurat.' }, 500)
