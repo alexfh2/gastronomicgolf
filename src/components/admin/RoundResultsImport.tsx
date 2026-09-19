@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, AlertTriangle, Search, Plus, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
+import { Check, X, AlertTriangle, Search, Plus, Trash2, Upload, FileSpreadsheet, Image } from 'lucide-react';
 import { DialogDescription } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { parseExcelResults, type ExcelParsedResult, type ExcelParseOutput } from '@/lib/parseExcelResults';
@@ -154,7 +154,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     return matched;
   };
 
-  // --- Senior file cross-reference (Excel or PDF) — supports multiple files / multi-day ---
+  // --- Senior file cross-reference (Excel, PDF or image) — supports multiple files / multi-day ---
   const handleSeniorFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -164,25 +164,42 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
       const processedNames: string[] = [];
 
       for (const file of files) {
-        const isPdf = file.name.toLowerCase().endsWith('.pdf');
+        const extension = file.name.toLowerCase().split('.').pop() || '';
+        const isPdf = file.type === 'application/pdf' || extension === 'pdf';
+        const isImage = file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp'].includes(extension);
+        const isAiReadable = isPdf || isImage;
         let seniorCount = 0;
 
-        if (isPdf) {
-          const base64 = await new Promise<string>((resolve) => {
+        if (isAiReadable) {
+          const base64 = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
-              const result = reader.result as string;
-              resolve(result.split(',')[1]);
+              const result = typeof reader.result === 'string' ? reader.result : '';
+              const encoded = result.split(',')[1];
+              if (!encoded) {
+                reject(new Error(`No s'ha pogut llegir ${file.name}`));
+                return;
+              }
+              resolve(encoded);
             };
+            reader.onerror = () => reject(new Error(`No s'ha pogut llegir ${file.name}`));
             reader.readAsDataURL(file);
           });
 
           const { data, error } = await supabase.functions.invoke('parse-senior-pdf', {
-            body: { pdf_base64: base64 },
+            body: {
+              file_base64: base64,
+              mime_type: isPdf ? 'application/pdf' : (file.type || `image/${extension === 'jpg' ? 'jpeg' : extension}`),
+              filename: file.name,
+            },
           });
           if (error) throw new Error(error.message);
+          if (data?.error) throw new Error(data.error);
 
           const players: { name: string; license: string }[] = data?.players || [];
+          if (players.length === 0) {
+            throw new Error(`No s'han pogut extreure jugadors de ${file.name}. Comprova que el nom i la llicència siguin llegibles.`);
+          }
           seniorCount = players.length;
           for (const p of players) {
             if (p.license) seniorLicensesRef.current.add(p.license.trim().toUpperCase());
@@ -581,8 +598,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                 </p>
                 <p className={`text-xs ${needsSeniorFile ? 'text-amber-700' : 'text-muted-foreground'}`}>
                   {needsSeniorFile
-                    ? "No s'ha detectat edat als resultats. Puja la classificació sènior (Excel/PDF o URL) per identificar els jugadors de 65+ anys."
-                    : "Si tens la llista oficial de jugadors sènior (65+), puja-la per ajustar el filtrat (opcional)."}
+                    ? "No s'ha detectat edat als resultats. Puja la classificació sènior (captura, Excel, PDF o URL) per identificar els jugadors de 65+ anys."
+                    : "Si tens la llista oficial de jugadors sènior (65+), puja una captura, un Excel o un PDF per ajustar el filtrat (opcional)."}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Identificats actualment: <span className="font-mono font-semibold">{results.filter(r => r._is_senior).length}</span> sènior
@@ -593,7 +610,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             <Tabs value={seniorMode} onValueChange={(v) => setSeniorMode(v as 'file' | 'url')}>
               <TabsList className="w-full h-8">
                 <TabsTrigger value="file" className="flex-1 text-xs gap-1 h-6">
-                  <FileSpreadsheet className="h-3 w-3" /> Excel / PDF
+                  <Image className="h-3 w-3" /> Captura / fitxer
                 </TabsTrigger>
                 <TabsTrigger value="url" className="flex-1 text-xs gap-1 h-6">
                   <Search className="h-3 w-3" /> URL
@@ -604,7 +621,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                 <input
                   ref={seniorFileRef}
                   type="file"
-                  accept=".xlsx,.xls,.pdf"
+                  accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                   multiple
                   onChange={handleSeniorFileUpload}
                   className="hidden"
@@ -615,8 +632,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                   onClick={() => seniorFileRef.current?.click()}
                   className="w-full"
                 >
-                  <FileSpreadsheet className="h-4 w-4 mr-2" />
-                  {seniorFiles.length > 0 ? 'Afegir més fitxers sènior' : 'Pujar classificació sènior (Excel o PDF)'}
+                  <Upload className="h-4 w-4 mr-2" />
+                  {seniorFiles.length > 0 ? 'Afegir més captures o fitxers' : 'Pujar classificació sènior (captura, Excel o PDF)'}
                 </Button>
               </TabsContent>
 
