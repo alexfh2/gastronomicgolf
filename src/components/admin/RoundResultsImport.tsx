@@ -145,8 +145,10 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         p => (r.license && p.license === r.license) ||
           p.name.toLowerCase() === r.name.toLowerCase()
       );
+      const seniorByLicense = !!r.license && seniorLicensesRef.current.has(r.license.trim().toUpperCase());
+      const seniorByName = seniorNamesRef.current.has(r.name.trim().toUpperCase());
       if (!match && !r._is_np) w.push(`"${r.name}" no trobat a la base de dades`);
-      return { ...r, _matched_player_id: match?.id };
+      return { ...r, _is_senior: r._is_senior || seniorByLicense || seniorByName, _matched_player_id: match?.id };
     });
 
     setResults(matched);
@@ -264,9 +266,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     setWarnings([]);
     setResults([]);
     setNeedsSeniorFile(false);
-    setSeniorFiles([]);
-    seniorLicensesRef.current = new Set();
-    seniorNamesRef.current = new Set();
 
     try {
       const buffer = await file.arrayBuffer();
@@ -318,9 +317,6 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
     setLoading(true);
     setWarnings([]);
     setResults([]);
-    setSeniorFiles([]);
-    seniorLicensesRef.current = new Set();
-    seniorNamesRef.current = new Set();
 
     try {
       const responses = await Promise.all(
@@ -586,8 +582,8 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
         </TabsContent>
       </Tabs>
 
-      {/* Senior classification upload — always available after loading results */}
-      {results.length > 0 && (
+      {/* Senior classification upload — available before or after loading results */}
+      {
         <Card className={needsSeniorFile ? "border-amber-300 bg-amber-50/50" : "border-muted"}>
           <CardContent className="py-3 space-y-3">
             <div className="flex items-start gap-2">
@@ -597,12 +593,18 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
                   Classificació sènior (≥ 65 anys)
                 </p>
                 <p className={`text-xs ${needsSeniorFile ? 'text-amber-700' : 'text-muted-foreground'}`}>
-                  {needsSeniorFile
+                  {results.length === 0
+                    ? "Puja aquí la captura de la classificació sènior. Després importa l'Excel o les URLs dels resultats i els jugadors es marcaran automàticament."
+                    : needsSeniorFile
                     ? "No s'ha detectat edat als resultats. Puja la classificació sènior (captura, Excel, PDF o URL) per identificar els jugadors de 65+ anys."
                     : "Si tens la llista oficial de jugadors sènior (65+), puja una captura, un Excel o un PDF per ajustar el filtrat (opcional)."}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  Identificats actualment: <span className="font-mono font-semibold">{results.filter(r => r._is_senior).length}</span> sènior
+                  {results.length > 0
+                    ? <>Identificats actualment: <span className="font-mono font-semibold">{results.filter(r => r._is_senior).length}</span> sènior</>
+                    : seniorFiles.length > 0
+                      ? <>Classificació preparada: <span className="font-mono font-semibold">{seniorLicensesRef.current.size || seniorNamesRef.current.size}</span> jugadors</>
+                      : 'Formats admesos: captura JPG/PNG/WEBP, Excel o PDF.'}
                 </p>
               </div>
             </div>
@@ -684,7 +686,7 @@ const RoundResultsImport = ({ round, onClose }: Props) => {
             )}
           </CardContent>
         </Card>
-      )}
+      }
 
 
       {/* Warnings */}
