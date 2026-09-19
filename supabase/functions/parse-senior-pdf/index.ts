@@ -52,6 +52,37 @@ function parsePlayers(raw: string): ExtractedPlayer[] {
   })
 }
 
+async function readResponseTextStream(response: Response): Promise<string> {
+  if (!response.body) return ''
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let output = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() || ''
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      const data = line.slice(6).trim()
+      if (!data || data === '[DONE]') continue
+      try {
+        const event = JSON.parse(data) as { type?: string; delta?: string; response?: { output_text?: string } }
+        if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') output += event.delta
+        if (!output && event.type === 'response.completed' && typeof event.response?.output_text === 'string') {
+          output = event.response.output_text
+        }
+      } catch {
+        // Ignore keep-alive or malformed non-data frames.
+      }
+    }
+  }
+  return output
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -94,11 +125,11 @@ Deno.serve(async (req: Request) => {
 
     const content = mimeType === 'application/pdf'
       ? [
-          { type: 'input_text', text: 'Extract every senior player shown in this golf classification PDF.' },
+          { type: 'input_text', text: 'Extract every senior player shown in this golf classification PDF and return the requested JSON array.' },
           { type: 'input_file', filename, file_data: `data:${mimeType};base64,${fileBase64}` },
         ]
       : [
-          { type: 'input_text', text: 'Extract every senior player shown in this golf classification screenshot.' },
+          { type: 'input_text', text: 'Extract every senior player shown in this golf classification screenshot and return the requested JSON array.' },
           { type: 'input_image', image_url: `data:${mimeType};base64,${fileBase64}` },
         ]
 
@@ -106,11 +137,14 @@ Deno.serve(async (req: Request) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Lovable-API-Key': lovableApiKey,
+        'X-Lovable-AIG-SDK': 'fetch',
       },
       body: JSON.stringify({
         model: 'openai/gpt-6-astra',
-        reasoning: { effort: 'low' },
+        stream: true,
+        store: false,
+        reasoning: { effort: 'low', summary: 'auto' },
         instructions: 'Extract golf senior-classification data. Return only a JSON array. Each item must have exactly two string fields: "name" and "license". Copy every visible player row, including rows where the position number is omitted because of ties. Never infer age or senior status: every player in the supplied senior classification is senior. Preserve names as printed. Remove spaces from license numbers. Do not include headings, totals, dates, scores, handicaps, or explanations.',
         input: [
           {
@@ -129,8 +163,8 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: safeMessage }, response.status)
     }
 
-    const aiResult = await response.json() as Record<string, unknown>
-    const players = parsePlayers(extractOutputText(aiResult))
+    const outputText = await readResponseTextStream(response)
+    const players = parsePlayers(outputText)
     if (players.length === 0) return jsonResponse({ error: 'No s’han trobat noms i llicències llegibles al fitxer.' }, 422)
     return jsonResponse({ players })
   } catch (err) {
