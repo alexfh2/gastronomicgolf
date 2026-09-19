@@ -72,37 +72,59 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const [{ data: resultsData, error: resultsError }, { data: playersData, error: playersError }] = await Promise.all([
-      adminClient
-      .from("results")
-      .select(`
-        id,
-        round_id,
-        player_id,
-        handicap_at_round,
-        stableford_points,
-        scratch_score,
-        category,
-        is_female_prize,
-        is_senior_prize,
-        scorecard,
-        play_date,
-        source_url,
-        created_at,
-        updated_at,
-        rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap, course_handicap_women),
-        players!inner(id, name, license, club, gender, is_senior, initial_handicap, current_handicap, photo_url, created_at, updated_at)
-      `)
-      .eq("rounds.status", "published")
-      .not("stableford_points", "is", null),
-      adminClient
-        .from("players")
-        .select("id, license, name, club, current_handicap, initial_handicap, gender, is_senior, photo_url, created_at, updated_at")
-        .order("name"),
-    ]);
+    const PAGE_SIZE = 1000;
 
-    if (resultsError) throw resultsError;
-    if (playersError) throw playersError;
+    // PostgREST caps every response at 1000 rows, so page through all rows explicitly.
+    const fetchAllResults = async () => {
+      const rows: any[] = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await adminClient
+          .from("results")
+          .select(`
+            id,
+            round_id,
+            player_id,
+            handicap_at_round,
+            stableford_points,
+            scratch_score,
+            category,
+            is_female_prize,
+            is_senior_prize,
+            scorecard,
+            play_date,
+            source_url,
+            created_at,
+            updated_at,
+            rounds!inner(status, is_master, master_coefficient, name, round_number, date, club, course, course_par, course_handicap, course_handicap_women),
+            players!inner(id, name, license, club, gender, is_senior, initial_handicap, current_handicap, photo_url, created_at, updated_at)
+          `)
+          .eq("rounds.status", "published")
+          .not("stableford_points", "is", null)
+          .order("id", { ascending: true })
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        const page = data || [];
+        rows.push(...page);
+        if (page.length < PAGE_SIZE) return rows;
+      }
+    };
+
+    const fetchAllPlayers = async () => {
+      const rows: any[] = [];
+      for (let from = 0; ; from += PAGE_SIZE) {
+        const { data, error } = await adminClient
+          .from("players")
+          .select("id, license, name, club, current_handicap, initial_handicap, gender, is_senior, photo_url, created_at, updated_at")
+          .order("name")
+          .range(from, from + PAGE_SIZE - 1);
+        if (error) throw error;
+        const page = data || [];
+        rows.push(...page);
+        if (page.length < PAGE_SIZE) return rows;
+      }
+    };
+
+    const [resultsData, playersData] = await Promise.all([fetchAllResults(), fetchAllPlayers()]);
 
     const results: RankingResultRow[] = (resultsData || []).map((row: any) => ({
       id: row.id,
