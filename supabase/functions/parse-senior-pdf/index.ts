@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const AI_GATEWAY = 'https://ai-gateway.lovable.dev'
+const AI_GATEWAY = 'https://ai.gateway.lovable.dev'
 const ALLOWED_MIME_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp'])
 
 type ExtractedPlayer = { name: string; license: string }
