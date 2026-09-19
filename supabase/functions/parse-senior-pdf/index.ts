@@ -17,22 +17,6 @@ function jsonResponse(body: unknown, status = 200) {
   })
 }
 
-function extractOutputText(result: Record<string, unknown>): string {
-  if (typeof result.output_text === 'string') return result.output_text
-  const output = Array.isArray(result.output) ? result.output : []
-  return output.flatMap((item) => {
-    if (!item || typeof item !== 'object') return []
-    const content = Array.isArray((item as { content?: unknown[] }).content)
-      ? (item as { content: unknown[] }).content
-      : []
-    return content.flatMap((part) => {
-      if (!part || typeof part !== 'object') return []
-      const text = (part as { text?: unknown }).text
-      return typeof text === 'string' ? [text] : []
-    })
-  }).join('')
-}
-
 function parsePlayers(raw: string): ExtractedPlayer[] {
   const cleaned = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim()
   const start = cleaned.indexOf('[')
