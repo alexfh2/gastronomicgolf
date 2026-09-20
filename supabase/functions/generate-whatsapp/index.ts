@@ -131,7 +131,7 @@ serve(async (req) => {
       .sort((a: any, b: any) => {
         const diff = b.scratch_points - a.scratch_points;
         if (diff !== 0) return diff;
-        return (Number(getHcp(b)) || -Infinity) - (Number(getHcp(a)) || -Infinity);
+        return (getHcp(b) ?? -Infinity) - (getHcp(a) ?? -Infinity);
       });
 
     const langLabel = language === "ca" ? "català" : "castellà";
@@ -194,7 +194,8 @@ INSTRUCCIONS:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableApiKey}`,
+        "Lovable-API-Key": lovableApiKey,
+        "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
