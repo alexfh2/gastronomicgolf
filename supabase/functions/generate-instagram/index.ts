@@ -198,8 +198,6 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 
 [Frase de tancament engrescadora sobre la propera jornada o el circuit]
 
-[Si se n'han proporcionat: Premis especials]
-
 🤝 Sponsors & Ordre de Mèrit
 @omodajaecoo.prunacargo
 @cavesbohigas
@@ -209,8 +207,6 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 @garmin_iberia
 @bonareaoficial_cat
 #GastronomicGolf #GolfiGastronomia #CircuitGastronomic
-
-https://resultatsgastronomic.com
 
 DADES DE LA JORNADA:
 - Jornada: ${round.name} (J${round.round_number})
@@ -240,15 +236,15 @@ INSTRUCCIONS:
 - Utilitza emojis de manera similar a l'estructura de referència
 - Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats (🥇🥈🥉)
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a (🥇)
-- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades, en aquest ordre exacte: Scratch, Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
+- OBLIGATORI: després de la introducció, escriu cinc blocs consecutius i identificables, sense mencionar cap categoria abans del seu bloc: 1) Scratch, 2) Hàndicap Baix, 3) Hàndicap Alt, 4) Femenina, 5) Sènior
 - IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Inclou SEMPRE els sponsors i hashtags al final
 - El to ha de ser celebratori i engrescador
 - Modalitat STABLEFORD: a Scratch parla de punts Stableford Scratch, mai de cops totals
 - Si és jornada MASTER, destaca-ho
 - Si hi ha patrocinador, menciona'l
-- Si s'han proporcionat premis especials, afegeix una secció pròpia després de Sènior i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
-- Després de categories i premis, mantén sponsors i hashtags, i acaba SEMPRE amb el web exacte https://resultatsgastronomic.com sense afegir cap text després
+- No escriguis premis especials ni cap adreça web: el sistema afegirà els premis després de Sènior i el web al final
+- Després de les categories, mantén sponsors i hashtags
 - Retorna NOMÉS el text del post, sense JSON ni markdown
 
 Retorna el text complet del post d'Instagram.`;
@@ -286,6 +282,8 @@ Retorna el text complet del post d'Instagram.`;
     if (content.startsWith("```")) {
       content = content.replace(/^```(?:\w+)?\n?/, "").replace(/\n?```$/, "");
     }
+    const prizesBlock = special_prizes ? `\n\n🏅 *Premis especials*\n${special_prizes}` : "";
+    content = `${content}${prizesBlock}\n\nhttps://resultatsgastronomic.com`;
 
     return new Response(JSON.stringify({ success: true, post: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

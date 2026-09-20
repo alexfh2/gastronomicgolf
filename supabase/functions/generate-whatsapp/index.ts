@@ -169,9 +169,6 @@ En la classificació Hàndicap Baix (≤15), [NOM] s'ha imposat amb [X] punts St
 En la classificació Hàndicap Alt (15.1–36), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X]).
 ${females.length > 0 ? `\nEn la classificació Femenina, [NOM] s'ha imposat amb [X] punts.` : ""}
 ${seniors.length > 0 ? `\nEn la classificació Sènior (+65), [NOM] s'ha imposat amb [X] punts.` : ""}
-${special_prizes ? `\n\n*Premis especials*\n${special_prizes}` : ""}
-
-Les classificacions completes i estadístiques detallades es poden consultar a: ${publishedUrl}
 ---
 
 DADES REALS:
@@ -192,13 +189,12 @@ INSTRUCCIONS:
 - Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories, premis especials si n'hi ha i web final
 - Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
-- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades, en aquest ordre exacte: Scratch, Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
+- OBLIGATORI: després de la introducció, escriu cinc blocs consecutius i identificables, sense mencionar cap categoria abans del seu bloc: 1) Scratch, 2) Hàndicap Baix, 3) Hàndicap Alt, 4) Femenina, 5) Sènior
 - IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Utilitza format *negretes* de WhatsApp per al títol i noms de categories
 - To formal i informatiu, sense emojis excessius (només algun puntual si escau)
 - A Scratch, indica SEMPRE punts Stableford Scratch, MAI cops totals
-- Si s'han proporcionat premis especials, afegeix una secció pròpia *Premis especials* després de Sènior i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
-- Acaba SEMPRE el missatge amb el web exacte ${publishedUrl}, sense afegir cap text després
+- No escriguis premis especials ni cap adreça web: el sistema els afegirà després de la classificació Sènior
 - Retorna NOMÉS el text del missatge, sense JSON ni markdown`;
 
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -232,6 +228,8 @@ INSTRUCCIONS:
     if (content.startsWith("```")) {
       content = content.replace(/^```(?:\w+)?\n?/, "").replace(/\n?```$/, "");
     }
+    const prizesBlock = special_prizes ? `\n\n*Premis especials*\n${special_prizes}` : "";
+    content = `${content}${prizesBlock}\n\n${publishedUrl}`;
 
     return new Response(JSON.stringify({ success: true, message: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

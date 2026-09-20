@@ -230,7 +230,6 @@ DADES DE LA JORNADA:
 - Patrocinador: ${sponsor || 'cap'}
 ${round.is_master ? '- JORNADA MASTER (punts x1.25)' : ''}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
-${special_prizes ? `- PREMIS ESPECIALS A INCLOURE ÍNTEGRAMENT:\n${special_prizes}` : ''}
 ${(() => {
   const w = weather_conditions || {};
   const lines: string[] = [];
@@ -259,15 +258,13 @@ Total participants: ${results.length}
 INSTRUCCIONS:
 - ABSOLUTAMENT CAP EMOJI. Ni un sol emoji en tot el text. Això és una nota de premsa professional per enviar a diaris i mitjans de comunicació.
 - To formal, sobri i periodístic. Sense exclamacions excessives.
-- Segueix SEMPRE aquest ordre exacte després de la introducció: Scratch, Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i, al final, Premis especials si n'hi ha
+- Després de la introducció, escriu cinc blocs consecutius i identificables, sense mencionar cap categoria abans del seu bloc: 1) Scratch, 2) Hàndicap Baix, 3) Hàndicap Alt, 4) Femenina, 5) Sènior
 - Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats amb comentaris personalitzats
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
 - OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades, en aquest ordre exacte: Scratch, Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
 - Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
 - A Scratch parla sempre de punts Stableford Scratch, mai de cops totals
-- Si s'han proporcionat premis especials, crea una secció pròpia titulada "Premis especials" i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
-- La secció "Premis especials" ha d'anar després de la classificació Sènior i abans del web final
-- Acaba SEMPRE el cos de la notícia amb el web exacte ${publishedUrl}, sense afegir cap text després
+- No escriguis premis especials ni cap adreça web: el sistema els afegirà després de la classificació Sènior
 - Si s'han proporcionat condicions meteorològiques, velocitat de greens o vent, integra-les amb naturalitat a la narració quan siguin rellevants (especialment si han estat dures: pluja, vent fort, greens molt ràpids, calor, etc.). Si són condicions normals, pots ometre-les o mencionar-les breument. No facis una secció separada de meteorologia.
 - Genera un títol atractiu
 - Un subtítol complementari
@@ -319,6 +316,9 @@ Retorna EXCLUSIVAMENT un JSON vàlid amb aquest format:
     }
     
     const news = JSON.parse(cleaned);
+    const generatedBody = typeof news.body === "string" ? news.body.trim() : "";
+    const prizesBlock = special_prizes ? `\n\nPremis especials\n${special_prizes}` : "";
+    news.body = `${generatedBody}${prizesBlock}\n\n${publishedUrl}`;
 
     return new Response(JSON.stringify({ success: true, news }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
