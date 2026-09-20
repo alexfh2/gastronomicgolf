@@ -147,7 +147,7 @@ serve(async (req) => {
       });
 
     const langLabel = language === "ca" ? "català" : "castellà";
-    const publishedUrl = "https://resultatsgastronomic.com";
+    const publishedUrl = "https://resultatsgastronomicgolf.com";
 
     const prompt = `Genera un missatge de WhatsApp en ${langLabel} per compartir els RESULTATS d'una jornada de golf del circuit Gastronòmic Golf Experience.
 

@@ -283,7 +283,7 @@ Retorna el text complet del post d'Instagram.`;
       content = content.replace(/^```(?:\w+)?\n?/, "").replace(/\n?```$/, "");
     }
     const prizesBlock = special_prizes ? `\n\n🏅 *Premis especials*\n${special_prizes}` : "";
-    content = `${content}${prizesBlock}\n\nhttps://resultatsgastronomic.com`;
+    content = `${content}${prizesBlock}\n\nhttps://resultatsgastronomicgolf.com`;
 
     return new Response(JSON.stringify({ success: true, post: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -183,7 +183,7 @@ serve(async (req) => {
       ? 'nota de premsa esportiva, formal i professional' 
       : 'engrescador per xarxes socials (WhatsApp/Instagram), amb emojis i to proper';
 
-    const publishedUrl = "https://resultatsgastronomic.com";
+    const publishedUrl = "https://resultatsgastronomicgolf.com";
     const prompt = `Genera una notícia esportiva de golf en ${langLabel} amb to de ${toneLabel}.
 IMPORTANT: La competició és en modalitat STABLEFORD. Inclou la classificació Scratch, expressada en punts Stableford Scratch; no són cops totals.
 El circuit és el "Gastronòmic Golf Experience" — un circuit de golf amb gastronomia i grans premis.
