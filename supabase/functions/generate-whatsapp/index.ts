@@ -113,12 +113,33 @@ serve(async (req) => {
       .filter((r: any) => r.players?.is_senior === true)
       .sort(sortByPointsThenLowHcp);
 
+    // Scratch: Stableford brut, igual que a la classificació pública. En empat, guanya l'HCP més alt.
+    const coursePar = Array.isArray(round.course_par) ? round.course_par as number[] : null;
+    const getScratchPoints = (r: any): number | null => {
+      const scores = Array.isArray(r.scorecard)
+        ? r.scorecard
+        : Array.isArray(r.scorecard?.scores) ? r.scorecard.scores : null;
+      if (!scores || !coursePar || scores.length !== coursePar.length) return null;
+      return scores.reduce((total: number, score: number | null, index: number) => {
+        if (score == null || score === 0) return total;
+        return total + Math.max(0, 2 - (score - coursePar[index]));
+      }, 0);
+    };
+    const scratch = results
+      .map((r: any) => ({ ...r, scratch_points: getScratchPoints(r) }))
+      .filter((r: any) => r.scratch_points != null)
+      .sort((a: any, b: any) => {
+        const diff = b.scratch_points - a.scratch_points;
+        if (diff !== 0) return diff;
+        return (Number(getHcp(b)) || -Infinity) - (Number(getHcp(a)) || -Infinity);
+      });
+
     const langLabel = language === "ca" ? "català" : "castellà";
     const publishedUrl = "https://verdant-stats.lovable.app/rankings";
 
     const prompt = `Genera un missatge de WhatsApp en ${langLabel} per compartir els RESULTATS d'una jornada de golf del circuit Gastronòmic Golf Experience.
 
-IMPORTANT: La competició és en modalitat STABLEFORD. Tots els resultats són en PUNTS STABLEFORD, NO en cops. No mencionIs "cops" ni "scratch".
+IMPORTANT: La competició és en modalitat STABLEFORD. Inclou també la classificació Scratch, sempre expressada en PUNTS STABLEFORD SCRATCH, mai en cops totals.
 
 TEXT DE REFERÈNCIA (adapta l'estil però amb dades Stableford):
 ---
@@ -136,6 +157,8 @@ En la classificació Hàndicap Alt (15.1–36), [NOM] s'ha imposat amb [X] punts
 ${females.length > 0 ? `\nEn la classificació Femenina, [NOM] s'ha imposat amb [X] punts.` : ""}
 ${seniors.length > 0 ? `\nEn la classificació Sènior (+65), [NOM] s'ha imposat amb [X] punts.` : ""}
 
+En la classificació Scratch, [NOM] s'ha imposat amb [X] punts Stableford Scratch, seguit de [NOM] ([X]) i [NOM] ([X]).
+
 Les classificacions completes i estadístiques detallades es poden consultar a: ${publishedUrl}
 ---
 
@@ -148,17 +171,19 @@ ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 
 ${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — Guanyadora:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ""}
 ${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — Guanyador:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ""}
+${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 
 Total participants: ${results.length}
 
 INSTRUCCIONS:
 - Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories, link final
-- Per a Hàndicap Baix i Alt: inclou els 3 primers classificats
+- Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
+- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
 - IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Utilitza format *negretes* de WhatsApp per al títol i noms de categories
 - To formal i informatiu, sense emojis excessius (només algun puntual si escau)
-- SEMPRE punts Stableford, MAI cops ni scratch
+- A Scratch, indica SEMPRE punts Stableford Scratch, MAI cops totals
 - Inclou el link a les classificacions al final: ${publishedUrl}
 - Retorna NOMÉS el text del missatge, sense JSON ni markdown`;
 
@@ -172,7 +197,8 @@ INSTRUCCIONS:
         Authorization: `Bearer ${lovableApiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: "Ets un redactor esportiu de golf. Generes missatges de WhatsApp clars, formals i concisos." },
           { role: "user", content: prompt },

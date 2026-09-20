@@ -113,8 +113,28 @@ serve(async (req) => {
       .filter((r: any) => r.players?.is_senior === true)
       .sort(sortByPointsThenLowHcp);
 
+    // Scratch: Stableford brut, igual que a la classificació pública. En empat, guanya l'HCP més alt.
+    const coursePar = Array.isArray(round.course_par) ? round.course_par as number[] : null;
+    const getScratchPoints = (r: any): number | null => {
+      const scores = Array.isArray(r.scorecard)
+        ? r.scorecard
+        : Array.isArray(r.scorecard?.scores) ? r.scorecard.scores : null;
+      if (!scores || !coursePar || scores.length !== coursePar.length) return null;
+      return scores.reduce((total: number, score: number | null, index: number) => {
+        if (score == null || score === 0) return total;
+        return total + Math.max(0, 2 - (score - coursePar[index]));
+      }, 0);
+    };
+    const scratch = results
+      .map((r: any) => ({ ...r, scratch_points: getScratchPoints(r) }))
+      .filter((r: any) => r.scratch_points != null)
+      .sort((a: any, b: any) => {
+        const diff = b.scratch_points - a.scratch_points;
+        if (diff !== 0) return diff;
+        return (Number(getHcp(b)) || -Infinity) - (Number(getHcp(a)) || -Infinity);
+      });
+
     // Notable performances (birdies)
-    const coursePar = round.course_par as number[] | null;
     let notablePerformances = "";
     if (coursePar && Array.isArray(coursePar)) {
       results.forEach((r: any) => {
@@ -157,6 +177,11 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 👴 *Classificació Sènior (+65)*
 🥇 [Nom] — [Punts] pts
 
+⛳ *Classificació Scratch*
+🥇 [Nom] — [Punts Stableford Scratch] pts
+🥈 [Nom] — [Punts Stableford Scratch] pts
+🥉 [Nom] — [Punts Stableford Scratch] pts
+
 [Si hi ha actuacions destacades com birdies, mencionar-les amb emojis]
 
 [Frase de tancament engrescadora sobre la propera jornada o el circuit]
@@ -188,18 +213,20 @@ ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 
 ${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — Guanyadora:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ""}
 ${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — Guanyador:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ""}
+${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ""}
 
 Total participants: ${results.length}
 
 INSTRUCCIONS:
 - Utilitza emojis de manera similar a l'estructura de referència
-- Per a Hàndicap Baix i Alt: inclou els 3 primers classificats (🥇🥈🥉)
+- Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats (🥇🥈🥉)
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a (🥇)
+- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
 - IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Inclou SEMPRE els sponsors i hashtags al final
 - El to ha de ser celebratori i engrescador
-- Modalitat STABLEFORD, NO mencionIs resultats scratch
+- Modalitat STABLEFORD: a Scratch parla de punts Stableford Scratch, mai de cops totals
 - Si és jornada MASTER, destaca-ho
 - Si hi ha patrocinador, menciona'l
 - Retorna NOMÉS el text del post, sense JSON ni markdown
@@ -216,7 +243,8 @@ Retorna el text complet del post d'Instagram.`;
         Authorization: `Bearer ${lovableApiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: "Ets un community manager especialitzat en golf i gastronomia. Generes posts d'Instagram atractius i engrescadors amb emojis." },
           { role: "user", content: prompt },
