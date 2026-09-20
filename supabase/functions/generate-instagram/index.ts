@@ -173,6 +173,11 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 
 🏆 RESULTATS
 
+⛳ *Classificació Scratch*
+🥇 [Nom] — [Punts Stableford Scratch] pts
+🥈 [Nom] — [Punts Stableford Scratch] pts
+🥉 [Nom] — [Punts Stableford Scratch] pts
+
 🏌️ *Hàndicap Baix*
 🥇 [Nom] — [Punts] pts
 🥈 [Nom] — [Punts] pts
@@ -188,11 +193,6 @@ ESTRUCTURA DE REFERÈNCIA (adapta-la per a RESULTATS, no per a convocatòria):
 
 👴 *Classificació Sènior (+65)*
 🥇 [Nom] — [Punts] pts
-
-⛳ *Classificació Scratch*
-🥇 [Nom] — [Punts Stableford Scratch] pts
-🥈 [Nom] — [Punts Stableford Scratch] pts
-🥉 [Nom] — [Punts Stableford Scratch] pts
 
 [Si hi ha actuacions destacades com birdies, mencionar-les amb emojis]
 
@@ -218,6 +218,8 @@ DADES DE LA JORNADA:
 ${round.is_master ? "- JORNADA MASTER (punts x1.25)" : ""}
 ${special_prizes ? `- PREMIS ESPECIALS A INCLOURE ÍNTEGRAMENT:\n${special_prizes}` : ""}
 
+${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0):
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
@@ -226,7 +228,6 @@ ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 
 ${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — Guanyadora:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ""}
 ${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — Guanyador:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ""}
-${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ""}
 
 Total participants: ${results.length}
@@ -235,14 +236,15 @@ INSTRUCCIONS:
 - Utilitza emojis de manera similar a l'estructura de referència
 - Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats (🥇🥈🥉)
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a (🥇)
-- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
+- OBLIGATORI: després de la introducció, escriu cinc blocs consecutius i identificables, sense mencionar cap categoria abans del seu bloc: 1) Scratch, 2) Hàndicap Baix, 3) Hàndicap Alt, 4) Femenina, 5) Sènior
 - IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Inclou SEMPRE els sponsors i hashtags al final
 - El to ha de ser celebratori i engrescador
 - Modalitat STABLEFORD: a Scratch parla de punts Stableford Scratch, mai de cops totals
 - Si és jornada MASTER, destaca-ho
 - Si hi ha patrocinador, menciona'l
-- Si s'han proporcionat premis especials, afegeix una secció pròpia de premis i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
+- No escriguis premis especials ni cap adreça web: el sistema afegirà els premis després de Sènior i el web al final
+- Després de les categories, mantén sponsors i hashtags
 - Retorna NOMÉS el text del post, sense JSON ni markdown
 
 Retorna el text complet del post d'Instagram.`;
@@ -280,6 +282,8 @@ Retorna el text complet del post d'Instagram.`;
     if (content.startsWith("```")) {
       content = content.replace(/^```(?:\w+)?\n?/, "").replace(/\n?```$/, "");
     }
+    const prizesBlock = special_prizes ? `\n\n🏅 *Premis especials*\n${special_prizes}` : "";
+    content = `${content}${prizesBlock}\n\nhttps://resultatsgastronomic.com`;
 
     return new Response(JSON.stringify({ success: true, post: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -147,7 +147,7 @@ serve(async (req) => {
       });
 
     const langLabel = language === "ca" ? "català" : "castellà";
-    const publishedUrl = "https://verdant-stats.lovable.app/rankings";
+    const publishedUrl = "https://resultatsgastronomic.com";
 
     const prompt = `Genera un missatge de WhatsApp en ${langLabel} per compartir els RESULTATS d'una jornada de golf del circuit Gastronòmic Golf Experience.
 
@@ -162,20 +162,18 @@ RESULTATS DE LA ${round.name} DEL GASTRONÒMIC GOLF EXPERIENCE ${season?.year ||
 El ${round.club || "club"} ha acollit la ${round.name} del Gastronòmic Golf Experience, disputada el ${round.date}, amb la participació de ${results.length} jugadors.
 ${round.sponsor ? `Jornada patrocinada per ${round.sponsor}.` : ""}
 ${round.is_master ? "⭐ JORNADA MASTER — Punts x1.25!" : ""}
-${special_prizes ? `\nPREMIS ESPECIALS:\n${special_prizes}` : ""}
+En la classificació Scratch, [NOM] s'ha imposat amb [X] punts Stableford Scratch, seguit de [NOM] ([X]) i [NOM] ([X]).
 
 En la classificació Hàndicap Baix (≤15), [NOM] s'ha imposat amb [X] punts Stableford, seguit de [NOM] ([X]) i [NOM] ([X]).
 
 En la classificació Hàndicap Alt (15.1–36), [NOM] s'ha imposat amb [X] punts, seguit de [NOM] ([X]) i [NOM] ([X]).
 ${females.length > 0 ? `\nEn la classificació Femenina, [NOM] s'ha imposat amb [X] punts.` : ""}
 ${seniors.length > 0 ? `\nEn la classificació Sènior (+65), [NOM] s'ha imposat amb [X] punts.` : ""}
-
-En la classificació Scratch, [NOM] s'ha imposat amb [X] punts Stableford Scratch, seguit de [NOM] ([X]) i [NOM] ([X]).
-
-Les classificacions completes i estadístiques detallades es poden consultar a: ${publishedUrl}
 ---
 
 DADES REALS:
+${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
+
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
 
@@ -184,21 +182,19 @@ ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 
 ${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — Guanyadora:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ""}
 ${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — Guanyador:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ""}
-${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join("\n")}` : ""}
 
 Total participants: ${results.length}
 
 INSTRUCCIONS:
-- Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories, link final
+- Segueix EXACTAMENT l'estructura del text de referència: títol, introducció, resultats per categories, premis especials si n'hi ha i web final
 - Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
-- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
+- OBLIGATORI: després de la introducció, escriu cinc blocs consecutius i identificables, sense mencionar cap categoria abans del seu bloc: 1) Scratch, 2) Hàndicap Baix, 3) Hàndicap Alt, 4) Femenina, 5) Sènior
 - IMPORTANT: Deixa una línia en blanc entre cada secció/categoria per facilitar la lectura
 - Utilitza format *negretes* de WhatsApp per al títol i noms de categories
 - To formal i informatiu, sense emojis excessius (només algun puntual si escau)
 - A Scratch, indica SEMPRE punts Stableford Scratch, MAI cops totals
-- Si s'han proporcionat premis especials, afegeix una secció pròpia *Premis especials* i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
-- Inclou el link a les classificacions al final: ${publishedUrl}
+- No escriguis premis especials ni cap adreça web: el sistema els afegirà després de la classificació Sènior
 - Retorna NOMÉS el text del missatge, sense JSON ni markdown`;
 
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -232,6 +228,8 @@ INSTRUCCIONS:
     if (content.startsWith("```")) {
       content = content.replace(/^```(?:\w+)?\n?/, "").replace(/\n?```$/, "");
     }
+    const prizesBlock = special_prizes ? `\n\n*Premis especials*\n${special_prizes}` : "";
+    content = `${content}${prizesBlock}\n\n${publishedUrl}`;
 
     return new Response(JSON.stringify({ success: true, message: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
