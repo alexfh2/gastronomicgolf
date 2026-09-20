@@ -183,6 +183,7 @@ serve(async (req) => {
       ? 'nota de premsa esportiva, formal i professional' 
       : 'engrescador per xarxes socials (WhatsApp/Instagram), amb emojis i to proper';
 
+    const publishedUrl = "https://resultatsgastronomic.com";
     const prompt = `Genera una notícia esportiva de golf en ${langLabel} amb to de ${toneLabel}.
 IMPORTANT: La competició és en modalitat STABLEFORD. Inclou la classificació Scratch, expressada en punts Stableford Scratch; no són cops totals.
 El circuit és el "Gastronòmic Golf Experience" — un circuit de golf amb gastronomia i grans premis.
@@ -190,6 +191,9 @@ El circuit és el "Gastronòmic Golf Experience" — un circuit de golf amb gast
 TEXT DE REFERÈNCIA D'ESTIL (adapta'l al golf i al Gastronòmic Golf Experience):
 ---
 Després de [X] intenses jornades, la classificació s'està consolidant i ja es perfilen els jugadors que lluitaran pel podi aquesta temporada.
+
+Classificació Scratch:
+[Top 3, en punts Stableford Scratch]
 
 Hàndicap Baix: la batalla dels millors!
 La competició no pot estar més ajustada. [Descripció del líder i perseguidors]
@@ -210,12 +214,11 @@ Classificació Femenina:
 Classificació Sènior (+65):
 [Mateixa estructura amb top 3]
 
-Classificació Scratch:
-[Mateixa estructura amb top 3, en punts Stableford Scratch]
-
 [Si hi ha actuacions destacades: birdies, hole-in-ones, etc.]
 
-Per a més detalls i classificacions actualitzades, visiteu la nostra web.
+[Si se n'han proporcionat: Premis especials]
+
+Per a més detalls i classificacions actualitzades: ${publishedUrl}
 ---
 
 DADES DE LA JORNADA:
@@ -239,6 +242,8 @@ ${(() => {
   return lines.length ? `- Condicions meteorològiques i del camp:\n${lines.join('\n')}` : '';
 })()}
 
+${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH — ${scratch.length} jugadors:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
+
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0) — ${hcpLow.length} jugadors:
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join('\n')}
 
@@ -247,7 +252,6 @@ ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 
 ${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ''}
 ${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ''}
-${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH — ${scratch.length} jugadors:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 
 Total participants: ${results.length}
@@ -255,13 +259,15 @@ Total participants: ${results.length}
 INSTRUCCIONS:
 - ABSOLUTAMENT CAP EMOJI. Ni un sol emoji en tot el text. Això és una nota de premsa professional per enviar a diaris i mitjans de comunicació.
 - To formal, sobri i periodístic. Sense exclamacions excessives.
-- Segueix l'estructura: introducció, després cada categoria amb descripció + top 3 (Hcp Baix, Hcp Alt i Scratch) o guanyador/a (Femenina i Sènior)
+- Segueix SEMPRE aquest ordre exacte després de la introducció: Scratch, Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i, al final, Premis especials si n'hi ha
 - Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats amb comentaris personalitzats
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
-- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
+- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades, en aquest ordre exacte: Scratch, Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
 - Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
 - A Scratch parla sempre de punts Stableford Scratch, mai de cops totals
 - Si s'han proporcionat premis especials, crea una secció pròpia titulada "Premis especials" i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
+- La secció "Premis especials" ha d'anar després de la classificació Sènior i abans del web final
+- Acaba SEMPRE el cos de la notícia amb el web exacte ${publishedUrl}, sense afegir cap text després
 - Si s'han proporcionat condicions meteorològiques, velocitat de greens o vent, integra-les amb naturalitat a la narració quan siguin rellevants (especialment si han estat dures: pluja, vent fort, greens molt ràpids, calor, etc.). Si són condicions normals, pots ometre-les o mencionar-les breument. No facis una secció separada de meteorologia.
 - Genera un títol atractiu
 - Un subtítol complementari
