@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +34,18 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    const { round_id, language } = await req.json();
+    const parsedBody = z.object({
+      round_id: z.string().uuid(),
+      language: z.enum(["ca", "es"]),
+      special_prizes: z.string().trim().max(2000).nullable().optional(),
+    }).safeParse(await req.json());
+    if (!parsedBody.success) {
+      return new Response(JSON.stringify({ success: false, error: parsedBody.error.flatten().fieldErrors }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { round_id, language, special_prizes } = parsedBody.data;
 
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -204,6 +216,7 @@ DADES DE LA JORNADA:
 - Data: ${round.date}
 - Patrocinador: ${round.sponsor || "cap"}
 ${round.is_master ? "- JORNADA MASTER (punts x1.25)" : ""}
+${special_prizes ? `- PREMIS ESPECIALS A INCLOURE ÍNTEGRAMENT:\n${special_prizes}` : ""}
 
 CLASSIFICACIÓ HANDICAP BAIX (≤15.0):
 ${hcpLow.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.stableford_points} pts (Hcp ${r.handicap_at_round})`).join("\n")}
@@ -229,6 +242,7 @@ INSTRUCCIONS:
 - Modalitat STABLEFORD: a Scratch parla de punts Stableford Scratch, mai de cops totals
 - Si és jornada MASTER, destaca-ho
 - Si hi ha patrocinador, menciona'l
+- Si s'han proporcionat premis especials, afegeix una secció pròpia de premis i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
 - Retorna NOMÉS el text del post, sense JSON ni markdown
 
 Retorna el text complet del post d'Instagram.`;

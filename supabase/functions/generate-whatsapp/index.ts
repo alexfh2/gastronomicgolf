@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +34,18 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    const { round_id, language } = await req.json();
+    const parsedBody = z.object({
+      round_id: z.string().uuid(),
+      language: z.enum(["ca", "es"]),
+      special_prizes: z.string().trim().max(2000).nullable().optional(),
+    }).safeParse(await req.json());
+    if (!parsedBody.success) {
+      return new Response(JSON.stringify({ success: false, error: parsedBody.error.flatten().fieldErrors }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { round_id, language, special_prizes } = parsedBody.data;
 
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -150,6 +162,7 @@ RESULTATS DE LA ${round.name} DEL GASTRONÒMIC GOLF EXPERIENCE ${season?.year ||
 El ${round.club || "club"} ha acollit la ${round.name} del Gastronòmic Golf Experience, disputada el ${round.date}, amb la participació de ${results.length} jugadors.
 ${round.sponsor ? `Jornada patrocinada per ${round.sponsor}.` : ""}
 ${round.is_master ? "⭐ JORNADA MASTER — Punts x1.25!" : ""}
+${special_prizes ? `\nPREMIS ESPECIALS:\n${special_prizes}` : ""}
 
 En la classificació Hàndicap Baix (≤15), [NOM] s'ha imposat amb [X] punts Stableford, seguit de [NOM] ([X]) i [NOM] ([X]).
 
@@ -184,6 +197,7 @@ INSTRUCCIONS:
 - Utilitza format *negretes* de WhatsApp per al títol i noms de categories
 - To formal i informatiu, sense emojis excessius (només algun puntual si escau)
 - A Scratch, indica SEMPRE punts Stableford Scratch, MAI cops totals
+- Si s'han proporcionat premis especials, afegeix una secció pròpia *Premis especials* i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
 - Inclou el link a les classificacions al final: ${publishedUrl}
 - Retorna NOMÉS el text del missatge, sense JSON ni markdown`;
 
