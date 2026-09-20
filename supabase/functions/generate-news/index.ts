@@ -122,8 +122,28 @@ serve(async (req) => {
       .filter((r: any) => r.players?.is_senior === true)
       .sort(sortByPointsThenLowHcp);
 
+    // Scratch: Stableford brut, igual que a la classificació pública. En empat, guanya l'HCP més alt.
+    const coursePar = Array.isArray(round.course_par) ? round.course_par as number[] : null;
+    const getScratchPoints = (r: any): number | null => {
+      const scores = Array.isArray(r.scorecard)
+        ? r.scorecard
+        : Array.isArray(r.scorecard?.scores) ? r.scorecard.scores : null;
+      if (!scores || !coursePar || scores.length !== coursePar.length) return null;
+      return scores.reduce((total: number, score: number | null, index: number) => {
+        if (score == null || score === 0) return total;
+        return total + Math.max(0, 2 - (score - coursePar[index]));
+      }, 0);
+    };
+    const scratch = results
+      .map((r: any) => ({ ...r, scratch_points: getScratchPoints(r) }))
+      .filter((r: any) => r.scratch_points != null)
+      .sort((a: any, b: any) => {
+        const diff = b.scratch_points - a.scratch_points;
+        if (diff !== 0) return diff;
+        return (getHcp(b) ?? -Infinity) - (getHcp(a) ?? -Infinity);
+      });
+
     // Notable scorecards (birdies)
-    const coursePar = round.course_par as number[] | null;
     let notablePerformances = '';
     if (coursePar && Array.isArray(coursePar)) {
       results.forEach((r: any) => {
@@ -142,7 +162,7 @@ serve(async (req) => {
       : 'engrescador per xarxes socials (WhatsApp/Instagram), amb emojis i to proper';
 
     const prompt = `Genera una notícia esportiva de golf en ${langLabel} amb to de ${toneLabel}.
-IMPORTANT: La competició és en modalitat STABLEFORD. NO mencionis resultats scratch ni cops totals. Tots els resultats són en punts Stableford.
+IMPORTANT: La competició és en modalitat STABLEFORD. Inclou la classificació Scratch, expressada en punts Stableford Scratch; no són cops totals.
 El circuit és el "Gastronòmic Golf Experience" — un circuit de golf amb gastronomia i grans premis.
 
 TEXT DE REFERÈNCIA D'ESTIL (adapta'l al golf i al Gastronòmic Golf Experience):
@@ -167,6 +187,9 @@ Classificació Femenina:
 
 Classificació Sènior (+65):
 [Mateixa estructura amb top 3]
+
+Classificació Scratch:
+[Mateixa estructura amb top 3, en punts Stableford Scratch]
 
 [Si hi ha actuacions destacades: birdies, hole-in-ones, etc.]
 
@@ -201,6 +224,7 @@ ${hcpHigh.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} �
 
 ${females.length > 0 ? `CLASSIFICACIÓ FEMENINA — ${females.length} jugadores:\n1. ${females[0].players?.name} — ${females[0].stableford_points} pts (Hcp ${females[0].handicap_at_round})` : ''}
 ${seniors.length > 0 ? `CLASSIFICACIÓ SÈNIOR (+65) — ${seniors.length} jugadors:\n1. ${seniors[0].players?.name} — ${seniors[0].stableford_points} pts (Hcp ${seniors[0].handicap_at_round})` : ''}
+${scratch.length > 0 ? `CLASSIFICACIÓ SCRATCH — ${scratch.length} jugadors:\n${scratch.slice(0, 3).map((r: any, i: number) => `${i + 1}. ${r.players?.name} — ${r.scratch_points} pts Stableford Scratch (Hcp ${r.handicap_at_round})`).join('\n')}` : ''}
 ${notablePerformances ? `ACTUACIONS DESTACADES: ${notablePerformances}` : ''}
 
 Total participants: ${results.length}
@@ -208,12 +232,12 @@ Total participants: ${results.length}
 INSTRUCCIONS:
 - ABSOLUTAMENT CAP EMOJI. Ni un sol emoji en tot el text. Això és una nota de premsa professional per enviar a diaris i mitjans de comunicació.
 - To formal, sobri i periodístic. Sense exclamacions excessives.
-- Segueix l'estructura: introducció, després cada categoria amb descripció + top 3 (Hcp Baix i Alt) o guanyador/a (Femenina i Sènior)
-- Per a Hàndicap Baix i Hàndicap Alt: inclou els 3 primers classificats amb comentaris personalitzats
+- Segueix l'estructura: introducció, després cada categoria amb descripció + top 3 (Hcp Baix, Hcp Alt i Scratch) o guanyador/a (Femenina i Sènior)
+- Per a Hàndicap Baix, Hàndicap Alt i Scratch: inclou els 3 primers classificats amb comentaris personalitzats
 - Per a Femenina i Sènior: menciona NOMÉS el/la guanyador/a
-- OBLIGATORI: inclou SEMPRE les 4 categories si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina i Sènior
+- OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
 - Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
-- NO mencionIs resultats scratch ni cops totals
+- A Scratch parla sempre de punts Stableford Scratch, mai de cops totals
 - Si s'han proporcionat condicions meteorològiques, velocitat de greens o vent, integra-les amb naturalitat a la narració quan siguin rellevants (especialment si han estat dures: pluja, vent fort, greens molt ràpids, calor, etc.). Si són condicions normals, pots ometre-les o mencionar-les breument. No facis una secció separada de meteorologia.
 - Genera un títol atractiu
 - Un subtítol complementari
@@ -237,10 +261,12 @@ Retorna EXCLUSIVAMENT un JSON vàlid amb aquest format:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableApiKey}`,
+        "Lovable-API-Key": lovableApiKey,
+        "X-Lovable-AIG-SDK": "fetch",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
         messages: [
           { role: "system", content: "Ets un redactor esportiu especialitzat en golf. Respon SEMPRE amb JSON vàlid, sense markdown." },
           { role: "user", content: prompt },
