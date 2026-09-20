@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +34,28 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    const { round_id, language, tone, sponsor, special_mention, weather_conditions } = await req.json();
+    const parsedBody = z.object({
+      round_id: z.string().uuid(),
+      language: z.enum(["ca", "es"]),
+      tone: z.enum(["press", "whatsapp", "instagram"]),
+      sponsor: z.string().trim().max(500).nullable().optional(),
+      special_mention: z.string().trim().max(2000).nullable().optional(),
+      special_prizes: z.string().trim().max(2000).nullable().optional(),
+      weather_conditions: z.object({
+        friday: z.string().max(500).nullable().optional(),
+        saturday: z.string().max(500).nullable().optional(),
+        sunday: z.string().max(500).nullable().optional(),
+        green_speed: z.string().max(500).nullable().optional(),
+        wind: z.string().max(500).nullable().optional(),
+      }).optional(),
+    }).safeParse(await req.json());
+    if (!parsedBody.success) {
+      return new Response(JSON.stringify({ success: false, error: parsedBody.error.flatten().fieldErrors }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { round_id, language, tone, sponsor, special_mention, special_prizes, weather_conditions } = parsedBody.data;
 
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -205,6 +227,7 @@ DADES DE LA JORNADA:
 - Patrocinador: ${sponsor || 'cap'}
 ${round.is_master ? '- JORNADA MASTER (punts x1.25)' : ''}
 ${special_mention ? `- Menció especial: ${special_mention}` : ''}
+${special_prizes ? `- PREMIS ESPECIALS A INCLOURE ÍNTEGRAMENT:\n${special_prizes}` : ''}
 ${(() => {
   const w = weather_conditions || {};
   const lines: string[] = [];
@@ -238,6 +261,7 @@ INSTRUCCIONS:
 - OBLIGATORI: inclou SEMPRE les 5 classificacions si hi ha dades: Hàndicap Baix, Hàndicap Alt, Femenina, Sènior i Scratch
 - Separa cada secció/categoria amb una línia en blanc per facilitar la lectura
 - A Scratch parla sempre de punts Stableford Scratch, mai de cops totals
+- Si s'han proporcionat premis especials, crea una secció pròpia titulada "Premis especials" i inclou-los TOTS. No inventis, ometis ni alteris noms, forats o tipus de premi. Si no n'hi ha, no mencionis aquesta secció.
 - Si s'han proporcionat condicions meteorològiques, velocitat de greens o vent, integra-les amb naturalitat a la narració quan siguin rellevants (especialment si han estat dures: pluja, vent fort, greens molt ràpids, calor, etc.). Si són condicions normals, pots ometre-les o mencionar-les breument. No facis una secció separada de meteorologia.
 - Genera un títol atractiu
 - Un subtítol complementari

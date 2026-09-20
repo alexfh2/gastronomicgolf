@@ -41,6 +41,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [specialMention, setSpecialMention] = useState('');
+  const [specialPrizes, setSpecialPrizes] = useState('');
   const [confirmSponsor, setConfirmSponsor] = useState(true);
   // Weather conditions per day (optional)
   const [weatherFri, setWeatherFri] = useState('');
@@ -117,7 +118,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
     mutationFn: async () => {
       if (tone === 'instagram') {
         const { data, error } = await supabase.functions.invoke('generate-instagram', {
-          body: { round_id: round.id, language },
+          body: { round_id: round.id, language, special_prizes: specialPrizes.trim() || null },
         });
         if (error) throw error;
         if (!data?.success) throw new Error(data?.error || 'Error generant el post');
@@ -125,7 +126,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
       }
       if (tone === 'whatsapp') {
         const { data, error } = await supabase.functions.invoke('generate-whatsapp', {
-          body: { round_id: round.id, language },
+          body: { round_id: round.id, language, special_prizes: specialPrizes.trim() || null },
         });
         if (error) throw error;
         if (!data?.success) throw new Error(data?.error || 'Error generant el missatge');
@@ -146,6 +147,7 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
           tone,
           sponsor: confirmSponsor ? round.sponsor : null,
           special_mention: specialMention || null,
+          special_prizes: specialPrizes.trim() || null,
           weather_conditions,
         },
       });
@@ -280,6 +282,21 @@ const NewsGenerationDialog = ({ round, onClose }: NewsGenerationDialogProps) => 
                   onChange={(e) => setSpecialMention(e.target.value)}
                   placeholder="p. ex. homenatge a un jugador, agraïment especial..."
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="special-prizes">Premis especials (opcional)</Label>
+                <Textarea
+                  id="special-prizes"
+                  value={specialPrizes}
+                  onChange={(e) => setSpecialPrizes(e.target.value)}
+                  maxLength={2000}
+                  rows={4}
+                  placeholder={'Un premi per línia, per exemple:\nAproximació forat 3 — Nom del jugador\nDrive més llarg — Nom del jugador'}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Aproximacions als pars 3, drive més llarg, hole in one i altres reconeixements.
+                </p>
               </div>
 
               {/* Meteorology / course conditions */}
